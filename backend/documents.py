@@ -47,8 +47,12 @@ def load_claim_pages(store: Repository, claim_id: str, documents: List[Dict[str,
     folder = get_settings().cache_dir_for(claim_id) / "pages"
     folder.mkdir(parents=True, exist_ok=True)
     pages: List[PageImage] = []
+    seen_names = set()
     for doc in documents:
         data, name, _ = store.open_document(document_id=doc["document_id"])
+        if name in seen_names:  # a second copy of the same file is not read twice
+            continue
+        seen_names.add(name)
         path = folder / name
         path.write_bytes(data)
         pages.extend(load_file_pages(path))

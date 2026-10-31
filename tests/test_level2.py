@@ -249,7 +249,7 @@ def test_report_json_and_html(client: TestClient) -> None:
     assert client.get(f"/claims/{CLAIM}/report?format=pdf", headers=HEADERS).status_code == 422
 
 
-def test_eval_scores_only_claims_in_the_answer_key(client: TestClient, tmp_path: Path) -> None:
+def test_eval_scores_every_synthetic_claim_but_not_portal_claims(client: TestClient, tmp_path: Path) -> None:
     from backend import eval_summary
 
     key = tmp_path / "answer_key.json"
@@ -258,4 +258,13 @@ def test_eval_scores_only_claims_in_the_answer_key(client: TestClient, tmp_path:
     result = eval_summary.summary(store=_store(), key_path=key)
     assert result["available"] is True
     assert not any(row.get("claim_id", "").startswith("CLM-T-") for row in result["look_alikes_wrongly_flagged"])
-    assert "DUPLICATE_CLAIM" not in result["by_check"]  # the CLM-T-0101 finding is not in the key: not scored
+    # a finding on a claim outside the key is a false alarm (strict scoring) ...
+    assert result["by_check"]["DUPLICATE_CLAIM"]["fp"] == 1
+    # ... but a claim submitted through the customer portal has no ground truth and is not scored
+    store = _store()
+    store.upsert(collection="findings", doc_id="CLM-P-0099:ROOM_LIMIT_EXCEEDED:1",
+                 doc={"finding_id": "CLM-P-0099:ROOM_LIMIT_EXCEEDED:1", "claim_id": "CLM-P-0099",
+                      "check_id": "ROOM_LIMIT_EXCEEDED", "status": "open", "amount": 5.0, "amount_kind": "calculated"})
+    again = eval_summary.summary(store=store, key_path=key)
+    assert again["by_check"]["ROOM_LIMIT_EXCEEDED"]["fp"] == result["by_check"]["ROOM_LIMIT_EXCEEDED"]["fp"]
+    store.delete(collection="findings", doc_id="CLM-P-0099:ROOM_LIMIT_EXCEEDED:1")

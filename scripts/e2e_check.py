@@ -49,6 +49,7 @@ def main() -> None:
     parser.add_argument("--api", default="http://localhost:5173/api")
     parser.add_argument("--key", default="leaklens-dev")
     parser.add_argument("--documents-claim", default="CLM-2026-0033")
+    parser.add_argument("--upload", default=str(UPLOAD), help="folder of files to ingest (default: demo_upload)")
     args = parser.parse_args()
     c = httpx.Client(base_url=args.api, headers={"X-API-Key": args.key}, timeout=900)
 
@@ -56,8 +57,9 @@ def main() -> None:
     check("auth: key required", httpx.get(f"{args.api}/claims", timeout=30).status_code == 401)
 
     # 1. Ingest exactly what a person drags in.
-    files = [("files", (p.name, p.read_bytes())) for p in sorted(UPLOAD.iterdir()) if p.is_file()]
-    files += [("files", (p.name, p.read_bytes())) for p in sorted((UPLOAD / "documents").glob("*.pdf"))]
+    upload = Path(args.upload)
+    files = [("files", (p.name, p.read_bytes())) for p in sorted(upload.iterdir()) if p.is_file() and not p.name.startswith("~$")]
+    files += [("files", (p.name, p.read_bytes())) for p in sorted((upload / "documents").glob("*.*"))]
     started = time.monotonic()
     r = c.post("/ingest", files=files)
     rep = r.json() if r.status_code == 200 else {}
@@ -81,7 +83,8 @@ def main() -> None:
 
     # 3. Dashboard and filters.
     dash = c.get("/dashboard").json()
-    check("dashboard totals", dash.get("processed") == 125 and abs((dash.get("leakage_calculated") or 0) - 496509.5) < 1,
+    planted = c.get("/eval/summary").json().get("amount_planted") or 0  # planted calculated leakage, in the dashboard currency
+    check("dashboard totals", dash.get("processed") == 125 and abs((dash.get("leakage_calculated") or 0) - planted) < 1,
           f"processed {dash.get('processed')}, flagged {dash.get('flagged')}, calculated {dash.get('leakage_calculated')}, "
           f"suspected {dash.get('leakage_suspected')}, awaiting review {dash.get('awaiting_review')}")
     for label, params in [("category=duplicate", {"category": "duplicate"}), ("type=outpatient", {"type": "outpatient"}),

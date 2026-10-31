@@ -6,6 +6,7 @@ Nothing is dropped silently. Documents are stored and attached to the claim whos
 """
 from __future__ import annotations
 
+import hashlib
 import io
 import json
 import logging
@@ -334,14 +335,21 @@ def store_document(store: Repository, name: str, data: bytes, claim_ids: Set[str
             pages = _pdf_pages(data=data)
         except Exception as exc:
             issues.append(ValidationIssue(file=name, problem=f"page count unavailable ({exc}); stored as 1 page", accepted=True))
-    document_id = store.save_document(data=data, name=name, mime=mime)
     claim_id = match_claim_id(file_name=name, claim_ids=claim_ids)
+    # The same file uploaded again for the same claim is not stored twice (it would be read twice).
+    digest = hashlib.sha256(data).hexdigest()
+    if claim_id:
+        for existing in store.list(collection="documents", filter_={"claim_id": claim_id}):
+            if existing.get("name") == name and existing.get("sha256") == digest:
+                issues.append(ValidationIssue(file=name, problem="already attached to this claim; not stored again", accepted=True))
+                return existing, issues
+    document_id = store.save_document(data=data, name=name, mime=mime)
     predicted_type, confidence = guess_document_type(file_name=name)
     classification = [{"page_id": f"{document_id}:{page}", "page": page, "predicted_type": predicted_type,
                        "confidence": confidence, "confirmed_type": None, "predicted_by": "filename"}
                       for page in range(1, pages + 1)]
     meta = {**store.get(collection="documents", doc_id=document_id), "claim_id": claim_id, "pages": pages,
-            "document_type": None, "classification": classification}
+            "document_type": None, "classification": classification, "sha256": digest}
     store.upsert(collection="documents", doc_id=document_id, doc=meta)
     if claim_id is None:
         issues.append(ValidationIssue(file=name, problem="document stored but not attached: file name does not start with a known claim id", accepted=True))

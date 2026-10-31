@@ -18,6 +18,9 @@ from core.schemas.finding import Finding, FindingStatus
 from backend.store import Repository
 from backend.views import REPORTING_CURRENCY, to_reporting
 
+# Claims submitted through the customer portal (backend/portal.py) carry this id prefix.
+PORTAL_PREFIX = "CLM-P-"
+
 logger = logging.getLogger(__name__)
 
 Key = Tuple[str, str]
@@ -66,12 +69,11 @@ def summary(store: Repository, key_path: Path) -> Dict[str, Any]:
     for item in items:
         key = (str(item["claim_id"]), str(item["check_id"]))
         (planted if _should_flag(item) else must_not_flag)[key] = item
-    # Only claims the key knows about are scored: a claim that arrived later (e.g. through the portal) has no
-    # ground truth, so its findings are neither hits nor false alarms.
-    key_claims = {str(item["claim_id"]) for item in items}
+    # Every claim of the synthetic set is scored (a finding on a clean claim is a false alarm); only claims that
+    # arrived later through the customer portal have no ground truth and are left out.
     found: Dict[Key, List[Dict[str, Any]]] = defaultdict(list)
     for doc in store.list(collection="findings"):
-        if doc.get("status") == FindingStatus.DISMISSED.value or str(doc.get("claim_id")) not in key_claims:
+        if doc.get("status") == FindingStatus.DISMISSED.value or str(doc.get("claim_id")).startswith(PORTAL_PREFIX):
             continue
         found[(str(doc["claim_id"]), str(doc["check_id"]))].append(doc)
     per_check: Dict[str, Dict[str, int]] = defaultdict(lambda: {"tp": 0, "fp": 0, "fn": 0})
