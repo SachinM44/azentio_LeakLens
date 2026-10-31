@@ -1,0 +1,70 @@
+{
+  "product_id": "IN-HEALTH-RETAIL",
+  "name": "Retail Health Shield (India)",
+  "insurer": "Sahara Health Assurance",
+  "market": "IN",
+  "currency": "INR",
+  "required_documents": {
+    "inpatient": [
+      "claim_form",
+      "itemized_final_hospital_bill",
+      "discharge_summary",
+      "diagnostic_reports",
+      "prescriptions",
+      "kyc_document",
+      "pre_auth_form"
+    ],
+    "daycare": [
+      "claim_form",
+      "itemized_final_hospital_bill",
+      "discharge_summary",
+      "prescriptions",
+      "kyc_document"
+    ],
+    "outpatient": [
+      "itemized_final_hospital_bill",
+      "prescriptions"
+    ],
+    "pharmacy": [
+      "medicine_pharmacy_bills",
+      "prescriptions"
+    ]
+  },
+  "non_payable_items": [
+    "Surgical gloves",
+    "Disposable syringe",
+    "Cotton roll",
+    "Thermometer",
+    "Admission kit",
+    "Toiletries",
+    "Mineral water",
+    "Diet charges for attendant",
+    "Telephone charges",
+    "Television charges",
+    "Documentation charges",
+    "Registration charges",
+    "Visitor pass",
+    "Nebuliser kit",
+    "Hot water bag",
+    "Slippers",
+    "Mask (non-surgical)",
+    "Tissue paper",
+    "Sanitiser",
+    "Bed pan",
+    "Urine pot",
+    "Belt / brace (non-implant)",
+    "Crepe bandage",
+    "Spirit / disinfectant",
+    "Attendant charges"
+  ],
+  "auto_triage_threshold": 5000.0,
+  "near_duplicate_amount_tolerance_pct": 3.0,
+  "near_duplicate_days": 3,
+  "repeatable_service_codes": [
+    "PHY001",
+    "DIA001",
+    "CHE001"
+  ],
+  "provider_outlier_zscore": 2.5,
+  "policy_wording_file": "data/policies/IN-HEALTH-RETAIL.md"
+}

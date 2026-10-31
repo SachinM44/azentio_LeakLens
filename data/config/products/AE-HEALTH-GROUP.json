@@ -1,0 +1,57 @@
+{
+  "product_id": "AE-HEALTH-GROUP",
+  "name": "Group Health Plan (UAE)",
+  "insurer": "Gulf Shield Takaful",
+  "market": "AE",
+  "currency": "AED",
+  "required_documents": {
+    "inpatient": [
+      "claim_form",
+      "itemized_final_hospital_bill",
+      "discharge_summary",
+      "diagnostic_reports",
+      "prescriptions",
+      "kyc_document",
+      "pre_auth_form"
+    ],
+    "daycare": [
+      "claim_form",
+      "itemized_final_hospital_bill",
+      "discharge_summary",
+      "prescriptions",
+      "kyc_document"
+    ],
+    "outpatient": [
+      "itemized_final_hospital_bill",
+      "prescriptions"
+    ],
+    "pharmacy": [
+      "medicine_pharmacy_bills",
+      "prescriptions"
+    ]
+  },
+  "non_payable_items": [
+    "Non-prescription items",
+    "Cosmetics",
+    "Vitamins without prescription",
+    "Medical report fee",
+    "Telephone charges",
+    "Extra meals",
+    "Companion bed",
+    "Parking",
+    "Toiletries",
+    "Sick leave certificate fee",
+    "Administrative fee",
+    "Newspaper / magazines"
+  ],
+  "auto_triage_threshold": 500.0,
+  "near_duplicate_amount_tolerance_pct": 3.0,
+  "near_duplicate_days": 3,
+  "repeatable_service_codes": [
+    "97110",
+    "90935",
+    "96413"
+  ],
+  "provider_outlier_zscore": 2.5,
+  "policy_wording_file": "data/policies/AE-HEALTH-GROUP.md"
+}
