@@ -2,7 +2,7 @@
 claims, near-duplicates with small differences (for review), and legitimate repeat services left alone."""
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
 
 from core.checks._common import (code_in, line_evidence, make_finding, money, norm, positive_lines, product_for,
@@ -31,10 +31,15 @@ def days_apart(a, b) -> Optional[int]:
     return abs((a - b).days)
 
 
+def _utc(moment: datetime) -> datetime:
+    """Submission times arrive with and without a timezone (uploads vs the portal); compare them as UTC."""
+    return moment.replace(tzinfo=timezone.utc) if moment.tzinfo is None else moment.astimezone(timezone.utc)
+
+
 def _later(claim: Claim, other: Claim) -> bool:
     """True when `claim` is the later submission (the one that counts as the duplicate)."""
-    if claim.submitted_at and other.submitted_at and claim.submitted_at != other.submitted_at:
-        return claim.submitted_at > other.submitted_at
+    if claim.submitted_at and other.submitted_at and _utc(claim.submitted_at) != _utc(other.submitted_at):
+        return _utc(claim.submitted_at) > _utc(other.submitted_at)
     return claim.claim_id > other.claim_id
 
 

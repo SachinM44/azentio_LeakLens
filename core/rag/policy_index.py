@@ -132,6 +132,10 @@ def attach_clauses(findings: List[Finding], index: PolicyIndex, min_score: float
         if hits and hits[0][2] >= min_score:
             cid, text, score = hits[0]
             f.clause = ClauseRef(clause_id=cid, text=text, score=round(score, 3))
+    # The recommended correction cites the same clause the finding now rests on.
+    for f in findings:
+        if f.clause and f.correction is not None and not f.correction.clause_id:
+            f.correction.clause_id = f.clause.clause_id
     return findings
 
 

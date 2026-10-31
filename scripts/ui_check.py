@@ -61,7 +61,7 @@ def main() -> None:
     shots.mkdir(parents=True, exist_ok=True)
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        context = browser.new_context(viewport={"width": 1440, "height": 900}, accept_downloads=True)
+        context = browser.new_context(viewport={"width": 1920, "height": 1080}, accept_downloads=True)
         context.add_init_script("try { localStorage.setItem('leaklens_analyst', 'UI check'); } catch (e) {}")
         page = context.new_page()
         page.on("pageerror", lambda e: ERRORS.append(f"pageerror: {e}"))
@@ -71,15 +71,15 @@ def main() -> None:
         visit(page, f"{ui}/dashboard", "dashboard", shots, "Claims processed")
         visit(page, f"{ui}/claims", "claims", shots, "CLM-2026-")
         visit(page, f"{ui}/ingest", "ingest", shots, "Drop files here")
-        visit(page, f"{ui}/config", "config", shots, "IN-HEALTH-RETAIL")
+        visit(page, f"{ui}/config", "config", shots, "HEALTH-")
 
         visit(page, f"{ui}/claims/CLM-2026-0033", "claim_0033", shots, "CLM-2026-0033")
         for label, expect in [("Findings", "Recommended correction"), ("Settlement", "Recalculated"), ("Master data", "Invoice lines"),
                               ("Policy terms", "Annual limit"), ("Related claims", "CLM-"), ("Document comparison", "Claim total"),
-                              ("Documents", "CLM-2026-0033_bill.pdf"), ("Classification", "Itemized"), ("Notes", ""), ("Audit", "run")]:
+                              ("Documents", "CLM-2026-0033_bill.pdf"), ("Classification", "Itemized"), ("Notes", "note"), ("Audit", "run")]:
             tab(page, label, f"0033_{label.lower().replace(' ', '_')}", shots, expect)
-        page.get_by_role("tab", name=re.compile("^Findings")).click()
-        page.wait_for_timeout(600)
+        page.goto(f"{ui}/claims/CLM-2026-0033", wait_until="networkidle")  # back to the default Findings tab
+        page.wait_for_timeout(800)
         room = page.locator("text=Cap the room charge").first
         check("finding card shows the room correction", room.count() > 0 and room.is_visible(),
               page.locator("text=15,000").first.inner_text()[:60] if page.locator("text=15,000").count() else "15,000 not shown")

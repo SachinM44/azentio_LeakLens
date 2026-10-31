@@ -4,7 +4,7 @@ import type { PolicyTerm } from '../../api/types'
 export default function PolicyTermsTab({ terms }: { terms: PolicyTerm[] }) {
   if (!terms.length) return <Empty description="No policy terms are available for this claim." />
   return (
-    <Table<PolicyTerm> size="small" rowKey={(r, i) => `${r.term}-${i}`} dataSource={terms} pagination={false} className="card overflow-hidden"
+    <Table<PolicyTerm> size="small" rowKey={(r) => `${r.term}|${r.value}|${r.clause_id ?? ""}`} dataSource={terms} pagination={false} className="card overflow-hidden"
       columns={[
         { title: 'Term', dataIndex: 'term', render: (v: string) => <span className="font-medium">{v}</span> },
         { title: 'Value', dataIndex: 'value', render: (v: string | number) => <span className="num">{String(v)}</span> },
