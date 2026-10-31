@@ -85,7 +85,7 @@ export default function MasterDataTab({ detail, highlightLine }: Props) {
           <div className="mt-3 grid gap-3 md:grid-cols-3 text-[13px]">
             <div><div className="mb-1 font-semibold">Sub-limits</div>
               {policy.sublimits.length ? policy.sublimits.map((s) => (
-                <div key={s.sublimit_id}>{s.name}: {money(s.limit, policy.currency)} <span className="muted">({s.basis.replace(/_/g, ' ')}{s.clause_id ? `, cl. ${s.clause_id}` : ''})</span></div>
+                <div key={s.sublimit_id}>{s.name}: {s.basis.startsWith('sessions') ? `${s.limit} sessions` : money(s.limit, policy.currency)} <span className="muted">({s.basis.replace(/_/g, ' ')}{s.clause_id ? `, cl. ${s.clause_id}` : ''})</span></div>
               )) : <span className="muted">None</span>}</div>
             <div><div className="mb-1 font-semibold">Exclusions</div>
               {policy.exclusions.length ? policy.exclusions.map((e) => (

@@ -3,16 +3,23 @@ import { Link, useParams } from 'react-router-dom'
 import { Alert, Button, Empty, Segmented, Skeleton, Steps, Tabs, Tag, message } from 'antd'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, Play } from 'lucide-react'
-import { api } from '../api/client'
-import type { ClaimDetail, ReviewAction, Run } from '../api/types'
+import { api, connection } from '../api/client'
+import type { ClaimDetail, Run } from '../api/types'
 import { Avatar } from '../components/ui'
-import AuditTab from '../components/claim/AuditTab'
+import CaseRail from '../components/claim/CaseRail'
+import DocumentComparisonTab from '../components/claim/DocumentComparisonTab'
+import RelatedClaimsTab from '../components/claim/RelatedClaimsTab'
+import TimelineTab from '../components/claim/TimelineTab'
 import ClassificationTab from '../components/claim/ClassificationTab'
 import DocumentsTab from '../components/claim/DocumentsTab'
 import MasterDataTab from '../components/claim/MasterDataTab'
 import SettlementTab from '../components/claim/SettlementTab'
 import ErrorBox from '../components/ErrorBox'
+import EvidenceDrawer, { type EvidenceRef } from '../components/EvidenceDrawer'
 import FindingCard from '../components/FindingCard'
+import { buildComparison } from '../lib/analysis'
+import { currentDecision, type DecisionKind } from '../lib/decisions'
+import { useRelated } from '../lib/useRelated'
 import { SEVERITY_COLOR, fmtDate, money, pct, titleCase } from '../lib/format'
 import { isActive } from '../lib/runs'
 
@@ -53,6 +60,7 @@ export default function ClaimDetailPage() {
   const [filter, setFilter] = useState<'all' | 'open' | 'reviewed'>('all')
   const [highlight, setHighlight] = useState<string | null>(null)
   const [reviewing, setReviewing] = useState<string | null>(null)
+  const [evidence, setEvidence] = useState<EvidenceRef | null>(null)
 
   const detail = useQuery({ queryKey: ['claim', claimId], queryFn: () => api.getClaim(claimId) })
   const run = useQuery({
@@ -60,6 +68,8 @@ export default function ClaimDetailPage() {
     refetchInterval: (q) => (isActive(q.state.data) ? 1000 : false),
   })
   const liveRun = run.data ?? detail.data?.run ?? null
+  const notesQ = useQuery({ queryKey: ['notes', claimId], queryFn: () => api.listNotes(claimId) })
+  const related = useRelated(detail.data)
 
   // When a run finishes, refresh everything that depends on its output.
   const wasActive = useActiveEdge(isActive(liveRun))
@@ -72,8 +82,8 @@ export default function ClaimDetailPage() {
   })
 
   const review = useMutation({
-    mutationFn: (v: { findingId: string; action: ReviewAction; note: string; amount?: number }) =>
-      api.reviewFinding(claimId, v.findingId, { action: v.action, note: v.note, amount: v.amount }),
+    mutationFn: (v: { findingId: string; kind: DecisionKind; reason?: string; text?: string; amount?: number }) =>
+      api.decide(claimId, v.findingId, { kind: v.kind, reason: v.reason, text: v.text, amount: v.amount }),
     onMutate: (v) => setReviewing(v.findingId),
     onSuccess: (res) => {
       qc.setQueryData<ClaimDetail>(['claim', claimId], (cur) => (cur ? { ...cur, findings: res.findings, settlement: res.settlement ?? cur.settlement, summary: res.summary ?? cur.summary } : cur))
@@ -82,7 +92,7 @@ export default function ClaimDetailPage() {
       qc.invalidateQueries({ queryKey: ['dashboard'] })
       qc.invalidateQueries({ queryKey: ['eval'] })
       if (res.run_id) run.refetch()
-      message.success('Decision recorded; settlement recalculated')
+      message.success('Decision recorded and added to the audit trail')
     },
     onError: (e: Error) => message.error(e.message),
     onSettled: () => setReviewing(null),
@@ -96,6 +106,17 @@ export default function ClaimDetailPage() {
   const open = d.findings.filter((f) => f.status === 'open')
   const shown = d.findings.filter((f) => (filter === 'open' ? f.status === 'open' : filter === 'reviewed' ? f.status !== 'open' : true))
   const awaitingClass = d.classification.some((c) => !c.confirmed_type)
+  const notes = notesQ.data?.notes ?? []
+  const diffCount = buildComparison(d).filter((r) => r.status !== 'match').length
+  const escalated = d.findings.filter((f) => ['escalate_senior', 'escalate_siu'].includes(currentDecision(f)?.decision ?? ''))
+  const awaitingEvidence = d.findings.filter((f) => currentDecision(f)?.decision === 'request_evidence')
+  const relatedForReport = related.map((r) => ({ claim_id: r.claim_id, matches: r.matches }))
+
+  const openTab = (key: string, line?: string) => { if (line) setHighlight(line); setTab(key); window.scrollTo({ top: 0 }) }
+  const openEvidence = (source: string, ref: string, quote?: string) => {
+    if (source === 'invoice_line' && d.lines.some((l) => l.line_id === ref)) { setEvidence({ source, ref, quote }); return }
+    setEvidence({ source, ref, quote })
+  }
 
   const findingsTab = (
     <div className="flex flex-col gap-3">
@@ -108,9 +129,10 @@ export default function ClaimDetailPage() {
           ? 'No leakage found. Similar-looking services were checked and left alone.' : 'The checks have not run on this claim yet.'} />
       )}
       {shown.map((f) => (
-        <FindingCard key={f.finding_id} finding={f} busy={reviewing === f.finding_id}
-          onLineClick={(id) => { setHighlight(id); setTab('master') }}
-          onReview={(action, note, amount) => review.mutate({ findingId: f.finding_id, action, note, amount })} />
+        <FindingCard key={f.finding_id} finding={f} detail={d} busy={reviewing === f.finding_id}
+          onLineClick={(id) => openTab('master', id)}
+          onEvidenceClick={(source, ref) => openEvidence(source, ref, f.evidence.find((e) => e.ref === ref)?.quote)}
+          onDecide={(kind, input) => review.mutate({ findingId: f.finding_id, kind, ...input })} />
       ))}
     </div>
   )
@@ -165,14 +187,39 @@ export default function ClaimDetailPage() {
           action={<Button size="small" onClick={() => setTab('classification')}>Review pages</Button>} />
       )}
 
-      <Tabs activeKey={tab} onChange={setTab} items={[
-        { key: 'findings', label: `Findings${open.length ? ` (${open.length} open)` : ''}`, children: findingsTab },
-        { key: 'settlement', label: 'Settlement', children: <SettlementTab settlement={d.settlement} /> },
-        { key: 'master', label: 'Master data', children: <MasterDataTab detail={d} highlightLine={highlight} /> },
-        { key: 'documents', label: `Documents (${d.documents.length})`, children: <DocumentsTab documents={d.documents} /> },
-        { key: 'classification', label: 'Classification', children: <ClassificationTab claimId={claimId} rows={d.classification} documentCount={d.documents.length} /> },
-        { key: 'audit', label: `Audit (${d.audit.length})`, children: <AuditTab rows={d.audit} /> },
+      {(escalated.length > 0 || awaitingEvidence.length > 0) && (
+        <Alert type="info" showIcon
+          message={[escalated.length ? `${escalated.length} finding${escalated.length === 1 ? '' : 's'} escalated` : '', awaitingEvidence.length ? `${awaitingEvidence.length} waiting for additional evidence` : ''].filter(Boolean).join(' · ')}
+          description="These stay on the case file until the senior reviewer, the SIU or the provider responds." />
+      )}
+
+      {/* Full-width tab bar so every tab is visible; the content and the case rail sit below it. */}
+      <Tabs data-tour="tabs" activeKey={tab} onChange={setTab} className="level2-tabs !mb-0" items={[
+        { key: 'findings', label: `Findings${open.length ? ` (${open.length} open)` : ''}` },
+        { key: 'related', label: `Related claims${related.length ? ` (${related.length})` : ''}` },
+        { key: 'comparison', label: `Doc comparison${diffCount ? ` (${diffCount})` : ''}` },
+        { key: 'settlement', label: 'Settlement' },
+        { key: 'master', label: 'Master data' },
+        { key: 'documents', label: `Documents (${d.documents.length})` },
+        { key: 'classification', label: 'Classification' },
+        { key: 'timeline', label: 'Audit trail' },
       ]} />
+
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="min-w-0">
+          {tab === 'findings' && findingsTab}
+          {tab === 'related' && <RelatedClaimsTab detail={d} related={related} />}
+          {tab === 'comparison' && <DocumentComparisonTab detail={d} onOpenDocuments={() => openTab('documents')} />}
+          {tab === 'settlement' && <SettlementTab settlement={d.settlement} />}
+          {tab === 'master' && <MasterDataTab detail={d} highlightLine={highlight} />}
+          {tab === 'documents' && <DocumentsTab documents={d.documents} />}
+          {tab === 'classification' && <ClassificationTab claimId={claimId} rows={d.classification} documentCount={d.documents.length} />}
+          {tab === 'timeline' && <TimelineTab detail={d} notes={notes} related={relatedForReport} analyst={connection.analyst} />}
+        </div>
+        <CaseRail detail={d} notes={notes} notesLocal={!!notesQ.data?.local} onOpenEvidence={openEvidence} />
+      </div>
+
+      <EvidenceDrawer evidence={evidence} detail={d} onClose={() => setEvidence(null)} onOpenTab={openTab} />
     </div>
   )
 }

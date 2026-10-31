@@ -85,3 +85,15 @@ body {
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background: #cfd9df; border-radius: 10px; border: 2px solid #f4f7f9; }
 ::-webkit-scrollbar-thumb:hover { background: #aebdc6; }
+
+/* Claim page tab bar: tighter gaps so all eight tabs fit on one line */
+.level2-tabs .ant-tabs-nav::before { border-bottom-color: #e6ecf0; }
+.level2-tabs .ant-tabs-tab { padding: 10px 2px !important; }
+.level2-tabs .ant-tabs-tab + .ant-tabs-tab { margin-left: 22px !important; }
+.level2-tabs .ant-tabs-nav { margin-bottom: 8px !important; }
+.level2-tabs .ant-tabs-nav-list { flex-wrap: nowrap; }
+
+/* Case rail: stays put while the page scrolls, and scrolls on its own when taller than the screen */
+.case-rail { scrollbar-width: thin; scrollbar-color: #cfd9df transparent; }
+.case-rail::-webkit-scrollbar { width: 6px; }
+.case-rail::-webkit-scrollbar-thumb { background: #cfd9df; border: 0; border-radius: 6px; }

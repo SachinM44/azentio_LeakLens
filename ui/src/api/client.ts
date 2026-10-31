@@ -1,7 +1,8 @@
 import type {
   AuditRow, ClaimDetail, ClaimFilters, ClaimSummary, ClassificationRow, Dashboard, EvalSummary, IngestResult,
-  ProductConfig, ReviewAction, ReviewResponse, Run,
+  CaseNote, ProductConfig, ReviewResponse, Run,
 } from './types'
+import { DECISIONS, encodeNote, type DecisionKind } from '../lib/decisions'
 import { mockRequest } from './mocks'
 
 // ---- connection settings (editable from the header; kept per browser) -------------------------------------------
@@ -9,6 +10,8 @@ import { mockRequest } from './mocks'
 const KEY_URL = 'leaklens_api_url'
 const KEY_API = 'leaklens_api_key'
 const KEY_MOCK = 'leaklens_use_mocks'
+const KEY_ANALYST = 'leaklens_analyst'
+const KEY_NOTES = 'leaklens_local_notes'
 
 const read = (key: string): string | null => {
   try { return localStorage.getItem(key) } catch { return null }
@@ -28,10 +31,15 @@ export const connection = {
     const stored = read(KEY_MOCK)
     return stored !== null ? stored === 'true' : import.meta.env.VITE_USE_MOCKS === 'true'
   },
-  save(next: { baseUrl: string; apiKey: string; useMocks: boolean }) {
+  /** Who is working the case; sent with every request and written into decisions and notes. */
+  get analyst(): string {
+    return read(KEY_ANALYST) || ''
+  },
+  save(next: { baseUrl: string; apiKey: string; useMocks: boolean; analyst?: string }) {
     write(KEY_URL, next.baseUrl)
     write(KEY_API, next.apiKey)
     write(KEY_MOCK, String(next.useMocks))
+    if (next.analyst !== undefined) write(KEY_ANALYST, next.analyst)
   },
 }
 
@@ -69,6 +77,7 @@ async function readError(res: Response): Promise<string> {
 async function request<T>(method: string, path: string, opts: { params?: Params; body?: unknown; form?: FormData } = {}): Promise<T> {
   if (connection.useMocks) return mockRequest<T>(method, path, opts.params ?? {}, opts.body, opts.form)
   const headers: Record<string, string> = { 'X-API-Key': connection.apiKey }
+  if (connection.analyst) headers['X-Analyst'] = connection.analyst
   let body: BodyInit | undefined
   if (opts.form) body = opts.form
   else if (opts.body !== undefined) {
@@ -86,6 +95,14 @@ async function request<T>(method: string, path: string, opts: { params?: Params;
 }
 
 const filterParams = (f: ClaimFilters): Params => ({ ...f })
+
+// Claim notes: the backend has no notes endpoint yet, so a 404/405 falls back to this browser's storage.
+type NoteStore = Record<string, CaseNote[]>
+const readLocalNotes = (): NoteStore => {
+  try { return JSON.parse(localStorage.getItem(KEY_NOTES) || '{}') as NoteStore } catch { return {} }
+}
+const writeLocalNotes = (all: NoteStore) => write(KEY_NOTES, JSON.stringify(all))
+const noEndpoint = (e: unknown) => e instanceof ApiError && (e.status === 404 || e.status === 405 || e.status === 501)
 
 export const api = {
   health: () => request<{ status: string; store: string; ts: string }>('GET', '/health'),
@@ -108,8 +125,40 @@ export const api = {
     request<{ claim_id: string; classification: ClassificationRow[]; run_id: string | null }>(
       'POST', `/claims/${encodeURIComponent(id)}/classification/confirm`, { body: pages }),
 
-  reviewFinding: (claimId: string, findingId: string, body: { action: ReviewAction; amount?: number; note: string }) =>
-    request<ReviewResponse>('POST', `/claims/${encodeURIComponent(claimId)}/findings/${encodeURIComponent(findingId)}/review`, { body }),
+  /** Record an analyst decision. It goes out as one of the backend's four actions with the decision tagged in the note. */
+  decide: (claimId: string, findingId: string, v: { kind: DecisionKind; reason?: string; text?: string; amount?: number }) => {
+    const meta = DECISIONS[v.kind]
+    const body = {
+      action: meta.backendAction,
+      amount: v.kind === 'override_correction' ? v.amount : undefined,
+      note: encodeNote(v.kind, connection.analyst, v.reason ?? '', v.text ?? ''),
+    }
+    return request<ReviewResponse>('POST', `/claims/${encodeURIComponent(claimId)}/findings/${encodeURIComponent(findingId)}/review`, { body })
+  },
+
+  async listNotes(claimId: string): Promise<{ notes: CaseNote[]; local: boolean }> {
+    try {
+      const notes = await request<CaseNote[]>('GET', `/claims/${encodeURIComponent(claimId)}/notes`)
+      return { notes, local: false }
+    } catch (e) {
+      if (!noEndpoint(e)) throw e
+      return { notes: readLocalNotes()[claimId] ?? [], local: true }
+    }
+  },
+
+  async addNote(claimId: string, text: string): Promise<CaseNote> {
+    const author = connection.analyst || 'analyst'
+    try {
+      return await request<CaseNote>('POST', `/claims/${encodeURIComponent(claimId)}/notes`, { body: { text, author } })
+    } catch (e) {
+      if (!noEndpoint(e)) throw e
+      const note: CaseNote = { note_id: `N-${Date.now()}`, claim_id: claimId, author, text, ts: new Date().toISOString(), local: true }
+      const all = readLocalNotes()
+      all[claimId] = [...(all[claimId] ?? []), note]
+      writeLocalNotes(all)
+      return note
+    }
+  },
 
   dashboard: (filters: ClaimFilters) => request<Dashboard>('GET', '/dashboard', { params: filterParams(filters) }),
   listConfig: () => request<ProductConfig[]>('GET', '/config'),
