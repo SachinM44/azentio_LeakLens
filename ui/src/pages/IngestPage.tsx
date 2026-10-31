@@ -81,7 +81,11 @@ export default function IngestPage() {
       {result && (
         <div className="flex flex-col gap-4">
           <Alert type={rejected.length ? 'warning' : 'success'} showIcon
-            message={`${result.claims_created} new claim${result.claims_created === 1 ? '' : 's'} created · ${result.claims_affected.length} claim${result.claims_affected.length === 1 ? '' : 's'} updated`}
+            message={`${result.claims_created} new claim${result.claims_created === 1 ? '' : 's'} created`
+              + (result.claims_affected.length > result.claims_created
+                ? ` · ${result.claims_affected.length - result.claims_created} existing claim${result.claims_affected.length - result.claims_created === 1 ? '' : 's'} updated`
+                : '')
+              + ` · ${result.claims_affected.length} ready to check`}
             description={(
               <div className="mt-1 flex flex-wrap items-center gap-1.5">
                 {Object.entries(result.counts).map(([k, v]) => <Tag key={k} className="!m-0">{v} {titleCase(k)}</Tag>)}
