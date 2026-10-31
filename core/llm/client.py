@@ -31,14 +31,14 @@ logger = logging.getLogger("leaklens.llm")
 
 PRIMARY_MODEL = os.environ.get("LEAKLENS_MODEL", "bedrock/moonshotai.kimi-k2.5")
 FALLBACK_MODELS = [m.strip() for m in os.environ.get(
-    "LEAKLENS_FALLBACK_MODELS", "bedrock/anthropic.claude-sonnet-5-5").split(",") if m.strip()]
+    "LEAKLENS_FALLBACK_MODELS", "bedrock/in.anthropic.claude-sonnet-5").split(",") if m.strip()]
 AWS_REGION = os.environ.get("AWS_REGION_NAME", "ap-south-1")
 COST_CAP_USD = float(os.environ.get("COST_CAP_USD_PER_CLAIM", "2"))
 # USD per million tokens (input, output). Kimi list price; Claude via env.
 # by us; set from Google's price page before quoting a Gemini cost.
 PRICES: Dict[str, Tuple[float, float]] = {
     "bedrock/moonshotai.kimi-k2.5": (0.72, 3.60),
-    "bedrock/anthropic.claude-sonnet-5-5": (float(os.environ.get("CLAUDE_PRICE_IN", "3.0")), float(os.environ.get("CLAUDE_PRICE_OUT", "15.0"))),
+    "bedrock/in.anthropic.claude-sonnet-5": (float(os.environ.get("CLAUDE_PRICE_IN", "3.0")), float(os.environ.get("CLAUDE_PRICE_OUT", "15.0"))),
 }
 RETRY_BACKOFF_S = (2, 8, 20)
 SECRET_PATTERN = re.compile(r"AIza[0-9A-Za-z_\-]{20,}|(?:AKIA|ASIA)[0-9A-Z]{16}")
@@ -137,10 +137,12 @@ def _is_transient(exc: Exception) -> bool:
 def _call_bedrock(model: str, system: str, content: List[dict], max_tokens: int, timeout: float) -> Tuple[str, int, int]:
     import litellm  # imported on first use: litellm takes seconds to import
 
+    # Anthropic models on Bedrock reject `temperature`; the open models take it.
+    sampling = {} if "anthropic" in model else {"temperature": 0.1}
     response = litellm.completion(
         model=model, messages=[{"role": "system", "content": system}, {"role": "user", "content": content}],
-        max_tokens=max_tokens, temperature=0.1, response_format={"type": "json_object"},
-        aws_region_name=AWS_REGION, timeout=timeout, drop_params=True)
+        max_tokens=max_tokens, response_format={"type": "json_object"},
+        aws_region_name=AWS_REGION, timeout=timeout, drop_params=True, **sampling)
     usage = getattr(response, "usage", None)
     return (response.choices[0].message.content or "", int(getattr(usage, "prompt_tokens", 0) or 0),
             int(getattr(usage, "completion_tokens", 0) or 0))
