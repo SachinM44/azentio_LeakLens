@@ -25,6 +25,7 @@ def main() -> None:
     parser.add_argument("--api", default="http://localhost:8000")
     parser.add_argument("--key", default="leaklens-dev")
     parser.add_argument("--limit", type=int, default=125)
+    parser.add_argument("--claim", default="CLM-2026-0033", help="claim to open in the walkthrough")
     args = parser.parse_args()
     client = httpx.Client(base_url=args.api, headers={"X-API-Key": args.key}, timeout=600)
 
@@ -66,7 +67,8 @@ def main() -> None:
     flagged.sort(key=lambda r: -(r.get("leakage_calculated") or 0))
     if not flagged:
         print("5. no flagged claims"); return
-    cid = flagged[0]["claim_id"]
+    # The brief's own example (room 2,000 over the limit x 3 days) when it is in the set, else the biggest leak.
+    cid = args.claim if args.claim and any(r["claim_id"] == args.claim for r in flagged) else flagged[0]["claim_id"]
     detail = client.get(f"/claims/{cid}").json()
     print(f"5. claim {cid}: {len(detail.get('findings', []))} findings; settlement payable "
           f"{(detail.get('settlement') or {}).get('payable')} vs proposed {(detail.get('settlement') or {}).get('proposed_settlement')}")
