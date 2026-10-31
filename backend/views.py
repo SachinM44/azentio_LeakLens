@@ -158,6 +158,16 @@ def claim_detail(store: Repository, claim_id: str) -> Optional[Dict[str, Any]]:
             "reconciled": master.get("reconciled"), "printed_total": master.get("printed_total")}
 
 
+# The dashboard adds claims from both markets, so amounts are reported in one currency. Rates are fixed for the
+# demo and shown in the response; each claim page keeps its own currency.
+REPORTING_CURRENCY = "INR"
+FX_TO_REPORTING = {"INR": 1.0, "AED": 22.7}
+
+
+def to_reporting(amount: float, currency: Optional[str]) -> float:
+    return amount * FX_TO_REPORTING.get((currency or REPORTING_CURRENCY).upper(), 1.0)
+
+
 def dashboard(store: Repository, filters: ClaimFilters) -> Dict[str, Any]:
     rows = filtered_claims(store=store, filters=filters)
     settled_ids = {doc["claim_id"] for doc in store.list(collection="settlements")}
@@ -170,6 +180,8 @@ def dashboard(store: Repository, filters: ClaimFilters) -> Dict[str, Any]:
     flagged = awaiting = 0
     for claim, findings in rows:
         calculated, suspected, _ = leakage_totals(findings=findings)
+        fx = to_reporting(1.0, claim.get("currency"))
+        calculated, suspected = calculated * fx, suspected * fx
         total_calculated += calculated
         total_suspected += suspected
         live = [f for f in findings if f.status != FindingStatus.DISMISSED]
@@ -185,8 +197,8 @@ def dashboard(store: Repository, filters: ClaimFilters) -> Dict[str, Any]:
         provider["leakage_calculated"] = round(provider["leakage_calculated"] + calculated, 2)
         provider["leakage_suspected"] = round(provider["leakage_suspected"] + suspected, 2)
         for finding in live:
-            cal = finding.effective_amount
-            sus = suspected_amount(finding=finding)
+            cal = finding.effective_amount * fx
+            sus = suspected_amount(finding=finding) * fx
             for bucket, key in ((by_category, finding.category.value), (by_check, finding.check_id.value)):
                 entry = bucket.setdefault(key, {"key": key, "count": 0, "amount_calculated": 0.0, "amount_suspected": 0.0})
                 entry["count"] += 1
@@ -201,5 +213,7 @@ def dashboard(store: Repository, filters: ClaimFilters) -> Dict[str, Any]:
     severities = sorted(by_severity.values(), key=lambda s: SEVERITY_RANK[Severity(s["severity"])], reverse=True)
     return {"claims": len(rows), "processed": sum(1 for claim, _ in rows if claim["claim_id"] in settled_ids or claim["claim_id"] in run_ids),
             "flagged": flagged, "leakage_calculated": round(total_calculated, 2), "leakage_suspected": round(total_suspected, 2),
-            "awaiting_review": awaiting, "by_category": sorted(categories, key=lambda c: c["count"], reverse=True),
+            "awaiting_review": awaiting, "reporting_currency": REPORTING_CURRENCY,
+            "fx_rates": {k: v for k, v in FX_TO_REPORTING.items() if k != REPORTING_CURRENCY},
+            "by_category": sorted(categories, key=lambda c: c["count"], reverse=True),
             "by_severity": severities, "by_provider": providers, "by_check": sorted(checks, key=lambda c: c["count"], reverse=True)}

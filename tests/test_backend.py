@@ -335,11 +335,11 @@ def test_dashboard_counts(client: TestClient) -> None:
     assert any(row["check_id"] == "COPAY_NOT_APPLIED" for row in board["by_check"])
     assert any(row["severity"] == "high" for row in board["by_severity"])
     uae = next(row for row in board["by_provider"] if row["provider_id"] == "PRV-AE-01")
-    assert uae["claims"] == 1 and uae["flagged"] == 1 and uae["leakage_calculated"] == 248.0
+    assert uae["claims"] == 1 and uae["flagged"] == 1 and uae["leakage_calculated"] == round(248.0 * 22.7, 2)  # AED reported in INR
     # filters narrow every figure: only the outpatient claim carries the confirmed copay finding
     outpatient = client.get("/dashboard?type=outpatient", headers=HEADERS).json()
-    assert outpatient["claims"] == 1 and outpatient["flagged"] == 1 and outpatient["leakage_calculated"] == 248.0
-    assert outpatient["by_category"] == [{"category": "settlement", "count": 1, "amount_calculated": 248.0, "amount_suspected": 0.0}]
+    assert outpatient["claims"] == 1 and outpatient["flagged"] == 1 and outpatient["leakage_calculated"] == round(248.0 * 22.7, 2)
+    assert outpatient["by_category"] == [{"category": "settlement", "count": 1, "amount_calculated": round(248.0 * 22.7, 2), "amount_suspected": 0.0}]
     none = client.get("/dashboard?provider=PRV-NONE", headers=HEADERS).json()
     assert none["claims"] == 0 and none["by_provider"] == [] and none["leakage_calculated"] == 0.0
 

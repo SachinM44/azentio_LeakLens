@@ -16,6 +16,7 @@ from typing import Any, Dict, List, Tuple
 from core.schemas.finding import Finding, FindingStatus
 
 from backend.store import Repository
+from backend.views import REPORTING_CURRENCY, to_reporting
 
 logger = logging.getLogger(__name__)
 
@@ -71,13 +72,22 @@ def summary(store: Repository, key_path: Path) -> Dict[str, Any]:
             continue
         found[(str(doc["claim_id"]), str(doc["check_id"]))].append(doc)
     per_check: Dict[str, Dict[str, int]] = defaultdict(lambda: {"tp": 0, "fp": 0, "fn": 0})
-    recovered = planted_amount = 0.0
+    # Money is compared on CALCULATED cases only (suspected amounts count once a reviewer confirms them),
+    # converted to the dashboard's reporting currency so INR and AED claims add up.
+    currency = {doc["claim_id"]: doc.get("currency") for doc in store.list(collection="claims")}
+    recovered = planted_amount = suspected_planted = 0.0
     false_alarms: List[Dict[str, Any]] = []
     for key, item in planted.items():
-        planted_amount += float(item.get("amount") or 0.0)
+        amount = to_reporting(float(item.get("amount") or 0.0), currency.get(key[0]))
+        calculated_case = str(item.get("amount_kind") or "calculated") == "calculated"
+        if calculated_case:
+            planted_amount += amount
+        else:
+            suspected_planted += amount
         if key in found:
             per_check[key[1]]["tp"] += 1
-            recovered += sum(_effective(doc) for doc in found[key])
+            if calculated_case:
+                recovered += sum(to_reporting(_effective(doc), currency.get(key[0])) for doc in found[key])
         else:
             per_check[key[1]]["fn"] += 1
     for key, docs in found.items():
@@ -91,6 +101,7 @@ def summary(store: Repository, key_path: Path) -> Dict[str, Any]:
     checks = {check: _rates(tp=v["tp"], fp=v["fp"], fn=v["fn"]) for check, v in sorted(per_check.items())}
     return {"available": True, "planted": len(planted), "must_not_flag": len(must_not_flag), "overall": _rates(tp=tp, fp=fp, fn=fn),
             "amount_planted": round(planted_amount, 2), "amount_recovered": round(recovered, 2),
+            "amount_suspected_planted": round(suspected_planted, 2), "reporting_currency": REPORTING_CURRENCY,
             "look_alikes_wrongly_flagged": false_alarms, "by_check": checks}
 
 
