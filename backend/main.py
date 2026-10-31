@@ -13,6 +13,7 @@ from core.schemas.master import ProductConfig
 
 from backend.api import public, router
 from backend.graph import get_graph
+from backend.portal import auto_read_after_ingest, portal_router
 from backend.settings import get_settings
 from backend.store import Repository, get_store, to_doc
 
@@ -53,6 +54,8 @@ def create_app() -> FastAPI:
     app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
     app.include_router(public)
     app.include_router(router)
+    app.include_router(portal_router)
+    app.middleware("http")(auto_read_after_ingest)
     return app
 
 

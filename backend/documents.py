@@ -5,6 +5,8 @@ claim and its latest run.
 from __future__ import annotations
 
 import logging
+import threading
+import time
 from collections import Counter
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -13,7 +15,7 @@ from core.documents.pipeline import DigitisedClaim, classify_pages, digitise_doc
 from core.llm.client import CostMeter
 from core.media.pages import PageImage, load_file_pages
 
-from backend.graph import latest_run
+from backend.graph import latest_run, start_run
 from backend.settings import get_settings
 from backend.store import Repository, now_iso, to_doc
 
@@ -131,7 +133,13 @@ def digitise_claim_documents(store: Repository, claim_id: str, documents: List[D
         for doc in lines:
             store.upsert(collection="invoice_lines", doc_id=doc["line_id"], doc=doc)
         source = "documents"
-    record = {"claim_id": claim_id, "ts": now_iso(), "document_facts": result.document_facts,
+    fact_sources = {fact: {"document_id": id_by_name.get(src["document_name"], src["document_name"]),
+                           "document_name": src["document_name"], "page": src["page"]}
+                    for fact, src in result.document_fact_sources.items()}
+    stamp = now_iso()
+    record = {"claim_id": claim_id, "ts": stamp, "document_facts": result.document_facts,
+              "document_fact_sources": fact_sources, "extracted_by": result.extracted_by, "extracted_at": stamp,
+              "model": result.model, "read_seconds": result.read_seconds, "pages_read": len(pages),
               "printed_total": result.printed_total, "reconciled": result.reconciled, "document_lines": lines,
               "discount_rows": result.discount_rows, "confirmed_types": confirmed, "cost_usd": round(meter.spent_usd, 5),
               "calls": len(result.calls)}
@@ -143,3 +151,79 @@ def digitise_claim_documents(store: Repository, claim_id: str, documents: List[D
     logger.info("documents digitised", extra={"claim_id": claim_id, "lines": len(lines), "source": source,
                                               "reconciled": result.reconciled, "cost_usd": meter.spent_usd})
     return record
+
+
+AUTO_CONFIRM_CONFIDENCE = 0.85
+_reading: Dict[str, threading.Lock] = {}
+_reading_guard = threading.Lock()
+
+
+def auto_confirmable(documents: List[Dict[str, Any]]) -> bool:
+    """True when the model classified every page with confidence >= AUTO_CONFIRM_CONFIDENCE."""
+    entries = [e for doc in documents for e in doc.get("classification", [])]
+    return bool(entries) and all(e.get("predicted_by") == "model" and float(e.get("confidence") or 0) >= AUTO_CONFIRM_CONFIDENCE
+                                 for e in entries)
+
+
+def confirm_predicted_types(store: Repository, documents: List[Dict[str, Any]]) -> None:
+    """The model's page types become the confirmed types (what the analyst's confirm would store)."""
+    stamp = now_iso()
+    for doc in documents:
+        for entry in doc.get("classification", []):
+            entry["confirmed_type"] = entry.get("predicted_type")
+            entry["confirmed_by"] = "auto"
+        confirmed = [e["confirmed_type"] for e in doc.get("classification", []) if e.get("confirmed_type")]
+        if confirmed:
+            doc["document_type"] = Counter(confirmed).most_common(1)[0][0]
+            doc["confirmed_at"] = stamp
+        store.upsert(collection="documents", doc_id=doc["document_id"], doc=doc)
+
+
+def read_claim_documents(store: Repository, claim_id: str, progress: Optional[Any] = None) -> str:
+    """Automatic reading: classify -> auto-confirm (every page >= 0.85, else wait for the analyst) -> read -> check.
+    Claims with data lines keep them (the read lines go to `digitisations` for the comparison); document-only claims
+    take the read lines and run the checks. Returns the outcome: no_documents | waiting_for_analyst | read | checked.
+    progress(step, status, seconds) is told about each step."""
+    def tell(step: str, status: str, seconds: float = 0.0) -> None:
+        if progress is not None:
+            progress(step, status, round(seconds, 2))
+
+    with _reading_guard:
+        lock = _reading.setdefault(claim_id, threading.Lock())
+    with lock:
+        documents = claim_documents(store=store, claim_id=claim_id)
+        if not documents:
+            return "no_documents"
+        started = time.monotonic()
+        tell("classify", "running")
+        documents, _ = classify_claim_documents(store=store, claim_id=claim_id)
+        tell("classify", "done", time.monotonic() - started)
+        if not auto_confirmable(documents):
+            tell("confirm", "waiting")
+            return "waiting_for_analyst"
+        confirm_predicted_types(store=store, documents=documents)
+        tell("confirm", "done")
+        started = time.monotonic()
+        tell("read", "running")
+        record = digitise_claim_documents(store=store, claim_id=claim_id, documents=documents)
+        tell("read", "done", time.monotonic() - started)
+        claim = store.get(collection="claims", doc_id=claim_id) or {}
+        if claim.get("source") != "documents":
+            return "read"
+        started = time.monotonic()
+        tell("check", "running")
+        start_run(claim_id=claim_id, background=False)
+        tell("check", "done", time.monotonic() - started)
+        logger.info("claim read automatically", extra={"claim_id": claim_id, "lines": len(record.get("document_lines", []))})
+        return "checked"
+
+
+def read_in_background(store: Repository, claim_ids: List[str]) -> None:
+    """Automatic reading of each claim's stored documents on a worker thread; a failure leaves the claim for the analyst."""
+    def work() -> None:
+        for claim_id in claim_ids:
+            try:
+                read_claim_documents(store=store, claim_id=claim_id)
+            except Exception as exc:  # noqa: BLE001 - the classification gate still lets the analyst finish by hand
+                logger.warning("automatic reading failed", extra={"claim_id": claim_id, "error": str(exc)})
+    threading.Thread(target=work, daemon=True).start()

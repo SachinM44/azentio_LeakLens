@@ -38,6 +38,7 @@ COST_CAP_USD = float(os.environ.get("COST_CAP_USD_PER_CLAIM", "2"))
 # by us; set from Google's price page before quoting a Gemini cost.
 PRICES: Dict[str, Tuple[float, float]] = {
     "bedrock/moonshotai.kimi-k2.5": (0.72, 3.60),
+    "bedrock/global.anthropic.claude-haiku-4-5-20251001-v1:0": (1.0, 5.0),
     "bedrock/in.anthropic.claude-sonnet-5": (float(os.environ.get("CLAUDE_PRICE_IN", "3.0")), float(os.environ.get("CLAUDE_PRICE_OUT", "15.0"))),
 }
 RETRY_BACKOFF_S = (2, 8, 20)
@@ -193,10 +194,12 @@ def call_model(prompt_name: str, payload: Union[Dict[str, Any], str], images: Se
                schema: Type[BaseModel], *, tag: str, cache_dir: Optional[Path] = None,
                meter: Optional[CostMeter] = None, labels: Optional[Sequence[str]] = None,
                model: str = PRIMARY_MODEL, max_tokens: int = 16384, timeout: float = 300.0,
-               use_fallback: bool = True, offline: bool = False) -> ModelResult:
+               use_fallback: bool = True, offline: bool = False,
+               fallbacks: Optional[Sequence[str]] = None) -> ModelResult:
     """Run one prompt over a payload and page images; return a schema-valid answer or raise ModelCallFailed.
 
     offline=True answers from the cache only (a cache miss raises), for demos and CI without network.
+    fallbacks: the models tried after `model` (default FALLBACK_MODELS); `model` itself is never retried as its own fallback.
     """
     system, prompt = _system_text(prompt_name, schema)
     content = _user_content(payload, images, labels)
@@ -214,7 +217,8 @@ def call_model(prompt_name: str, payload: Union[Dict[str, Any], str], images: Se
     started = time.monotonic()
     notes: List[str] = []
     attempts = 0
-    for current in [model] + (FALLBACK_MODELS if use_fallback else []):
+    chain = [m for m in (FALLBACK_MODELS if fallbacks is None else fallbacks) if m != model] if use_fallback else []
+    for current in [model] + chain:
         caller = _call_bedrock
         turn_content = content
         reasked = False

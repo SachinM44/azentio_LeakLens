@@ -9,7 +9,9 @@ documents → invoice lines and header facts for the master record, reconciled a
 from __future__ import annotations
 
 import json
+import os
 import re
+import time
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
@@ -18,7 +20,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
 from core.engines.bill_totals import bill_line_looks_like_discount, merge_bill_document_data_from_batches
-from core.llm.client import CostMeter, ModelResult, call_model
+from core.llm.client import PRIMARY_MODEL, CostMeter, ModelResult, call_model
 from core.media.pages import PageImage, batches, encode_for_request
 from core.schemas.classification import BILL_TYPES, DOCUMENT_TYPES, PageClassificationBatch
 from core.schemas.digitisation import FileDigitizationResponse
@@ -28,9 +30,15 @@ ROOT = Path(__file__).resolve().parents[2]
 PAYLOAD_DEFAULTS: Dict[str, Dict[str, Any]] = json.loads(
     (ROOT / "core" / "prompts" / "digitise_payload_defaults.json").read_text(encoding="utf-8"))
 STAGE = "claim-settlement-v1"
-CLASSIFY_PAGES_PER_REQUEST = 3
+# One page per request everywhere, all pages of all files at once: the wall time is the slowest page, not the sum.
+CLASSIFY_PAGES_PER_REQUEST = 1
 BILL_PAGES_PER_REQUEST = 1
-DOC_PAGES_PER_REQUEST = 4
+DOC_PAGES_PER_REQUEST = 1
+MAX_PARALLEL_CALLS = 16
+KIMI_MODEL = "bedrock/moonshotai.kimi-k2.5"
+DEFAULT_DOC_MODEL = "bedrock/global.anthropic.claude-haiku-4-5-20251001-v1:0"  # fastest that reconciles (docs/SPEED.md)
+TEXT_LAYER_NOTE = ("This page is a native PDF page: it is given below as its TEXT LAYER (printed rows top to bottom, "
+                   "' | ' between columns) instead of an image. Read it exactly as you would read the page image.")
 # Rows a bill prints to summarise its items (section subtotals, gross / grand total, net payable): kept for the
 # reconciliation, never treated as charges.
 SUMMARY_ROW = re.compile(r"\b(sub[\s-]?total|gross total|grand total|net payable|net amount|amount payable|total payable|"
@@ -42,9 +50,28 @@ ITEM_TYPE_TO_CATEGORY = {"lab": LineCategory.LAB, "room": LineCategory.ROOM, "me
 Ask = Callable[..., ModelResult]
 
 
+def doc_model() -> str:
+    """The model that reads documents (LEAKLENS_DOC_MODEL); Kimi stays the fallback."""
+    return os.environ.get("LEAKLENS_DOC_MODEL", DEFAULT_DOC_MODEL).strip() or DEFAULT_DOC_MODEL
+
+
+def text_layer_enabled() -> bool:
+    """LEAKLENS_TEXT_LAYER=0 sends every page as an image (the old path)."""
+    return os.environ.get("LEAKLENS_TEXT_LAYER", "1").strip() not in ("0", "false", "no")
+
+
+def _as_text(page: PageImage) -> bool:
+    return bool(page.text) and text_layer_enabled()
+
+
 def make_ask(cache_dir: Optional[Path], meter: Optional[CostMeter] = None, offline: bool = False) -> Ask:
-    """A call_model bound to one claim's cache and cost meter."""
+    """A call_model bound to one claim's cache and cost meter, on the document model with Kimi as the fallback."""
+    model = doc_model()
+    fallbacks = [KIMI_MODEL] if model != KIMI_MODEL else None
+
     def ask(prompt: str, payload, images, schema, **kw) -> ModelResult:
+        kw.setdefault("model", model)
+        kw.setdefault("fallbacks", fallbacks)
         return call_model(prompt, payload, images, schema, cache_dir=cache_dir, meter=meter, offline=offline, **kw)
     return ask
 
@@ -71,11 +98,15 @@ def classify_pages(pages: List[PageImage], ask: Ask, bundle_name: str = "claim.p
                  "pharmacy/chemist headers → medicine_pharmacy_bills, not hospital bill types.\n- other_documents is ALWAYS "
                  f"valid — use it when unsure.\n- Allowed document_type values: {', '.join(DOCUMENT_TYPES)}")
         labels = [f"--- Page index {start + i} (0-based GLOBAL index) ---" for i in range(len(chunk))]
+        if all(_as_text(p) for p in chunk):
+            body = "\n\n".join(f"{labels[i]}\n{TEXT_LAYER_NOTE}\n{p.text}" for i, p in enumerate(chunk))
+            return ask("classify_pages", f"{intro}\n\n{body}", [], PageClassificationBatch,
+                       tag=f"classify_p{first}-{last}_text", max_tokens=32768)
         return ask("classify_pages", intro, encode_for_request([p.image for p in chunk]), PageClassificationBatch,
                    tag=f"classify_p{first}-{last}", labels=labels, max_tokens=32768)
 
     predictions = [PagePrediction(p.source_file, p.page_in_file, i, "other_documents", 0.0) for i, p in enumerate(pages)]
-    with ThreadPoolExecutor(max_workers=4) as pool:
+    with ThreadPoolExecutor(max_workers=MAX_PARALLEL_CALLS) as pool:
         for result in pool.map(run, batches(pages, CLASSIFY_PAGES_PER_REQUEST)):
             for page in result.parsed.pages:
                 if 0 <= page.page_index < len(pages):
@@ -102,6 +133,10 @@ class DigitisedClaim:
     reconciled: Optional[bool] = None
     raw: Dict[str, List[Dict[str, Any]]] = field(default_factory=dict)   # file -> digitisation responses
     calls: List[ModelResult] = field(default_factory=list)
+    document_fact_sources: Dict[str, Dict[str, Any]] = field(default_factory=dict)  # fact -> {document_name, page}
+    extracted_by: Optional[str] = None   # ai-text when every bill page was read from its text layer, else ai-vision
+    model: Optional[str] = None
+    read_seconds: float = 0.0
 
 
 def _amount(text: Any) -> Optional[float]:
@@ -117,21 +152,36 @@ def _date(text: Any) -> Optional[date]:
     return date(int(m.group(3)), int(m.group(2)), int(m.group(1))) if m else None
 
 
-def digitise_file(name: str, doc_type: str, file_pages: List[PageImage], ask: Ask, claim_id: str) -> List[ModelResult]:
-    """Bills one page per request, other documents up to four, with the default extraction configuration."""
+def _file_jobs(name: str, doc_type: str, file_pages: List[PageImage], ask: Ask, claim_id: str) -> List[Callable[[], ModelResult]]:
+    """One call per batch of a file (bills one page per request), with the default extraction configuration.
+    A page with a text layer goes as text; a scan or photo as an image."""
     is_bill = doc_type in BILL_TYPES
     defaults = PAYLOAD_DEFAULTS.get(doc_type.upper()) or PAYLOAD_DEFAULTS["OTHER_DOCUMENTS"]
 
-    def run(batch):
-        start, chunk = batch
-        numbers = [p.page_in_file for p in chunk]
-        payload = {"claim_id": claim_id, "stage": STAGE, "document_type": doc_type, "document_uuid": name, **defaults,
-                   "page_numbers": numbers, "total_pages": len(file_pages), "pages_per_request": len(chunk)}
-        return ask("digitise_bill" if is_bill else "digitise_doc", payload, encode_for_request([p.image for p in chunk]),
-                   FileDigitizationResponse, tag=f"digitise_{Path(name).stem}_p{numbers[0]}-{numbers[-1]}", max_tokens=32768)
+    def job(chunk: List[PageImage]) -> Callable[[], ModelResult]:
+        def run() -> ModelResult:
+            numbers = [p.page_in_file for p in chunk]
+            payload = {"claim_id": claim_id, "stage": STAGE, "document_type": doc_type, "document_uuid": name, **defaults,
+                       "page_numbers": numbers, "total_pages": len(file_pages), "pages_per_request": len(chunk)}
+            prompt = "digitise_bill" if is_bill else "digitise_doc"
+            tag = f"digitise_{Path(name).stem}_p{numbers[0]}-{numbers[-1]}"
+            if all(_as_text(p) for p in chunk):
+                payload["input_mode"] = TEXT_LAYER_NOTE
+                payload["page_text_layer"] = {str(p.page_in_file): p.text for p in chunk}
+                return ask(prompt, payload, [], FileDigitizationResponse, tag=f"{tag}_text", max_tokens=32768)
+            return ask(prompt, payload, encode_for_request([p.image for p in chunk]), FileDigitizationResponse,
+                       tag=tag, max_tokens=32768)
+        return run
 
-    with ThreadPoolExecutor(max_workers=4) as pool:
-        return list(pool.map(run, batches(file_pages, BILL_PAGES_PER_REQUEST if is_bill else DOC_PAGES_PER_REQUEST)))
+    size = BILL_PAGES_PER_REQUEST if is_bill else DOC_PAGES_PER_REQUEST
+    return [job(chunk) for _, chunk in batches(file_pages, size)]
+
+
+def digitise_file(name: str, doc_type: str, file_pages: List[PageImage], ask: Ask, claim_id: str) -> List[ModelResult]:
+    """Every batch of one file, in parallel."""
+    jobs = _file_jobs(name, doc_type, file_pages, ask, claim_id)
+    with ThreadPoolExecutor(max_workers=MAX_PARALLEL_CALLS) as pool:
+        return list(pool.map(lambda run: run(), jobs))
 
 
 def _facts_from_fields(fields: List[Dict[str, Any]], facts: Dict[str, str]) -> None:
@@ -148,24 +198,46 @@ def _facts_from_fields(fields: List[Dict[str, Any]], facts: Dict[str, str]) -> N
                 facts[out] = value
 
 
+def _fact_page(dumps: List[Dict[str, Any]], fact: str, value: str, pages_per_request: int) -> int:
+    """The 1-based page whose answer carried this fact's value (the first batch that yields it), else page 1."""
+    for index, dump in enumerate(dumps):
+        found: Dict[str, str] = {}
+        _facts_from_fields(merge_bill_document_data_from_batches([dump])["fields"], found)
+        if found.get(fact) == value:
+            return index * pages_per_request + 1
+    return 1
+
+
 def digitise_documents(pages: List[PageImage], confirmed: Dict[str, str], ask: Ask, *, claim_id: str,
                        provider_id: Optional[str] = None) -> DigitisedClaim:
     """confirmed: file name -> document type (after the human review). Returns master-ready lines and facts."""
     out = DigitisedClaim()
+    started = time.monotonic()
     by_file: Dict[str, List[PageImage]] = {}
     for p in pages:
         by_file.setdefault(p.source_file, []).append(p)
-    with ThreadPoolExecutor(max_workers=5) as pool:
-        jobs = {name: pool.submit(digitise_file, name, confirmed.get(name, "other_documents"), fp, ask, claim_id)
-                for name, fp in by_file.items()}
-        results = {name: job.result() for name, job in jobs.items()}
+    # Bills first so their header facts win; every page of every file in flight at once.
+    order = sorted(by_file, key=lambda name: confirmed.get(name) not in BILL_TYPES)
+    jobs = {name: _file_jobs(name, confirmed.get(name, "other_documents"), by_file[name], ask, claim_id) for name in order}
+    with ThreadPoolExecutor(max_workers=MAX_PARALLEL_CALLS) as pool:
+        futures = {name: [pool.submit(run) for run in runs] for name, runs in jobs.items()}
+        results = {name: [f.result() for f in fs] for name, fs in futures.items()}
+    out.read_seconds = round(time.monotonic() - started, 2)
+    bill_pages = [p for name in order if confirmed.get(name) in BILL_TYPES for p in by_file[name]] or pages
+    out.extracted_by = "ai-text" if all(_as_text(p) for p in bill_pages) else "ai-vision"
     serial = 0
-    for name, file_results in results.items():
+    for name in order:
+        file_results = results[name]
         out.calls.extend(file_results)
         dumps = [r.parsed.model_dump() for r in file_results]
         out.raw[name] = dumps
         footer = merge_bill_document_data_from_batches(dumps)
+        before = set(out.document_facts)
         _facts_from_fields(footer["fields"], out.document_facts)
+        size = BILL_PAGES_PER_REQUEST if confirmed.get(name) in BILL_TYPES else DOC_PAGES_PER_REQUEST
+        for fact in set(out.document_facts) - before:
+            out.document_fact_sources[fact] = {"document_name": name,
+                                               "page": _fact_page(dumps, fact, out.document_facts[fact], size)}
         if confirmed.get(name) not in BILL_TYPES:
             continue
         invoice_no = out.document_facts.get("invoice_no") or Path(name).stem
@@ -186,6 +258,8 @@ def digitise_documents(pages: List[PageImage], confirmed: Dict[str, str], ask: A
                     service_date=_date(item.item_date), code=item.item_code, description=item.item_name, category=category,
                     quantity=item.quantity or 1.0, unit_price=item.unit_price, amount=float(item.total_amount),
                     provider_id=provider_id, document_id=name, page=item.page_number))
+    models = Counter(r.model for r in out.calls)
+    out.model = models.most_common(1)[0][0] if models else None
     printed = _amount(out.document_facts.get("net_payable")) or _amount(out.document_facts.get("grand_total"))
     out.printed_total = printed
     if printed is not None and out.lines:

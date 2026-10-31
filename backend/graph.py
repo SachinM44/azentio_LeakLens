@@ -248,6 +248,12 @@ def investigate_node(state: ClaimState) -> dict:
         finding.recommendation_confidence = verdict.confidence
         finding.recommendation_note = verdict.note
         applied += 1
+        # The evidence trail carries each AI recommendation (same row shape as backend.views.write_audit).
+        audit_id = f"AUD-{uuid.uuid4().hex[:12]}"
+        store.upsert(collection="audit", doc_id=audit_id, doc={
+            "audit_id": audit_id, "ts": now_iso(), "actor": "investigator", "action": "ai_recommendation",
+            "claim_id": claim_id, "details": {"finding_id": finding.finding_id, "recommendation": verdict.recommendation,
+                                              "confidence": verdict.confidence, "note": verdict.note, "run_id": run_id}})
     docs = _persist_findings(store=store, findings=findings)
     cost = round(trail.input_tokens * AGENT_USD_PER_M_INPUT / 1e6 + trail.output_tokens * AGENT_USD_PER_M_OUTPUT / 1e6, 5)
     _run_update(run_id, investigation={"steps": trail.steps, "model": trail.model, "input_tokens": trail.input_tokens,

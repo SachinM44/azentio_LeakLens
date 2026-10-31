@@ -20,6 +20,8 @@ MAX_REQUEST_IMAGE_BYTES = 3_300_000
 # (max side, JPEG quality) tried in order when a request's images are over the byte limit.
 SHRINK_LADDER: Tuple[Tuple[int, int], ...] = ((1600, 80), (1100, 65), (800, 55), (560, 45))
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp", ".tif", ".tiff", ".bmp"}
+# A native PDF page with at least this much text goes to the model as text (fast path); scans and photos as images.
+TEXT_LAYER_MIN_CHARS = 200
 
 
 @dataclass
@@ -28,6 +30,7 @@ class PageImage:
     source_file: str
     page_in_file: int  # 1-based page number inside source_file
     image: Image.Image
+    text: str = ""  # the page's text layer, row by row, when it is a native PDF page with enough text
 
 
 def pdf_to_images(pdf_bytes: bytes, dpi: int = PDF_DPI) -> List[Image.Image]:
@@ -43,11 +46,48 @@ def pdf_to_images(pdf_bytes: bytes, dpi: int = PDF_DPI) -> List[Image.Image]:
         doc.close()
 
 
+def page_text_rows(page: "fitz.Page") -> str:
+    """The page's words regrouped into printed rows (top to bottom, left to right), so a bill table keeps one
+    charge per line; a wide gap between words becomes ' | ' so the columns stay apart."""
+    words = page.get_text("words")
+    rows: List[list] = []
+    for w in sorted(words, key=lambda w: ((w[1] + w[3]) / 2, w[0])):
+        middle = (w[1] + w[3]) / 2
+        if rows and abs(rows[-1][0] - middle) <= 3:
+            rows[-1][1].append(w)
+        else:
+            rows.append([middle, [w]])
+    out = []
+    for _, row in rows:
+        row.sort(key=lambda w: w[0])
+        text = row[0][4]
+        for prev, word in zip(row, row[1:]):
+            text += (" | " if word[0] - prev[2] > 12 else " ") + word[4]
+        out.append(text)
+    return chr(10).join(out)
+
+
+def pdf_text_layers(pdf_bytes: bytes) -> List[str]:
+    """Per page: the row text when the page has a usable text layer (>= TEXT_LAYER_MIN_CHARS), else ''."""
+    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+    try:
+        texts = []
+        for page in doc:
+            text = page_text_rows(page)
+            texts.append(text if len(text.strip()) >= TEXT_LAYER_MIN_CHARS else "")
+        return texts
+    finally:
+        doc.close()
+
+
 def load_file_pages(path: Path) -> List[PageImage]:
-    """All pages of one claim file (PDF or image)."""
+    """All pages of one claim file (PDF or image); native PDF pages carry their text layer."""
     suffix = path.suffix.lower()
     if suffix == ".pdf":
-        return [PageImage(path.name, i + 1, img) for i, img in enumerate(pdf_to_images(path.read_bytes()))]
+        data = path.read_bytes()
+        texts = pdf_text_layers(data)
+        return [PageImage(path.name, i + 1, img, texts[i] if i < len(texts) else "")
+                for i, img in enumerate(pdf_to_images(data))]
     if suffix in IMAGE_SUFFIXES:
         img = Image.open(path)
         img.load()
