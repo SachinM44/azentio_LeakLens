@@ -86,6 +86,21 @@ def check_duplicate_claim(record: MasterRecord, history_index: Dict[str, History
         if other.claim_id == claim.claim_id or not _later(claim, other):
             continue
         if other.claimant_id != claim.claimant_id and other.policy_number != claim.policy_number:
+            # Another member under another policy presenting the same invoice: one of the two is not payable.
+            shared = sorted(mine & {i.strip().upper() for i in other.invoice_numbers if i})
+            if shared:
+                findings.append(make_finding(
+                    record, CheckId.DUPLICATE_CLAIM, amount=claim.requested_amount, kind=AmountKind.SUSPECTED,
+                    rule_id="DUP-CLAIM-03",
+                    rule_text="One invoice can be claimed once; the same invoice under another policy needs investigation.",
+                    calculation=f"invoice {', '.join(shared)} also on claim {other.claim_id} (policy {other.policy_number}, "
+                                f"member {other.claimant_id}); at risk = requested {money(claim.requested_amount, claim.currency)}",
+                    reason=f"Invoice {', '.join(shared)} from {other.provider_name or other.provider_id} was already claimed "
+                           f"under policy {other.policy_number} by another member.",
+                    evidence=[Evidence(source="claim", ref=other.claim_id,
+                                       quote=f"policy {other.policy_number}, member {other.claimant_id}, invoices "
+                                             f"{', '.join(other.invoice_numbers)}, requested {money(other.requested_amount, claim.currency)}")],
+                    related_claim_ids=[other.claim_id], severity=Severity.HIGH))
             continue
         shared = sorted(mine & {i.strip().upper() for i in other.invoice_numbers if i})
         if shared:
