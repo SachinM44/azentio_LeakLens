@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { api } from '../../api/client'
 import type { ComparisonField, ComparisonLine, DocSource } from '../../api/types'
 import { fmtDateTime, money, titleCase } from '../../lib/format'
+import EvidenceViewer from './EvidenceViewer'
 
 const FIELD_COLOR: Record<string, string> = { match: 'green', mismatch: 'red', only_in_claim: 'gold', only_in_document: 'blue', not_read: 'default' }
 const LINE_COLOR: Record<string, string> = { match: 'green', amount_differs: 'red', only_in_document: 'blue', only_in_claim: 'gold' }
@@ -16,6 +17,7 @@ interface Props {
 
 export default function ComparisonTab({ claimId, currency, onOpenDocument }: Props) {
   const [lineFilter, setLineFilter] = useState<string>('all')
+  const [evidence, setEvidence] = useState<DocSource | null>(null)
   const q = useQuery({
     queryKey: ['comparison', claimId], queryFn: () => api.comparison(claimId),
     refetchInterval: (query) => (query.state.data && !query.state.data.extracted ? 3000 : false),
@@ -30,7 +32,7 @@ export default function ComparisonTab({ claimId, currency, onOpenDocument }: Pro
   }
 
   const source = (s: DocSource | null) => (s ? (
-    <button type="button" onClick={() => onOpenDocument(s.document_id)}
+    <button type="button" onClick={() => setEvidence(s)}
       className="cursor-pointer border-0 bg-transparent p-0 text-left text-[12.5px] text-[#2F7FF2] hover:underline">
       {s.document_name}{s.page ? ` · page ${s.page}` : ''}
     </button>
@@ -93,6 +95,8 @@ export default function ComparisonTab({ claimId, currency, onOpenDocument }: Pro
             { title: 'Source', dataIndex: 'source', width: 170, render: (v: DocSource | null) => source(v) },
           ]} />
       </section>
+      <EvidenceViewer source={evidence} comparison={c} currency={currency} onClose={() => setEvidence(null)}
+        onOpenDocuments={onOpenDocument} />
     </div>
   )
 }
