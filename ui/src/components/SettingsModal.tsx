@@ -6,14 +6,15 @@ export default function SettingsModal({ open, onClose }: { open: boolean; onClos
   const [baseUrl, setBaseUrl] = useState('')
   const [apiKey, setApiKey] = useState('')
   const [useMocks, setUseMocks] = useState(false)
+  const [analyst, setAnalyst] = useState('')
   const [testing, setTesting] = useState(false)
 
   useEffect(() => {
-    if (open) { setBaseUrl(connection.baseUrl); setApiKey(connection.apiKey); setUseMocks(connection.useMocks) }
+    if (open) { setBaseUrl(connection.baseUrl); setApiKey(connection.apiKey); setUseMocks(connection.useMocks); setAnalyst(connection.analyst) }
   }, [open])
 
   const save = (reload = true) => {
-    connection.save({ baseUrl, apiKey, useMocks })
+    connection.save({ baseUrl, apiKey, useMocks, analyst })
     if (reload) window.location.reload()
   }
 
@@ -38,6 +39,11 @@ export default function SettingsModal({ open, onClose }: { open: boolean; onClos
         <label className="flex items-center justify-between gap-3">
           <span><b>Use mock data</b><br /><span className="muted text-[13px]">Demo the screens without a backend.</span></span>
           <Switch checked={useMocks} onChange={setUseMocks} />
+        </label>
+        <label>
+          <div className="mb-1 font-medium">Your name (analyst)</div>
+          <Input value={analyst} onChange={(e) => setAnalyst(e.target.value)} placeholder="e.g. Priya Sharma" />
+          <div className="muted mt-1 text-[12px]">Recorded on every decision, note and report as the user identity.</div>
         </label>
         <label>
           <div className="mb-1 font-medium">API base URL</div>

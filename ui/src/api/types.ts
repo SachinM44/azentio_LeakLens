@@ -39,6 +39,10 @@ export interface Finding {
   reviewer_note: string
   corrected_amount?: number | null
   created_at?: string
+  /** Investigator agent (suspected findings): confirm | dismiss | clarify */
+  recommendation?: string | null
+  recommendation_confidence?: number | null
+  recommendation_note?: string
 }
 
 export interface ClaimSummary {
@@ -93,6 +97,9 @@ export interface Claim {
   invoice_numbers: string[]
   status: string
   source?: string
+  contact_phone?: string | null
+  bank_account?: string | null
+  address?: string | null
   extra?: Record<string, string>
 }
 
@@ -239,6 +246,37 @@ export interface ProductConfig {
   policy_wording_file?: string | null
 }
 
+/** What the document says, with a pointer back to where it was read (Level 2: values keep their source). */
+export interface DocumentFact {
+  field: string
+  value: string
+  document_id?: string
+  document_name?: string
+  page?: number | null
+}
+
+export interface DocumentLine {
+  description: string
+  code?: string | null
+  quantity?: number | null
+  unit_price?: number | null
+  amount: number
+  service_date?: string | null
+  document_id?: string
+  document_name?: string
+  page?: number | null
+}
+
+/** Claim-level analyst note. */
+export interface CaseNote {
+  note_id: string
+  claim_id: string
+  author: string
+  text: string
+  ts: string
+  local?: boolean
+}
+
 export interface ClaimDetail {
   claim: Claim
   policy: Policy | null
@@ -253,6 +291,10 @@ export interface ClaimDetail {
   summary: ClaimSummary
   reconciled?: boolean | null
   printed_total?: number | null
+  /** Optional: values read off the documents. When absent the UI derives what it can from the findings. */
+  document_facts?: DocumentFact[]
+  document_lines?: DocumentLine[]
+  notes?: CaseNote[]
 }
 
 export interface ValidationIssue {

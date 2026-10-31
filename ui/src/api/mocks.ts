@@ -1,7 +1,7 @@
 // In-memory stand-in for the API (Settings → "Use mock data"). Same shapes as docs/PLAN.md section 4, so the UI can be
 // built and demoed before the backend is up. Synthetic people, providers and amounts only.
 import type {
-  AuditRow, Claim, ClaimDetail, ClaimFilters, ClaimSummary, ClassificationRow, Dashboard, EvalSummary, Finding,
+  AuditRow, CaseNote, Claim, ClaimDetail, ClaimFilters, ClaimSummary, ClassificationRow, Dashboard, EvalSummary, Finding,
   IngestResult, InvoiceLine, Policy, ProductConfig, ReviewAction, Run, Settlement, Severity,
 } from './types'
 
@@ -47,17 +47,20 @@ const claims: Claim[] = [
     incident_date: '2026-08-11', admission_date: '2026-08-11', discharge_date: '2026-08-14', diagnosis: 'Appendicectomy', room_category: 'Private',
     requested_amount: 58400, proposed_settlement: 55000, invoice_numbers: ['INV-5521'] }),
   mk({ claim_id: 'CLM-1002', claimant_name: 'Rohan Iyer', claimant_id: 'M-202', provider_id: 'P-CITY', provider_name: 'City Care Clinic', claim_type: 'outpatient',
-    incident_date: '2026-09-02', requested_amount: 4620, invoice_numbers: ['INV-7810'], diagnosis: 'Knee MRI' }),
+    incident_date: '2026-09-02', requested_amount: 4620, invoice_numbers: ['INV-7810'], diagnosis: 'Knee MRI', bank_account: 'ACC-90214471', contact_phone: '+91-98100-22011' }),
   mk({ claim_id: 'CLM-1003', claimant_name: 'Rohan Iyer', claimant_id: 'M-202', provider_id: 'P-CITY', provider_name: 'City Care Clinic', claim_type: 'outpatient',
     incident_date: '2026-09-04', requested_amount: 4600, invoice_numbers: ['INV-7814'], diagnosis: 'Knee MRI' }),
   mk({ claim_id: 'CLM-1004', claimant_name: 'Meera Nair', provider_id: 'P-PHYS', provider_name: 'Motion Physio Centre', claim_type: 'outpatient',
     incident_date: '2026-09-09', requested_amount: 1800, invoice_numbers: ['INV-3301'], diagnosis: 'Post-op physiotherapy' }),
   mk({ claim_id: 'CLM-1005', claimant_name: 'Vikram Shah', provider_id: 'P-CITY', provider_name: 'City Care Clinic', claim_type: 'inpatient',
-    incident_date: '2026-09-15', admission_date: '2026-09-15', discharge_date: '2026-09-17', requested_amount: 91200, invoice_numbers: ['INV-7902'], diagnosis: 'Cataract surgery' }),
+    incident_date: '2026-09-15', admission_date: '2026-09-15', discharge_date: '2026-09-17', requested_amount: 91200, invoice_numbers: ['INV-7902'], diagnosis: 'Cataract surgery', bank_account: 'ACC-90214471', contact_phone: '+91-98100-22011' }),
   mk({ claim_id: 'CLM-1006', claimant_name: 'Sana Qureshi', provider_id: 'P-APEX', provider_name: 'Apex Hospital', claim_type: 'daycare',
     incident_date: '2026-09-21', requested_amount: 22000, invoice_numbers: [] }),
   mk({ claim_id: 'CLM-1007', claimant_name: 'Dev Malhotra', provider_id: 'P-GARAGE', provider_name: 'Prime Auto Works', claim_type: 'motor',
     incident_date: '2026-10-02', requested_amount: 37500, proposed_settlement: 37500, invoice_numbers: ['INV-9001'], policy_number: 'POL-MO-2210', product_id: 'IN-MOTOR' }),
+  mk({ claim_id: 'CLM-1009', claimant_name: 'Neha Kapoor', claimant_id: 'M-310', provider_id: 'P-APEX', provider_name: 'Apex Hospital', claim_type: 'inpatient',
+    incident_date: '2026-08-12', admission_date: '2026-08-11', discharge_date: '2026-08-14', diagnosis: 'Appendicectomy', requested_amount: 57400,
+    invoice_numbers: ['INV-5521'], policy_number: 'POL-IN-9902' }),
   mk({ claim_id: 'CLM-1008', claimant_name: 'Isha Rao', provider_id: 'P-APEX', provider_name: 'Apex Hospital', claim_type: 'pharmacy',
     incident_date: '2026-10-12', requested_amount: 3150, invoice_numbers: ['INV-5710'], status: 'ingested' }),
 ]
@@ -79,6 +82,10 @@ const linesByClaim: Record<string, InvoiceLine[]> = {
   'CLM-1005': [line('CLM-1005', 'INV-7902', 1, 'Cataract surgery with IOL', 1, 78000, 'surgery', '2026-09-16', 'SUR-CAT'),
     line('CLM-1005', 'INV-7902', 2, 'Room rent', 2, 2800, 'room', '2026-09-15'), line('CLM-1005', 'INV-7902', 3, 'Medicines', 1, 7600, 'pharma', '2026-09-16')],
   'CLM-1007': [line('CLM-1007', 'INV-9001', 1, 'Front bumper (part)', 1, 18500, 'parts', '2026-10-03'), line('CLM-1007', 'INV-9001', 2, 'Paint & labour', 1, 19000, 'labour', '2026-10-04')],
+  'CLM-1009': [line('CLM-1009', 'INV-5521', 1, 'Private room rent', 3, 5000, 'room', '2026-08-11', 'RM-PVT'),
+    line('CLM-1009', 'INV-5521', 2, 'Appendicectomy (laparoscopic)', 1, 28000, 'surgery', '2026-08-12', 'SUR-APP'),
+    line('CLM-1009', 'INV-5521', 3, 'Surgeon professional fee', 1, 9000, 'professional fees', '2026-08-12'),
+    line('CLM-1009', 'INV-5521', 4, 'Medicines and consumables', 1, 5400, 'pharma', '2026-08-13')],
   'CLM-1008': [line('CLM-1008', 'INV-5710', 1, 'Paracetamol 650mg x 30', 3, 50, 'pharma', '2026-10-12'), line('CLM-1008', 'INV-5710', 2, 'Antibiotic course', 1, 3000, 'pharma', '2026-10-12')],
 }
 
@@ -108,6 +115,8 @@ const findings: Finding[] = [
   fnd('CLM-1003', 'NEAR_DUPLICATE', 'duplicate', 'medium', 4600, 'suspected', 'NEAR-DUP', 'Same member, provider and service within 3 days and 2% of the amount is reviewed.',
     'Suspected: up to ₹4,600 if CLM-1003 repeats CLM-1002', 'Knee MRI billed by the same clinic two days later; invoice number and amount differ slightly (₹4,620 vs ₹4,600).', {
       related_claim_ids: ['CLM-1002'], line_ids: ['CLM-1003:INV-7814:1'],
+      recommendation: 'clarify', recommendation_confidence: 0.72,
+      recommendation_note: 'Same member, clinic and scan within two days; the invoice numbers differ by a few digits. No second referral is on file, so ask the clinic whether this is a re-bill of INV-7810.',
       evidence: [{ source: 'claim', ref: 'CLM-1002', quote: 'MRI knee 02 Sep ₹4,620 INV-7810' }, { source: 'claim', ref: 'CLM-1003', quote: 'MRI knee 04 Sep ₹4,600 INV-7814' }],
     }),
   fnd('CLM-1005', 'SUBLIMIT_EXCEEDED', 'policy_rule', 'high', 38000, 'calculated', 'SUBLIMIT_CATARACT', 'Cataract surgery is capped at ₹40,000 per claim.',
@@ -118,10 +127,20 @@ const findings: Finding[] = [
   fnd('CLM-1005', 'PROVIDER_PRICE_OUTLIER', 'pattern', 'medium', 22000, 'suspected', 'PEER_BENCHMARK', 'Unit price above 2.5σ of peer providers for the same code.',
     'Suspected: (78,000 − peer median 56,000) = ₹22,000', 'City Care bills cataract surgery 39% above the peer median across 14 comparable claims. This is a pattern for review, not a conclusion of fraud.', {
       line_ids: ['CLM-1005:INV-7902:1'], evidence: [{ source: 'history', ref: 'peer SUR-CAT', quote: 'median ₹56,000, σ ₹6,100, n=14' }],
+      recommendation: 'confirm', recommendation_confidence: 0.64,
+      recommendation_note: 'Peer prices for SUR-CAT range from ₹48,000 to ₹66,000 across 14 lines; this charge is above the highest. The lens is included in the price, which explains part of the gap.',
     }),
   fnd('CLM-1005', 'RELATED_PARTY_PATTERN', 'pattern', 'medium', 0, 'suspected', 'SHARED_BANK', 'Claims sharing a bank account across different claimants are reviewed.',
     'No amount can be determined', 'The payee bank account matches CLM-1002 (a different claimant at the same provider).', {
+      recommendation: 'clarify', recommendation_confidence: 0.8,
+      recommendation_note: 'The payee bank account and phone match CLM-1002, a different member at the same clinic. Request proof of relationship before paying.',
       related_claim_ids: ['CLM-1002'], evidence: [{ source: 'claim', ref: 'CLM-1005', quote: 'bank_account …4471' }, { source: 'claim', ref: 'CLM-1002', quote: 'bank_account …4471' }],
+    }),
+  fnd('CLM-1009', 'DUPLICATE_CLAIM', 'duplicate', 'high', 57400, 'calculated', 'DUP-CLAIM-01', 'The same invoice cannot be claimed twice.',
+    'invoice INV-5521 also on claim CLM-1001; duplicate = requested amount',
+    'Invoice INV-5521 from Apex Hospital is attached to this claim and to CLM-1001, which is under a different policy (POL-IN-7781).', {
+      related_claim_ids: ['CLM-1001'],
+      evidence: [{ source: 'claim', ref: 'CLM-1001', quote: 'invoices INV-5521 requested ₹58,400, policy POL-IN-7781' }, { source: 'claim', ref: 'CLM-1009', quote: 'invoices INV-5521 requested ₹57,400, policy POL-IN-9902' }],
     }),
   fnd('CLM-1006', 'MISSING_EVIDENCE', 'evidence', 'low', 0, 'suspected', 'REQUIRED_DOCS', 'A daycare claim needs an itemised bill and a discharge summary.',
     'Cannot be calculated without the invoice', 'No invoice lines or bill were supplied, so no leakage assessment is possible. Ask the provider for the itemised bill.', {
@@ -200,6 +219,26 @@ function classificationFor(claimId: string): ClassificationRow[] {
   ]
 }
 
+const DOC1 = { document_id: 'DOC-2', document_name: 'CLM-1001_bill.pdf' }
+const FACTS: Record<string, NonNullable<ClaimDetail['document_facts']>> = {
+  'CLM-1001': [
+    { field: 'claimant_name', value: 'Asha Verma', ...DOC1, page: 1 }, { field: 'policy_number', value: 'POL-IN-7781', ...DOC1, page: 1 },
+    { field: 'invoice_no', value: 'INV-5521', ...DOC1, page: 1 }, { field: 'admission_date', value: '2026-08-11', ...DOC1, page: 1 },
+    { field: 'discharge_date', value: '2026-08-15', ...DOC1, page: 1 }, { field: 'net_payable', value: '57,650', ...DOC1, page: 2 },
+  ],
+}
+const DOC_LINES: Record<string, NonNullable<ClaimDetail['document_lines']>> = {
+  'CLM-1001': [
+    { description: 'Private room rent', amount: 15000, service_date: '2026-08-11', ...DOC1, page: 1 },
+    { description: 'Appendicectomy (laparoscopic)', amount: 28000, service_date: '2026-08-12', ...DOC1, page: 1 },
+    { description: 'Complete blood count', amount: 600, service_date: '2026-08-11', ...DOC1, page: 1 },
+    { description: 'Surgical gloves & mask', amount: 1250, service_date: '2026-08-12', ...DOC1, page: 2 },
+    { description: 'Surgeon professional fee', amount: 9500, service_date: '2026-08-12', ...DOC1, page: 2 },
+    { description: 'Medicines', amount: 2950, service_date: '2026-08-13', ...DOC1, page: 2 },
+  ],
+}
+const notes: Record<string, CaseNote[]> = {}
+
 function detail(id: string): ClaimDetail {
   const claim = claims.find((c) => c.claim_id === id)
   if (!claim) throw Object.assign(new Error(`claim ${id} not found`), { status: 404 })
@@ -209,11 +248,14 @@ function detail(id: string): ClaimDetail {
   const checked = claimsByStatus[id] !== 'ingested'
   return {
     claim: { ...claim, status: claimsByStatus[id] }, policy: claim.product_id === 'IN-MOTOR' ? null : POLICY, product: PRODUCT, lines: linesByClaim[id] ?? [],
-    documents: classification.length ? [{ id: 'DOC-1', name: 'scan_001.pdf', type: null, pages: 2, mime: 'application/pdf', uploaded_at: iso() }] : [],
+    documents: classification.length ? [{ id: 'DOC-1', name: 'scan_001.pdf', type: null, pages: 2, mime: 'application/pdf', uploaded_at: iso() }]
+      : id === 'CLM-1001' ? [{ id: 'DOC-2', name: 'CLM-1001_bill.pdf', type: 'itemized_final_hospital_bill', pages: 2, mime: 'application/pdf', uploaded_at: iso() }] : [],
     classification, findings: [...fs].sort((a, b) => SEV[b.severity] - SEV[a.severity]), settlement: settle(claim),
     audit: audits.filter((a) => a.claim_id === id),
     run: checked ? { run_id: `RUN-${id}`, claim_id: id, status: 'completed', steps: ['load_master', 'run_checks', 'assess', 'settle', 'done'].map((name) => ({ name, status: 'completed', started: iso(), ended: iso() })), cost_usd: 0, paused_at: null } : null,
-    summary, reconciled: linesByClaim[id] ? true : null, printed_total: linesByClaim[id]?.reduce((s, l) => s + l.amount, 0) ?? null,
+    summary, reconciled: id === 'CLM-1001' ? false : linesByClaim[id] ? true : null,
+    printed_total: id === 'CLM-1001' ? 57650 : linesByClaim[id]?.reduce((s, l) => s + l.amount, 0) ?? null,
+    document_facts: FACTS[id], document_lines: DOC_LINES[id],
   }
 }
 
@@ -295,6 +337,16 @@ export async function mockRequest<T>(method: string, path: string, params: Recor
     return result as T
   }
 
+  if ((m = path.match(/^\/claims\/([^/]+)\/notes$/))) {
+    const id = decodeURIComponent(m[1])
+    if (method === 'POST') {
+      const n: CaseNote = { note_id: `N-${Date.now()}`, claim_id: id, author: String(bodyObj.author ?? 'analyst'), text: String(bodyObj.text ?? ''), ts: iso() }
+      notes[id] = [...(notes[id] ?? []), n]
+      audits.push({ audit_id: `AUD-${audits.length}`, ts: iso(), actor: n.author, action: 'note_added', claim_id: id, details: { note: n.text } })
+      return n as T
+    }
+    return (notes[id] ?? []) as T
+  }
   if ((m = path.match(/^\/claims\/([^/]+)\/run$/))) {
     const id = decodeURIComponent(m[1])
     if (method === 'POST') { claimsByStatus[id] = 'checked'; return { run_id: `RUN-${id}`, claim_id: id, status: 'queued' } as T }
