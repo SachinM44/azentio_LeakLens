@@ -119,8 +119,10 @@ def check_exclusions(record: MasterRecord) -> List[Finding]:
 
 
 def check_non_payable(record: MasterRecord) -> List[Finding]:
+    # The insurer's rule book (Config screen) decides; a policy's own list is used only when the product has none.
     policy = record.policy
-    items = (policy.non_payable_items if policy and policy.non_payable_items else product_for(record).non_payable_items)
+    product_items = product_for(record).non_payable_items
+    items = product_items or (policy.non_payable_items if policy else [])
     if not items:
         return []
     findings: List[Finding] = []
