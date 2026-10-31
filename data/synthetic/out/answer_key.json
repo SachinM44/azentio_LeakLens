@@ -1,0 +1,1179 @@
+{
+  "seed": 20261031,
+  "claims": 125,
+  "clean_claims": 75,
+  "conventions": {
+    "stay_nights": "discharge_date - admission_date in days (same-day discharge counts as 1)",
+    "settlement_order": "lines total - calculated deductions - deductible (per visit, outpatient) then copay %; benefit cap last",
+    "room_limit_amount": "(rate - daily limit) x days billed; proportionate deduction is not in the key",
+    "suspected_amounts": "exposure, not leakage: not scored for exactness"
+  },
+  "counts_per_check": {
+    "ARITHMETIC_MISMATCH": 2,
+    "BENEFIT_LIMIT_EXCEEDED": 2,
+    "CONSISTENCY_MISMATCH": 2,
+    "COPAY_NOT_APPLIED": 3,
+    "COVERAGE_INACTIVE": 1,
+    "CROSS_CLAIM_DUPLICATE_LINE": 2,
+    "DATE_OUTSIDE_EPISODE": 2,
+    "DEDUCTIBLE_NOT_APPLIED": 3,
+    "DUPLICATE_CLAIM": 2,
+    "DUPLICATE_LINE": 3,
+    "EXCLUDED_SERVICE": 3,
+    "MISSING_EVIDENCE": 3,
+    "NEAR_DUPLICATE": 3,
+    "NON_PAYABLE_ITEM": 10,
+    "OUT_OF_NETWORK": 2,
+    "PROVIDER_PRICE_OUTLIER": 4,
+    "QUANTITY_VS_STAY": 2,
+    "RELATED_PARTY_PATTERN": 5,
+    "ROOM_LIMIT_EXCEEDED": 4,
+    "SETTLEMENT_MISMATCH": 2,
+    "SUBLIMIT_EXCEEDED": 2,
+    "WAITING_PERIOD": 2
+  },
+  "positives": [
+    {
+      "claim_id": "CLM-2026-0006",
+      "check_id": "COPAY_NOT_APPLIED",
+      "line_ids": [],
+      "amount": 7215.6,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Proposed settlement equals the full 72,156; the 10% copay (7,216) was not applied."
+    },
+    {
+      "claim_id": "CLM-2026-0007",
+      "check_id": "NON_PAYABLE_ITEM",
+      "line_ids": [
+        "CLM-2026-0007:RNH-2026-00001:16",
+        "CLM-2026-0007:RNH-2026-00001:17",
+        "CLM-2026-0007:RNH-2026-00001:18",
+        "CLM-2026-0007:RNH-2026-00001:19"
+      ],
+      "amount": 367.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Non-payable items on the bill: Mask (non-surgical), Sanitiser, Slippers, Tissue paper (sum of those lines)."
+    },
+    {
+      "claim_id": "CLM-2026-0007",
+      "check_id": "RELATED_PARTY_PATTERN",
+      "line_ids": [],
+      "amount": 26234.0,
+      "amount_kind": "suspected",
+      "currency": "INR",
+      "related_claim_ids": [
+        "CLM-2026-0067",
+        "CLM-2026-0057",
+        "CLM-2026-0029",
+        "CLM-2026-0042"
+      ],
+      "note": "Phone +91 9822004411, bank SBX440011223344 and address are shared by five claimants on different policies, all treated at P-008."
+    },
+    {
+      "claim_id": "CLM-2026-0009",
+      "check_id": "NEAR_DUPLICATE",
+      "line_ids": [
+        "CLM-2026-0009:MCH-2026-00004:1",
+        "CLM-2026-0009:MCH-2026-00004:2",
+        "CLM-2026-0009:MCH-2026-00004:3",
+        "CLM-2026-0009:MCH-2026-00004:4",
+        "CLM-2026-0009:MCH-2026-00004:5",
+        "CLM-2026-0009:MCH-2026-00004:6",
+        "CLM-2026-0009:MCH-2026-00004:7",
+        "CLM-2026-0009:MCH-2026-00004:8",
+        "CLM-2026-0009:MCH-2026-00004:9",
+        "CLM-2026-0009:MCH-2026-00004:10",
+        "CLM-2026-0009:MCH-2026-00004:11",
+        "CLM-2026-0009:MCH-2026-00004:12",
+        "CLM-2026-0009:MCH-2026-00004:13",
+        "CLM-2026-0009:MCH-2026-00004:14",
+        "CLM-2026-0009:MCH-2026-00004:15",
+        "CLM-2026-0009:MCH-2026-00004:16",
+        "CLM-2026-0009:MCH-2026-00004:17",
+        "CLM-2026-0009:MCH-2026-00004:18",
+        "CLM-2026-0009:MCH-2026-00004:19",
+        "CLM-2026-0009:MCH-2026-00004:20"
+      ],
+      "amount": 81104.28,
+      "amount_kind": "suspected",
+      "currency": "INR",
+      "related_claim_ids": [
+        "CLM-2026-0003"
+      ],
+      "note": "Same member, provider and lines as an earlier claim, dates +1 day, amounts +2%, new invoice number."
+    },
+    {
+      "claim_id": "CLM-2026-0013",
+      "check_id": "CROSS_CLAIM_DUPLICATE_LINE",
+      "line_ids": [
+        "CLM-2026-0013:SMC-2026-00006:18"
+      ],
+      "amount": 6370.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [
+        "HCL-2025-0006"
+      ],
+      "note": "CT scan dated 2026-01-16 was already paid on history claim HCL-2025-0006 (line HCL-2025-0006:SMC-2026-00005:10); readmission on the day the earlier episode ended."
+    },
+    {
+      "claim_id": "CLM-2026-0014",
+      "check_id": "BENEFIT_LIMIT_EXCEEDED",
+      "line_ids": [],
+      "amount": 78127.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [
+        "HCL-2025-0001",
+        "HCL-2025-0002"
+      ],
+      "note": "History paid 275,000 of the 300,000 annual limit (HCL-2025-0001, HCL-2025-0002); 25,000 remains; claim 103,127 exceeds it by 78,127."
+    },
+    {
+      "claim_id": "CLM-2026-0016",
+      "check_id": "EXCLUDED_SERVICE",
+      "line_ids": [
+        "CLM-2026-0016:SMC-2026-00010:16"
+      ],
+      "amount": 6650.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Dental treatment is excluded (clause 10.4)."
+    },
+    {
+      "claim_id": "CLM-2026-0016",
+      "check_id": "NON_PAYABLE_ITEM",
+      "line_ids": [
+        "CLM-2026-0016:SMC-2026-00010:17",
+        "CLM-2026-0016:SMC-2026-00010:18",
+        "CLM-2026-0016:SMC-2026-00010:19",
+        "CLM-2026-0016:SMC-2026-00010:20"
+      ],
+      "amount": 1290.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Non-payable items on the bill: Bed pan, Hot water bag, Surgical gloves, Urine pot (sum of those lines)."
+    },
+    {
+      "claim_id": "CLM-2026-0019",
+      "check_id": "WAITING_PERIOD",
+      "line_ids": [],
+      "amount": 52460.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Diagnosis names the declared pre-existing condition 'diabetes'; policy started 2025-04-27, inside the 730-day PED waiting period (clause 9.1)."
+    },
+    {
+      "claim_id": "CLM-2026-0022",
+      "check_id": "SUBLIMIT_EXCEEDED",
+      "line_ids": [
+        "CLM-2026-0022:LVH-2026-00018:1",
+        "CLM-2026-0022:LVH-2026-00018:2",
+        "CLM-2026-0022:LVH-2026-00018:3",
+        "CLM-2026-0022:LVH-2026-00018:4",
+        "CLM-2026-0022:LVH-2026-00018:5",
+        "CLM-2026-0022:LVH-2026-00018:6",
+        "CLM-2026-0022:LVH-2026-00018:7",
+        "CLM-2026-0022:LVH-2026-00018:8"
+      ],
+      "amount": 15000.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Cataract claim total 55,000 vs sub-limit 40,000 per eye per claim (clause 7.1) = 15,000."
+    },
+    {
+      "claim_id": "CLM-2026-0029",
+      "check_id": "MISSING_EVIDENCE",
+      "line_ids": [],
+      "amount": 0.0,
+      "amount_kind": "suspected",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Required documents absent: itemized_final_hospital_bill; request them instead of inventing a finding."
+    },
+    {
+      "claim_id": "CLM-2026-0029",
+      "check_id": "RELATED_PARTY_PATTERN",
+      "line_ids": [],
+      "amount": 21952.0,
+      "amount_kind": "suspected",
+      "currency": "INR",
+      "related_claim_ids": [
+        "CLM-2026-0007",
+        "CLM-2026-0067",
+        "CLM-2026-0057",
+        "CLM-2026-0042"
+      ],
+      "note": "Phone +91 9822004411, bank SBX440011223344 and address are shared by five claimants on different policies, all treated at P-008."
+    },
+    {
+      "claim_id": "CLM-2026-0030",
+      "check_id": "NEAR_DUPLICATE",
+      "line_ids": [
+        "CLM-2026-0030:LVH-2026-00005:1",
+        "CLM-2026-0030:LVH-2026-00005:2",
+        "CLM-2026-0030:LVH-2026-00005:3",
+        "CLM-2026-0030:LVH-2026-00005:4",
+        "CLM-2026-0030:LVH-2026-00005:5",
+        "CLM-2026-0030:LVH-2026-00005:6",
+        "CLM-2026-0030:LVH-2026-00005:7",
+        "CLM-2026-0030:LVH-2026-00005:8",
+        "CLM-2026-0030:LVH-2026-00005:9"
+      ],
+      "amount": 13845.48,
+      "amount_kind": "suspected",
+      "currency": "INR",
+      "related_claim_ids": [
+        "HCL-2025-0007"
+      ],
+      "note": "Near-copy of history claim HCL-2025-0007 (paid 2026-02-16): dates +1 day, amounts +2%, new invoice number."
+    },
+    {
+      "claim_id": "CLM-2026-0031",
+      "check_id": "NON_PAYABLE_ITEM",
+      "line_ids": [
+        "CLM-2026-0031:CSH-2026-00001:22",
+        "CLM-2026-0031:CSH-2026-00001:23",
+        "CLM-2026-0031:CSH-2026-00001:24"
+      ],
+      "amount": 2790.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Non-payable items on the bill: Belt / brace (non-implant), Crepe bandage, Spirit / disinfectant (sum of those lines)."
+    },
+    {
+      "claim_id": "CLM-2026-0031",
+      "check_id": "PROVIDER_PRICE_OUTLIER",
+      "line_ids": [
+        "CLM-2026-0031:CSH-2026-00001:1",
+        "CLM-2026-0031:CSH-2026-00001:2",
+        "CLM-2026-0031:CSH-2026-00001:3",
+        "CLM-2026-0031:CSH-2026-00001:4",
+        "CLM-2026-0031:CSH-2026-00001:5",
+        "CLM-2026-0031:CSH-2026-00001:6",
+        "CLM-2026-0031:CSH-2026-00001:7",
+        "CLM-2026-0031:CSH-2026-00001:8",
+        "CLM-2026-0031:CSH-2026-00001:9",
+        "CLM-2026-0031:CSH-2026-00001:10",
+        "CLM-2026-0031:CSH-2026-00001:11",
+        "CLM-2026-0031:CSH-2026-00001:12",
+        "CLM-2026-0031:CSH-2026-00001:13",
+        "CLM-2026-0031:CSH-2026-00001:14",
+        "CLM-2026-0031:CSH-2026-00001:15",
+        "CLM-2026-0031:CSH-2026-00001:16",
+        "CLM-2026-0031:CSH-2026-00001:17",
+        "CLM-2026-0031:CSH-2026-00001:18",
+        "CLM-2026-0031:CSH-2026-00001:19",
+        "CLM-2026-0031:CSH-2026-00001:20",
+        "CLM-2026-0031:CSH-2026-00001:21"
+      ],
+      "amount": 70251.0,
+      "amount_kind": "suspected",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Every unit price at P-007 is 1.6-2.2x the catalogue base the other providers bill around; amount = sum over lines of (unit price - base price) x qty. Compute peer stats leaving P-007 out."
+    },
+    {
+      "claim_id": "CLM-2026-0033",
+      "check_id": "NON_PAYABLE_ITEM",
+      "line_ids": [
+        "CLM-2026-0033:MCH-2026-00024:27",
+        "CLM-2026-0033:MCH-2026-00024:28",
+        "CLM-2026-0033:MCH-2026-00024:29"
+      ],
+      "amount": 1670.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Non-payable items on the bill: Admission kit, Disposable syringe, Surgical gloves (sum of those lines)."
+    },
+    {
+      "claim_id": "CLM-2026-0033",
+      "check_id": "ROOM_LIMIT_EXCEEDED",
+      "line_ids": [
+        "CLM-2026-0033:MCH-2026-00024:1"
+      ],
+      "amount": 6000.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Room 5,000/day vs limit 3,000/day (1% of 300,000) for 3 days: (5,000 - 3,000) x 3 = 6,000."
+    },
+    {
+      "claim_id": "CLM-2026-0037",
+      "check_id": "CONSISTENCY_MISMATCH",
+      "line_ids": [],
+      "amount": 66764.0,
+      "amount_kind": "suspected",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "The bill prints policy POL-IN-0002 but the claim is under POL-IN-0003."
+    },
+    {
+      "claim_id": "CLM-2026-0038",
+      "check_id": "ARITHMETIC_MISMATCH",
+      "line_ids": [
+        "CLM-2026-0038:LVH-2026-00021:21"
+      ],
+      "amount": 1000.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Inj. Enoxaparin: 3 x 1,200 = 3,600 but the line amount printed is 4,600; excess 1,000."
+    },
+    {
+      "claim_id": "CLM-2026-0039",
+      "check_id": "DATE_OUTSIDE_EPISODE",
+      "line_ids": [
+        "CLM-2026-0039:SMC-2026-00013:24"
+      ],
+      "amount": 970.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Lipid Profile dated 2026-03-10, four days after discharge on 2026-03-06."
+    },
+    {
+      "claim_id": "CLM-2026-0039",
+      "check_id": "QUANTITY_VS_STAY",
+      "line_ids": [
+        "CLM-2026-0039:SMC-2026-00013:1"
+      ],
+      "amount": 13380.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Room billed for 7 days; stay is 4 nights (2026-03-02 to 2026-03-06); 3 x 4,460 = 13,380."
+    },
+    {
+      "claim_id": "CLM-2026-0041",
+      "check_id": "WAITING_PERIOD",
+      "line_ids": [],
+      "amount": 13949.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Admission 2026-03-05 is 18 days after policy start 2026-02-15; the 30-day waiting period (clause 8.1) applies."
+    },
+    {
+      "claim_id": "CLM-2026-0042",
+      "check_id": "MISSING_EVIDENCE",
+      "line_ids": [],
+      "amount": 0.0,
+      "amount_kind": "suspected",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Required documents absent: discharge_summary; request them instead of inventing a finding."
+    },
+    {
+      "claim_id": "CLM-2026-0042",
+      "check_id": "RELATED_PARTY_PATTERN",
+      "line_ids": [],
+      "amount": 32470.0,
+      "amount_kind": "suspected",
+      "currency": "INR",
+      "related_claim_ids": [
+        "CLM-2026-0007",
+        "CLM-2026-0067",
+        "CLM-2026-0057",
+        "CLM-2026-0029"
+      ],
+      "note": "Phone +91 9822004411, bank SBX440011223344 and address are shared by five claimants on different policies, all treated at P-008."
+    },
+    {
+      "claim_id": "CLM-2026-0043",
+      "check_id": "SUBLIMIT_EXCEEDED",
+      "line_ids": [
+        "CLM-2026-0043:MCH-2026-00028:1",
+        "CLM-2026-0043:MCH-2026-00028:2",
+        "CLM-2026-0043:MCH-2026-00028:3",
+        "CLM-2026-0043:MCH-2026-00028:4",
+        "CLM-2026-0043:MCH-2026-00028:5",
+        "CLM-2026-0043:MCH-2026-00028:6",
+        "CLM-2026-0043:MCH-2026-00028:7",
+        "CLM-2026-0043:MCH-2026-00028:8",
+        "CLM-2026-0043:MCH-2026-00028:9",
+        "CLM-2026-0043:MCH-2026-00028:10",
+        "CLM-2026-0043:MCH-2026-00028:11",
+        "CLM-2026-0043:MCH-2026-00028:12",
+        "CLM-2026-0043:MCH-2026-00028:13",
+        "CLM-2026-0043:MCH-2026-00028:14",
+        "CLM-2026-0043:MCH-2026-00028:15",
+        "CLM-2026-0043:MCH-2026-00028:16",
+        "CLM-2026-0043:MCH-2026-00028:17",
+        "CLM-2026-0043:MCH-2026-00028:18",
+        "CLM-2026-0043:MCH-2026-00028:19",
+        "CLM-2026-0043:MCH-2026-00028:20",
+        "CLM-2026-0043:MCH-2026-00028:21",
+        "CLM-2026-0043:MCH-2026-00028:22",
+        "CLM-2026-0043:MCH-2026-00028:23"
+      ],
+      "amount": 30000.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Maternity claim total 80,000 vs sub-limit 50,000 per delivery (clause 7.2) = 30,000."
+    },
+    {
+      "claim_id": "CLM-2026-0045",
+      "check_id": "NON_PAYABLE_ITEM",
+      "line_ids": [
+        "CLM-2026-0045:SMC-2026-00009:16",
+        "CLM-2026-0045:SMC-2026-00009:17",
+        "CLM-2026-0045:SMC-2026-00009:18"
+      ],
+      "amount": 1190.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Non-payable items on the bill: Documentation charges, Registration charges, Television charges (sum of those lines)."
+    },
+    {
+      "claim_id": "CLM-2026-0045",
+      "check_id": "ROOM_LIMIT_EXCEEDED",
+      "line_ids": [
+        "CLM-2026-0045:SMC-2026-00009:1"
+      ],
+      "amount": 1600.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Room 4,800/day vs limit 4,000/day for 2 days = 1,600."
+    },
+    {
+      "claim_id": "CLM-2026-0046",
+      "check_id": "MISSING_EVIDENCE",
+      "line_ids": [],
+      "amount": 0.0,
+      "amount_kind": "suspected",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Required documents absent: discharge_summary, pre_auth_form; request them instead of inventing a finding."
+    },
+    {
+      "claim_id": "CLM-2026-0047",
+      "check_id": "DEDUCTIBLE_NOT_APPLIED",
+      "line_ids": [],
+      "amount": 40.0,
+      "amount_kind": "calculated",
+      "currency": "AED",
+      "related_claim_ids": [],
+      "note": "Proposed 474.40 = 80% of 593.00; correct is (total - 50 deductible) x 80% = 434.40; leakage 40.00 (= 50 x 80% because the copay applies after the deductible)."
+    },
+    {
+      "claim_id": "CLM-2026-0048",
+      "check_id": "SETTLEMENT_MISMATCH",
+      "line_ids": [
+        "CLM-2026-0048:LVH-2026-00020:21"
+      ],
+      "amount": 5000.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "The bill carries a -5,000 hospital discount line; the handler proposed the gross amount (net + 5,000)."
+    },
+    {
+      "claim_id": "CLM-2026-0053",
+      "check_id": "DEDUCTIBLE_NOT_APPLIED",
+      "line_ids": [],
+      "amount": 40.0,
+      "amount_kind": "calculated",
+      "currency": "AED",
+      "related_claim_ids": [],
+      "note": "Proposed 520.00 = 80% of 650.00; correct is (total - 50 deductible) x 80% = 480.00; leakage 40.00 (= 50 x 80% because the copay applies after the deductible)."
+    },
+    {
+      "claim_id": "CLM-2026-0054",
+      "check_id": "CONSISTENCY_MISMATCH",
+      "line_ids": [],
+      "amount": 21533.0,
+      "amount_kind": "suspected",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "The bill names 'Nandini Sharma' (M-0002) but the claim is for 'Tanish Malhotra' (M-0035)."
+    },
+    {
+      "claim_id": "CLM-2026-0055",
+      "check_id": "NON_PAYABLE_ITEM",
+      "line_ids": [
+        "CLM-2026-0055:CSH-2026-00002:20",
+        "CLM-2026-0055:CSH-2026-00002:21",
+        "CLM-2026-0055:CSH-2026-00002:22",
+        "CLM-2026-0055:CSH-2026-00002:23"
+      ],
+      "amount": 3628.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Non-payable items on the bill: Admission kit, Attendant charges, Telephone charges, Visitor pass (sum of those lines)."
+    },
+    {
+      "claim_id": "CLM-2026-0055",
+      "check_id": "PROVIDER_PRICE_OUTLIER",
+      "line_ids": [
+        "CLM-2026-0055:CSH-2026-00002:1",
+        "CLM-2026-0055:CSH-2026-00002:2",
+        "CLM-2026-0055:CSH-2026-00002:3",
+        "CLM-2026-0055:CSH-2026-00002:4",
+        "CLM-2026-0055:CSH-2026-00002:5",
+        "CLM-2026-0055:CSH-2026-00002:6",
+        "CLM-2026-0055:CSH-2026-00002:7",
+        "CLM-2026-0055:CSH-2026-00002:8",
+        "CLM-2026-0055:CSH-2026-00002:9",
+        "CLM-2026-0055:CSH-2026-00002:10",
+        "CLM-2026-0055:CSH-2026-00002:11",
+        "CLM-2026-0055:CSH-2026-00002:12",
+        "CLM-2026-0055:CSH-2026-00002:13",
+        "CLM-2026-0055:CSH-2026-00002:14",
+        "CLM-2026-0055:CSH-2026-00002:15",
+        "CLM-2026-0055:CSH-2026-00002:16",
+        "CLM-2026-0055:CSH-2026-00002:17",
+        "CLM-2026-0055:CSH-2026-00002:18",
+        "CLM-2026-0055:CSH-2026-00002:19"
+      ],
+      "amount": 65462.0,
+      "amount_kind": "suspected",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Every unit price at P-007 is 1.6-2.2x the catalogue base the other providers bill around; amount = sum over lines of (unit price - base price) x qty. Compute peer stats leaving P-007 out."
+    },
+    {
+      "claim_id": "CLM-2026-0057",
+      "check_id": "RELATED_PARTY_PATTERN",
+      "line_ids": [],
+      "amount": 49684.0,
+      "amount_kind": "suspected",
+      "currency": "INR",
+      "related_claim_ids": [
+        "CLM-2026-0007",
+        "CLM-2026-0067",
+        "CLM-2026-0029",
+        "CLM-2026-0042"
+      ],
+      "note": "Phone +91 9822004411, bank SBX440011223344 and address are shared by five claimants on different policies, all treated at P-008."
+    },
+    {
+      "claim_id": "CLM-2026-0060",
+      "check_id": "NON_PAYABLE_ITEM",
+      "line_ids": [
+        "CLM-2026-0060:MCH-2026-00025:21",
+        "CLM-2026-0060:MCH-2026-00025:22",
+        "CLM-2026-0060:MCH-2026-00025:23",
+        "CLM-2026-0060:MCH-2026-00025:24"
+      ],
+      "amount": 1140.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Non-payable items on the bill: Cotton roll, Nebuliser kit, Surgical gloves, Thermometer (sum of those lines)."
+    },
+    {
+      "claim_id": "CLM-2026-0060",
+      "check_id": "ROOM_LIMIT_EXCEEDED",
+      "line_ids": [
+        "CLM-2026-0060:MCH-2026-00025:2"
+      ],
+      "amount": 4000.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "ICU 8,000/day vs ICU limit 6,000/day for 2 days = 4,000."
+    },
+    {
+      "claim_id": "CLM-2026-0067",
+      "check_id": "DUPLICATE_LINE",
+      "line_ids": [
+        "CLM-2026-0067:RNH-2026-00002:19",
+        "CLM-2026-0067:RNH-2026-00002:20"
+      ],
+      "amount": 840.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Liver Function Test billed twice (second row worded 'LFT'), same code, date and amount."
+    },
+    {
+      "claim_id": "CLM-2026-0067",
+      "check_id": "RELATED_PARTY_PATTERN",
+      "line_ids": [],
+      "amount": 16038.0,
+      "amount_kind": "suspected",
+      "currency": "INR",
+      "related_claim_ids": [
+        "CLM-2026-0007",
+        "CLM-2026-0057",
+        "CLM-2026-0029",
+        "CLM-2026-0042"
+      ],
+      "note": "Phone +91 9822004411, bank SBX440011223344 and address are shared by five claimants on different policies, all treated at P-008."
+    },
+    {
+      "claim_id": "CLM-2026-0069",
+      "check_id": "NEAR_DUPLICATE",
+      "line_ids": [
+        "CLM-2026-0069:DRC-2026-00002:1",
+        "CLM-2026-0069:DRC-2026-00002:2",
+        "CLM-2026-0069:DRC-2026-00002:3",
+        "CLM-2026-0069:DRC-2026-00002:4",
+        "CLM-2026-0069:DRC-2026-00002:5"
+      ],
+      "amount": 763.98,
+      "amount_kind": "suspected",
+      "currency": "AED",
+      "related_claim_ids": [
+        "CLM-2026-0061"
+      ],
+      "note": "Same member, provider and lines as an earlier claim, dates +1 day, amounts +2%, new invoice number."
+    },
+    {
+      "claim_id": "CLM-2026-0072",
+      "check_id": "COPAY_NOT_APPLIED",
+      "line_ids": [],
+      "amount": 3001.8,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Proposed settlement equals the full 30,018; the 10% copay (3,002) was not applied."
+    },
+    {
+      "claim_id": "CLM-2026-0073",
+      "check_id": "COPAY_NOT_APPLIED",
+      "line_ids": [],
+      "amount": 2868.1,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Proposed settlement equals the full 28,681; the 10% copay (2,868) was not applied."
+    },
+    {
+      "claim_id": "CLM-2026-0074",
+      "check_id": "DEDUCTIBLE_NOT_APPLIED",
+      "line_ids": [],
+      "amount": 40.0,
+      "amount_kind": "calculated",
+      "currency": "AED",
+      "related_claim_ids": [],
+      "note": "Proposed 630.40 = 80% of 788.00; correct is (total - 50 deductible) x 80% = 590.40; leakage 40.00 (= 50 x 80% because the copay applies after the deductible)."
+    },
+    {
+      "claim_id": "CLM-2026-0075",
+      "check_id": "EXCLUDED_SERVICE",
+      "line_ids": [
+        "CLM-2026-0075:LVH-2026-00016:25"
+      ],
+      "amount": 19180.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Cosmetic scar revision is excluded (clause 10.3)."
+    },
+    {
+      "claim_id": "CLM-2026-0079",
+      "check_id": "DUPLICATE_CLAIM",
+      "line_ids": [
+        "CLM-2026-0079:LVH-2026-00017:1",
+        "CLM-2026-0079:LVH-2026-00017:2",
+        "CLM-2026-0079:LVH-2026-00017:3",
+        "CLM-2026-0079:LVH-2026-00017:4",
+        "CLM-2026-0079:LVH-2026-00017:5",
+        "CLM-2026-0079:LVH-2026-00017:6",
+        "CLM-2026-0079:LVH-2026-00017:7",
+        "CLM-2026-0079:LVH-2026-00017:8",
+        "CLM-2026-0079:LVH-2026-00017:9",
+        "CLM-2026-0079:LVH-2026-00017:10",
+        "CLM-2026-0079:LVH-2026-00017:11",
+        "CLM-2026-0079:LVH-2026-00017:12",
+        "CLM-2026-0079:LVH-2026-00017:13",
+        "CLM-2026-0079:LVH-2026-00017:14",
+        "CLM-2026-0079:LVH-2026-00017:15",
+        "CLM-2026-0079:LVH-2026-00017:16",
+        "CLM-2026-0079:LVH-2026-00017:17",
+        "CLM-2026-0079:LVH-2026-00017:18",
+        "CLM-2026-0079:LVH-2026-00017:19",
+        "CLM-2026-0079:LVH-2026-00017:20"
+      ],
+      "amount": 24168.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [
+        "CLM-2026-0068"
+      ],
+      "note": "Exact resubmission of an earlier claim: same member, provider, dates, invoice number and lines."
+    },
+    {
+      "claim_id": "CLM-2026-0080",
+      "check_id": "COVERAGE_INACTIVE",
+      "line_ids": [],
+      "amount": 22648.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Admission 2026-05-10 is after the policy end date 2026-03-31; nothing is payable."
+    },
+    {
+      "claim_id": "CLM-2026-0083",
+      "check_id": "ARITHMETIC_MISMATCH",
+      "line_ids": [
+        "CLM-2026-0083:CSH-2026-00003:5"
+      ],
+      "amount": 800.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Kidney Function Test: 2 x 1,270 = 2,540 but the amount printed is 3,340; excess 800."
+    },
+    {
+      "claim_id": "CLM-2026-0083",
+      "check_id": "PROVIDER_PRICE_OUTLIER",
+      "line_ids": [
+        "CLM-2026-0083:CSH-2026-00003:1",
+        "CLM-2026-0083:CSH-2026-00003:2",
+        "CLM-2026-0083:CSH-2026-00003:3",
+        "CLM-2026-0083:CSH-2026-00003:4",
+        "CLM-2026-0083:CSH-2026-00003:5",
+        "CLM-2026-0083:CSH-2026-00003:6",
+        "CLM-2026-0083:CSH-2026-00003:7",
+        "CLM-2026-0083:CSH-2026-00003:8",
+        "CLM-2026-0083:CSH-2026-00003:9",
+        "CLM-2026-0083:CSH-2026-00003:10",
+        "CLM-2026-0083:CSH-2026-00003:11",
+        "CLM-2026-0083:CSH-2026-00003:12",
+        "CLM-2026-0083:CSH-2026-00003:13",
+        "CLM-2026-0083:CSH-2026-00003:14",
+        "CLM-2026-0083:CSH-2026-00003:15",
+        "CLM-2026-0083:CSH-2026-00003:16",
+        "CLM-2026-0083:CSH-2026-00003:17"
+      ],
+      "amount": 28429.0,
+      "amount_kind": "suspected",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Every unit price at P-007 is 1.6-2.2x the catalogue base the other providers bill around; amount = sum over lines of (unit price - base price) x qty. Compute peer stats leaving P-007 out."
+    },
+    {
+      "claim_id": "CLM-2026-0091",
+      "check_id": "NON_PAYABLE_ITEM",
+      "line_ids": [
+        "CLM-2026-0091:MCH-2026-00026:25",
+        "CLM-2026-0091:MCH-2026-00026:26",
+        "CLM-2026-0091:MCH-2026-00026:27"
+      ],
+      "amount": 1670.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Non-payable items on the bill: Admission kit, Disposable syringe, Surgical gloves (sum of those lines)."
+    },
+    {
+      "claim_id": "CLM-2026-0096",
+      "check_id": "BENEFIT_LIMIT_EXCEEDED",
+      "line_ids": [],
+      "amount": 87708.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [
+        "HCL-2025-0003",
+        "HCL-2025-0004"
+      ],
+      "note": "History paid 380,000 of the 400,000 annual limit (HCL-2025-0003, HCL-2025-0004); 20,000 remains; claim 107,708 exceeds it by 87,708."
+    },
+    {
+      "claim_id": "CLM-2026-0097",
+      "check_id": "SETTLEMENT_MISMATCH",
+      "line_ids": [],
+      "amount": 400.0,
+      "amount_kind": "calculated",
+      "currency": "AED",
+      "related_claim_ids": [],
+      "note": "Inpatient, no copay or deductible: proposed is 400 above the line total (keying error)."
+    },
+    {
+      "claim_id": "CLM-2026-0098",
+      "check_id": "PROVIDER_PRICE_OUTLIER",
+      "line_ids": [
+        "CLM-2026-0098:CSH-2026-00004:1",
+        "CLM-2026-0098:CSH-2026-00004:2",
+        "CLM-2026-0098:CSH-2026-00004:3",
+        "CLM-2026-0098:CSH-2026-00004:4",
+        "CLM-2026-0098:CSH-2026-00004:5",
+        "CLM-2026-0098:CSH-2026-00004:6",
+        "CLM-2026-0098:CSH-2026-00004:7",
+        "CLM-2026-0098:CSH-2026-00004:8",
+        "CLM-2026-0098:CSH-2026-00004:9",
+        "CLM-2026-0098:CSH-2026-00004:10",
+        "CLM-2026-0098:CSH-2026-00004:11",
+        "CLM-2026-0098:CSH-2026-00004:12",
+        "CLM-2026-0098:CSH-2026-00004:13",
+        "CLM-2026-0098:CSH-2026-00004:14",
+        "CLM-2026-0098:CSH-2026-00004:15",
+        "CLM-2026-0098:CSH-2026-00004:16",
+        "CLM-2026-0098:CSH-2026-00004:17",
+        "CLM-2026-0098:CSH-2026-00004:18",
+        "CLM-2026-0098:CSH-2026-00004:19",
+        "CLM-2026-0098:CSH-2026-00004:20",
+        "CLM-2026-0098:CSH-2026-00004:21",
+        "CLM-2026-0098:CSH-2026-00004:22",
+        "CLM-2026-0098:CSH-2026-00004:23"
+      ],
+      "amount": 107230.0,
+      "amount_kind": "suspected",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Every unit price at P-007 is 1.6-2.2x the catalogue base the other providers bill around; amount = sum over lines of (unit price - base price) x qty. Compute peer stats leaving P-007 out."
+    },
+    {
+      "claim_id": "CLM-2026-0100",
+      "check_id": "DUPLICATE_CLAIM",
+      "line_ids": [
+        "CLM-2026-0100:SMC-2026-00011:1",
+        "CLM-2026-0100:SMC-2026-00011:2",
+        "CLM-2026-0100:SMC-2026-00011:3",
+        "CLM-2026-0100:SMC-2026-00011:4",
+        "CLM-2026-0100:SMC-2026-00011:5",
+        "CLM-2026-0100:SMC-2026-00011:6",
+        "CLM-2026-0100:SMC-2026-00011:7",
+        "CLM-2026-0100:SMC-2026-00011:8",
+        "CLM-2026-0100:SMC-2026-00011:9",
+        "CLM-2026-0100:SMC-2026-00011:10",
+        "CLM-2026-0100:SMC-2026-00011:11",
+        "CLM-2026-0100:SMC-2026-00011:12",
+        "CLM-2026-0100:SMC-2026-00011:13",
+        "CLM-2026-0100:SMC-2026-00011:14",
+        "CLM-2026-0100:SMC-2026-00011:15",
+        "CLM-2026-0100:SMC-2026-00011:16",
+        "CLM-2026-0100:SMC-2026-00011:17"
+      ],
+      "amount": 15228.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [
+        "CLM-2026-0093"
+      ],
+      "note": "Exact resubmission of an earlier claim: same member, provider, dates, invoice number and lines."
+    },
+    {
+      "claim_id": "CLM-2026-0101",
+      "check_id": "NON_PAYABLE_ITEM",
+      "line_ids": [
+        "CLM-2026-0101:PCH-2026-00005:15",
+        "CLM-2026-0101:PCH-2026-00005:16",
+        "CLM-2026-0101:PCH-2026-00005:17"
+      ],
+      "amount": 795.0,
+      "amount_kind": "calculated",
+      "currency": "AED",
+      "related_claim_ids": [],
+      "note": "Non-payable items on the bill: Companion bed, Medical report fee, Parking (sum of those lines)."
+    },
+    {
+      "claim_id": "CLM-2026-0103",
+      "check_id": "DUPLICATE_LINE",
+      "line_ids": [
+        "CLM-2026-0103:PCH-2026-00006:13",
+        "CLM-2026-0103:PCH-2026-00006:14"
+      ],
+      "amount": 95.0,
+      "amount_kind": "calculated",
+      "currency": "AED",
+      "related_claim_ids": [],
+      "note": "CPT 85025 CBC billed twice on the same activity date."
+    },
+    {
+      "claim_id": "CLM-2026-0113",
+      "check_id": "CROSS_CLAIM_DUPLICATE_LINE",
+      "line_ids": [
+        "CLM-2026-0113:LVH-2026-00003:16"
+      ],
+      "amount": 7020.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [
+        "HCL-2025-0005"
+      ],
+      "note": "CT scan dated 2026-07-31 was already paid on history claim HCL-2025-0005 (line HCL-2025-0005:LVH-2026-00002:10); readmission on the day the earlier episode ended."
+    },
+    {
+      "claim_id": "CLM-2026-0114",
+      "check_id": "NON_PAYABLE_ITEM",
+      "line_ids": [
+        "CLM-2026-0114:LVH-2026-00015:20",
+        "CLM-2026-0114:LVH-2026-00015:21",
+        "CLM-2026-0114:LVH-2026-00015:22",
+        "CLM-2026-0114:LVH-2026-00015:23"
+      ],
+      "amount": 2286.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Non-payable items on the bill: Admission kit, Diet charges for attendant, Mineral water, Toiletries (sum of those lines)."
+    },
+    {
+      "claim_id": "CLM-2026-0114",
+      "check_id": "ROOM_LIMIT_EXCEEDED",
+      "line_ids": [
+        "CLM-2026-0114:LVH-2026-00015:1"
+      ],
+      "amount": 8000.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Room 7,000/day vs limit 5,000/day for 4 days = 8,000."
+    },
+    {
+      "claim_id": "CLM-2026-0115",
+      "check_id": "OUT_OF_NETWORK",
+      "line_ids": [],
+      "amount": 20616.0,
+      "amount_kind": "calculated",
+      "currency": "AED",
+      "related_claim_ids": [],
+      "note": "Provider P-006 is not in the policy network ['P-004', 'P-005']; no cover outside the network except emergencies (clause 12.1)."
+    },
+    {
+      "claim_id": "CLM-2026-0116",
+      "check_id": "OUT_OF_NETWORK",
+      "line_ids": [],
+      "amount": 18444.0,
+      "amount_kind": "calculated",
+      "currency": "AED",
+      "related_claim_ids": [],
+      "note": "Provider P-006 is not in the policy network ['P-004', 'P-005']; no cover outside the network except emergencies (clause 12.1)."
+    },
+    {
+      "claim_id": "CLM-2026-0117",
+      "check_id": "DATE_OUTSIDE_EPISODE",
+      "line_ids": [
+        "CLM-2026-0117:MCH-2026-00030:21"
+      ],
+      "amount": 850.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Lipid Profile dated 2026-09-12, four days after discharge on 2026-09-08."
+    },
+    {
+      "claim_id": "CLM-2026-0117",
+      "check_id": "QUANTITY_VS_STAY",
+      "line_ids": [
+        "CLM-2026-0117:MCH-2026-00030:1"
+      ],
+      "amount": 5040.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Room billed for 5 days; stay is 3 nights (2026-09-05 to 2026-09-08); 2 x 2,520 = 5,040."
+    },
+    {
+      "claim_id": "CLM-2026-0121",
+      "check_id": "EXCLUDED_SERVICE",
+      "line_ids": [
+        "CLM-2026-0121:PCH-2026-00004:6",
+        "CLM-2026-0121:PCH-2026-00004:7"
+      ],
+      "amount": 495.0,
+      "amount_kind": "calculated",
+      "currency": "AED",
+      "related_claim_ids": [],
+      "note": "Dental codes D0120 and D7140 are excluded (clause 10.2)."
+    },
+    {
+      "claim_id": "CLM-2026-0124",
+      "check_id": "DUPLICATE_LINE",
+      "line_ids": [
+        "CLM-2026-0124:MCH-2026-00027:16",
+        "CLM-2026-0124:MCH-2026-00027:17"
+      ],
+      "amount": 440.0,
+      "amount_kind": "calculated",
+      "currency": "INR",
+      "related_claim_ids": [],
+      "note": "Complete Blood Count billed twice on the same invoice, same date and amount."
+    }
+  ],
+  "negatives": [
+    {
+      "claim_id": "CLM-2026-0003",
+      "check_id": "NEAR_DUPLICATE",
+      "note": "The original; only the later near-copy should be flagged."
+    },
+    {
+      "claim_id": "CLM-2026-0006",
+      "check_id": "SETTLEMENT_MISMATCH",
+      "note": "The gap is exactly the missed copay; do not double count."
+    },
+    {
+      "claim_id": "CLM-2026-0010",
+      "check_id": "BENEFIT_LIMIT_EXCEEDED",
+      "note": "History paid 50,350 of 400,000; the new claim fits inside the remaining limit."
+    },
+    {
+      "claim_id": "CLM-2026-0024",
+      "check_id": "RELATED_PARTY_PATTERN",
+      "note": "Spouses on the same policy share an address but not phone or bank account; a household, not a pattern."
+    },
+    {
+      "claim_id": "CLM-2026-0024",
+      "check_id": "WAITING_PERIOD",
+      "note": "Policy declares diabetes as PED; this diagnosis is unrelated."
+    },
+    {
+      "claim_id": "CLM-2026-0034",
+      "check_id": "NON_PAYABLE_ITEM",
+      "note": "IV cannula, infusion set, dressing pack and sutures are payable medical items, not on the non-payable list."
+    },
+    {
+      "claim_id": "CLM-2026-0036",
+      "check_id": "DUPLICATE_LINE",
+      "note": "Complete Blood Count on admission and again three days later: distinct service dates, a legitimate repeat in dengue monitoring."
+    },
+    {
+      "claim_id": "CLM-2026-0039",
+      "check_id": "SETTLEMENT_MISMATCH",
+      "note": "The gap equals the extra room days plus the late line; do not double count."
+    },
+    {
+      "claim_id": "CLM-2026-0040",
+      "check_id": "DUPLICATE_LINE",
+      "note": "Legitimate repeat: 6 physiotherapy sessions on 6 distinct dates after knee replacement; PHY001/DIA001 are repeatable codes."
+    },
+    {
+      "claim_id": "CLM-2026-0040",
+      "check_id": "NEAR_DUPLICATE",
+      "note": "Legitimate repeat: 6 physiotherapy sessions on 6 distinct dates after knee replacement."
+    },
+    {
+      "claim_id": "CLM-2026-0040",
+      "check_id": "SUBLIMIT_EXCEEDED",
+      "note": "6 physiotherapy sessions are inside the 20-sessions-per-year sub-limit."
+    },
+    {
+      "claim_id": "CLM-2026-0047",
+      "check_id": "SETTLEMENT_MISMATCH",
+      "note": "The gap is exactly the missed deductible; do not double count."
+    },
+    {
+      "claim_id": "CLM-2026-0051",
+      "check_id": "NON_PAYABLE_ITEM",
+      "note": "IV cannula, infusion set, dressing pack and sutures are payable medical items, not on the non-payable list."
+    },
+    {
+      "claim_id": "CLM-2026-0053",
+      "check_id": "SETTLEMENT_MISMATCH",
+      "note": "The gap is exactly the missed deductible; do not double count."
+    },
+    {
+      "claim_id": "CLM-2026-0061",
+      "check_id": "NEAR_DUPLICATE",
+      "note": "The original; only the later near-copy should be flagged."
+    },
+    {
+      "claim_id": "CLM-2026-0064",
+      "check_id": "DUPLICATE_LINE",
+      "note": "Complete Blood Count on admission and again three days later: distinct service dates, a legitimate repeat in dengue monitoring."
+    },
+    {
+      "claim_id": "CLM-2026-0068",
+      "check_id": "DUPLICATE_CLAIM",
+      "note": "The original submission; only the later resubmission is a duplicate."
+    },
+    {
+      "claim_id": "CLM-2026-0070",
+      "check_id": "RELATED_PARTY_PATTERN",
+      "note": "Spouses on the same policy share an address but not phone or bank account; a household, not a pattern."
+    },
+    {
+      "claim_id": "CLM-2026-0070",
+      "check_id": "WAITING_PERIOD",
+      "note": "Policy declares diabetes as PED; this diagnosis is unrelated."
+    },
+    {
+      "claim_id": "CLM-2026-0071",
+      "check_id": "DUPLICATE_LINE",
+      "note": "Legitimate repeat: 6 physiotherapy sessions on 6 distinct dates (course of treatment); PHY001/DIA001 are repeatable codes."
+    },
+    {
+      "claim_id": "CLM-2026-0071",
+      "check_id": "NEAR_DUPLICATE",
+      "note": "Legitimate repeat: 6 physiotherapy sessions on 6 distinct dates (course of treatment)."
+    },
+    {
+      "claim_id": "CLM-2026-0071",
+      "check_id": "SUBLIMIT_EXCEEDED",
+      "note": "6 physiotherapy sessions are inside the 20-sessions-per-year sub-limit."
+    },
+    {
+      "claim_id": "CLM-2026-0072",
+      "check_id": "SETTLEMENT_MISMATCH",
+      "note": "The gap is exactly the missed copay; do not double count."
+    },
+    {
+      "claim_id": "CLM-2026-0073",
+      "check_id": "SETTLEMENT_MISMATCH",
+      "note": "The gap is exactly the missed copay; do not double count."
+    },
+    {
+      "claim_id": "CLM-2026-0074",
+      "check_id": "SETTLEMENT_MISMATCH",
+      "note": "The gap is exactly the missed deductible; do not double count."
+    },
+    {
+      "claim_id": "CLM-2026-0077",
+      "check_id": "OUT_OF_NETWORK",
+      "note": "The policy has an empty network list (any provider allowed)."
+    },
+    {
+      "claim_id": "CLM-2026-0085",
+      "check_id": "ROOM_LIMIT_EXCEEDED",
+      "note": "Room 5,000/day equals the 5,000 limit exactly; no excess."
+    },
+    {
+      "claim_id": "CLM-2026-0087",
+      "check_id": "DUPLICATE_LINE",
+      "note": "Legitimate repeat: 3 haemodialysis sessions on 3 distinct dates; PHY001/DIA001 are repeatable codes."
+    },
+    {
+      "claim_id": "CLM-2026-0087",
+      "check_id": "NEAR_DUPLICATE",
+      "note": "Legitimate repeat: 3 haemodialysis sessions on 3 distinct dates."
+    },
+    {
+      "claim_id": "CLM-2026-0089",
+      "check_id": "ROOM_LIMIT_EXCEEDED",
+      "note": "Room 5,000/day equals the 5,000 limit exactly; no excess."
+    },
+    {
+      "claim_id": "CLM-2026-0093",
+      "check_id": "DUPLICATE_CLAIM",
+      "note": "The original submission; only the later resubmission is a duplicate."
+    },
+    {
+      "claim_id": "CLM-2026-0094",
+      "check_id": "OUT_OF_NETWORK",
+      "note": "The policy has an empty network list (any provider allowed)."
+    },
+    {
+      "claim_id": "CLM-2026-0105",
+      "check_id": "SUBLIMIT_EXCEEDED",
+      "note": "Cataract claim 33,770 is inside the 40,000 sub-limit."
+    },
+    {
+      "claim_id": "CLM-2026-0117",
+      "check_id": "SETTLEMENT_MISMATCH",
+      "note": "The gap equals the extra room days plus the late line; do not double count."
+    },
+    {
+      "claim_id": "CLM-2026-0123",
+      "check_id": "NON_PAYABLE_ITEM",
+      "note": "Vitamin D3 is prescribed (drug code, prescription attached); only 'vitamins without prescription' are non-payable."
+    }
+  ]
+}

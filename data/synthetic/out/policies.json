@@ -1,0 +1,4225 @@
+[
+  {
+    "policy_number": "POL-IN-0001",
+    "product_id": "IN-HEALTH-RETAIL",
+    "holder_id": "M-0001",
+    "members": [
+      "M-0001",
+      "M-0002"
+    ],
+    "start_date": "2025-04-01",
+    "end_date": "2026-03-31",
+    "currency": "INR",
+    "annual_limit": 300000.0,
+    "deductible": {
+      "amount": 0.0,
+      "basis": "per_claim"
+    },
+    "copay": {
+      "inpatient_pct": 0.0,
+      "outpatient_pct": 0.0,
+      "pharmacy_pct": 0.0
+    },
+    "room_rent_limit_per_day": 3000.0,
+    "icu_limit_per_day": 6000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "CATARACT",
+        "name": "Cataract surgery (per eye, per claim)",
+        "limit": 40000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "cataract",
+          "phaco",
+          "iol"
+        ],
+        "codes": [
+          "SUR-CAT",
+          "MED-IOL",
+          "MED-IOL-PREM"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per delivery)",
+        "limit": 50000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "lscs"
+        ],
+        "codes": [
+          "SUR-LSCS",
+          "SUR-NVD"
+        ],
+        "clause_id": "7.2"
+      },
+      {
+        "sublimit_id": "PHYSIO_SESSIONS",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 20.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy"
+        ],
+        "codes": [
+          "PHY001"
+        ],
+        "clause_id": "7.3"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or aesthetic treatment of any description, unless required to restore function after an accident covered by this policy.",
+        "keywords": [
+          "cosmetic",
+          "aesthetic",
+          "rhinoplasty",
+          "liposuction",
+          "scar revision"
+        ],
+        "codes": [
+          "SUR-COS"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment or surgery of any kind unless necessitated by an accidental injury and requiring hospitalisation.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "orthodontic"
+        ],
+        "codes": [
+          "DEN-RCT",
+          "DEN-EXT"
+        ],
+        "clause_id": "10.4"
+      },
+      {
+        "exclusion_id": "OPD_CONSULT",
+        "text": "Out-patient consultation and treatment not resulting in hospitalisation or day care treatment.",
+        "keywords": [
+          "opd consultation",
+          "outpatient consultation"
+        ],
+        "codes": [
+          "CONS-OPD"
+        ],
+        "clause_id": "10.5"
+      }
+    ],
+    "non_payable_items": [
+      "Surgical gloves",
+      "Disposable syringe",
+      "Cotton roll",
+      "Thermometer",
+      "Admission kit",
+      "Toiletries",
+      "Mineral water",
+      "Diet charges for attendant",
+      "Telephone charges",
+      "Television charges",
+      "Documentation charges",
+      "Registration charges",
+      "Visitor pass",
+      "Nebuliser kit",
+      "Hot water bag",
+      "Slippers",
+      "Mask (non-surgical)",
+      "Tissue paper",
+      "Sanitiser",
+      "Bed pan",
+      "Urine pot",
+      "Belt / brace (non-implant)",
+      "Crepe bandage",
+      "Spirit / disinfectant",
+      "Attendant charges"
+    ],
+    "network_provider_ids": [],
+    "waiting_period_days": 30,
+    "ped_waiting_days": 730,
+    "declared_ped": [],
+    "proportionate_deduction": true
+  },
+  {
+    "policy_number": "POL-IN-0002",
+    "product_id": "IN-HEALTH-RETAIL",
+    "holder_id": "M-0003",
+    "members": [
+      "M-0003",
+      "M-0004"
+    ],
+    "start_date": "2025-04-14",
+    "end_date": "2026-04-13",
+    "currency": "INR",
+    "annual_limit": 500000.0,
+    "deductible": {
+      "amount": 0.0,
+      "basis": "per_claim"
+    },
+    "copay": {
+      "inpatient_pct": 10.0,
+      "outpatient_pct": 10.0,
+      "pharmacy_pct": 10.0
+    },
+    "room_rent_limit_per_day": 5000.0,
+    "icu_limit_per_day": 10000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "CATARACT",
+        "name": "Cataract surgery (per eye, per claim)",
+        "limit": 40000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "cataract",
+          "phaco",
+          "iol"
+        ],
+        "codes": [
+          "SUR-CAT",
+          "MED-IOL",
+          "MED-IOL-PREM"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per delivery)",
+        "limit": 50000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "lscs"
+        ],
+        "codes": [
+          "SUR-LSCS",
+          "SUR-NVD"
+        ],
+        "clause_id": "7.2"
+      },
+      {
+        "sublimit_id": "PHYSIO_SESSIONS",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 20.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy"
+        ],
+        "codes": [
+          "PHY001"
+        ],
+        "clause_id": "7.3"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or aesthetic treatment of any description, unless required to restore function after an accident covered by this policy.",
+        "keywords": [
+          "cosmetic",
+          "aesthetic",
+          "rhinoplasty",
+          "liposuction",
+          "scar revision"
+        ],
+        "codes": [
+          "SUR-COS"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment or surgery of any kind unless necessitated by an accidental injury and requiring hospitalisation.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "orthodontic"
+        ],
+        "codes": [
+          "DEN-RCT",
+          "DEN-EXT"
+        ],
+        "clause_id": "10.4"
+      },
+      {
+        "exclusion_id": "OPD_CONSULT",
+        "text": "Out-patient consultation and treatment not resulting in hospitalisation or day care treatment.",
+        "keywords": [
+          "opd consultation",
+          "outpatient consultation"
+        ],
+        "codes": [
+          "CONS-OPD"
+        ],
+        "clause_id": "10.5"
+      }
+    ],
+    "non_payable_items": [
+      "Surgical gloves",
+      "Disposable syringe",
+      "Cotton roll",
+      "Thermometer",
+      "Admission kit",
+      "Toiletries",
+      "Mineral water",
+      "Diet charges for attendant",
+      "Telephone charges",
+      "Television charges",
+      "Documentation charges",
+      "Registration charges",
+      "Visitor pass",
+      "Nebuliser kit",
+      "Hot water bag",
+      "Slippers",
+      "Mask (non-surgical)",
+      "Tissue paper",
+      "Sanitiser",
+      "Bed pan",
+      "Urine pot",
+      "Belt / brace (non-implant)",
+      "Crepe bandage",
+      "Spirit / disinfectant",
+      "Attendant charges"
+    ],
+    "network_provider_ids": [],
+    "waiting_period_days": 30,
+    "ped_waiting_days": 730,
+    "declared_ped": [],
+    "proportionate_deduction": true
+  },
+  {
+    "policy_number": "POL-IN-0003",
+    "product_id": "IN-HEALTH-RETAIL",
+    "holder_id": "M-0005",
+    "members": [
+      "M-0005",
+      "M-0006"
+    ],
+    "start_date": "2025-04-27",
+    "end_date": "2026-04-26",
+    "currency": "INR",
+    "annual_limit": 400000.0,
+    "deductible": {
+      "amount": 0.0,
+      "basis": "per_claim"
+    },
+    "copay": {
+      "inpatient_pct": 0.0,
+      "outpatient_pct": 0.0,
+      "pharmacy_pct": 0.0
+    },
+    "room_rent_limit_per_day": 4000.0,
+    "icu_limit_per_day": 8000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "CATARACT",
+        "name": "Cataract surgery (per eye, per claim)",
+        "limit": 40000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "cataract",
+          "phaco",
+          "iol"
+        ],
+        "codes": [
+          "SUR-CAT",
+          "MED-IOL",
+          "MED-IOL-PREM"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per delivery)",
+        "limit": 50000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "lscs"
+        ],
+        "codes": [
+          "SUR-LSCS",
+          "SUR-NVD"
+        ],
+        "clause_id": "7.2"
+      },
+      {
+        "sublimit_id": "PHYSIO_SESSIONS",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 20.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy"
+        ],
+        "codes": [
+          "PHY001"
+        ],
+        "clause_id": "7.3"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or aesthetic treatment of any description, unless required to restore function after an accident covered by this policy.",
+        "keywords": [
+          "cosmetic",
+          "aesthetic",
+          "rhinoplasty",
+          "liposuction",
+          "scar revision"
+        ],
+        "codes": [
+          "SUR-COS"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment or surgery of any kind unless necessitated by an accidental injury and requiring hospitalisation.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "orthodontic"
+        ],
+        "codes": [
+          "DEN-RCT",
+          "DEN-EXT"
+        ],
+        "clause_id": "10.4"
+      },
+      {
+        "exclusion_id": "OPD_CONSULT",
+        "text": "Out-patient consultation and treatment not resulting in hospitalisation or day care treatment.",
+        "keywords": [
+          "opd consultation",
+          "outpatient consultation"
+        ],
+        "codes": [
+          "CONS-OPD"
+        ],
+        "clause_id": "10.5"
+      }
+    ],
+    "non_payable_items": [
+      "Surgical gloves",
+      "Disposable syringe",
+      "Cotton roll",
+      "Thermometer",
+      "Admission kit",
+      "Toiletries",
+      "Mineral water",
+      "Diet charges for attendant",
+      "Telephone charges",
+      "Television charges",
+      "Documentation charges",
+      "Registration charges",
+      "Visitor pass",
+      "Nebuliser kit",
+      "Hot water bag",
+      "Slippers",
+      "Mask (non-surgical)",
+      "Tissue paper",
+      "Sanitiser",
+      "Bed pan",
+      "Urine pot",
+      "Belt / brace (non-implant)",
+      "Crepe bandage",
+      "Spirit / disinfectant",
+      "Attendant charges"
+    ],
+    "network_provider_ids": [],
+    "waiting_period_days": 30,
+    "ped_waiting_days": 730,
+    "declared_ped": [
+      "diabetes"
+    ],
+    "proportionate_deduction": true
+  },
+  {
+    "policy_number": "POL-IN-0004",
+    "product_id": "IN-HEALTH-RETAIL",
+    "holder_id": "M-0007",
+    "members": [
+      "M-0007",
+      "M-0008"
+    ],
+    "start_date": "2025-05-10",
+    "end_date": "2026-05-09",
+    "currency": "INR",
+    "annual_limit": 1000000.0,
+    "deductible": {
+      "amount": 0.0,
+      "basis": "per_claim"
+    },
+    "copay": {
+      "inpatient_pct": 10.0,
+      "outpatient_pct": 10.0,
+      "pharmacy_pct": 10.0
+    },
+    "room_rent_limit_per_day": 10000.0,
+    "icu_limit_per_day": 20000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "CATARACT",
+        "name": "Cataract surgery (per eye, per claim)",
+        "limit": 40000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "cataract",
+          "phaco",
+          "iol"
+        ],
+        "codes": [
+          "SUR-CAT",
+          "MED-IOL",
+          "MED-IOL-PREM"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per delivery)",
+        "limit": 50000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "lscs"
+        ],
+        "codes": [
+          "SUR-LSCS",
+          "SUR-NVD"
+        ],
+        "clause_id": "7.2"
+      },
+      {
+        "sublimit_id": "PHYSIO_SESSIONS",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 20.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy"
+        ],
+        "codes": [
+          "PHY001"
+        ],
+        "clause_id": "7.3"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or aesthetic treatment of any description, unless required to restore function after an accident covered by this policy.",
+        "keywords": [
+          "cosmetic",
+          "aesthetic",
+          "rhinoplasty",
+          "liposuction",
+          "scar revision"
+        ],
+        "codes": [
+          "SUR-COS"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment or surgery of any kind unless necessitated by an accidental injury and requiring hospitalisation.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "orthodontic"
+        ],
+        "codes": [
+          "DEN-RCT",
+          "DEN-EXT"
+        ],
+        "clause_id": "10.4"
+      },
+      {
+        "exclusion_id": "OPD_CONSULT",
+        "text": "Out-patient consultation and treatment not resulting in hospitalisation or day care treatment.",
+        "keywords": [
+          "opd consultation",
+          "outpatient consultation"
+        ],
+        "codes": [
+          "CONS-OPD"
+        ],
+        "clause_id": "10.5"
+      }
+    ],
+    "non_payable_items": [
+      "Surgical gloves",
+      "Disposable syringe",
+      "Cotton roll",
+      "Thermometer",
+      "Admission kit",
+      "Toiletries",
+      "Mineral water",
+      "Diet charges for attendant",
+      "Telephone charges",
+      "Television charges",
+      "Documentation charges",
+      "Registration charges",
+      "Visitor pass",
+      "Nebuliser kit",
+      "Hot water bag",
+      "Slippers",
+      "Mask (non-surgical)",
+      "Tissue paper",
+      "Sanitiser",
+      "Bed pan",
+      "Urine pot",
+      "Belt / brace (non-implant)",
+      "Crepe bandage",
+      "Spirit / disinfectant",
+      "Attendant charges"
+    ],
+    "network_provider_ids": [],
+    "waiting_period_days": 30,
+    "ped_waiting_days": 730,
+    "declared_ped": [],
+    "proportionate_deduction": true
+  },
+  {
+    "policy_number": "POL-IN-0005",
+    "product_id": "IN-HEALTH-RETAIL",
+    "holder_id": "M-0009",
+    "members": [
+      "M-0009",
+      "M-0010"
+    ],
+    "start_date": "2025-05-23",
+    "end_date": "2026-05-22",
+    "currency": "INR",
+    "annual_limit": 750000.0,
+    "deductible": {
+      "amount": 0.0,
+      "basis": "per_claim"
+    },
+    "copay": {
+      "inpatient_pct": 0.0,
+      "outpatient_pct": 0.0,
+      "pharmacy_pct": 0.0
+    },
+    "room_rent_limit_per_day": 7500.0,
+    "icu_limit_per_day": 15000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "CATARACT",
+        "name": "Cataract surgery (per eye, per claim)",
+        "limit": 40000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "cataract",
+          "phaco",
+          "iol"
+        ],
+        "codes": [
+          "SUR-CAT",
+          "MED-IOL",
+          "MED-IOL-PREM"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per delivery)",
+        "limit": 50000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "lscs"
+        ],
+        "codes": [
+          "SUR-LSCS",
+          "SUR-NVD"
+        ],
+        "clause_id": "7.2"
+      },
+      {
+        "sublimit_id": "PHYSIO_SESSIONS",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 20.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy"
+        ],
+        "codes": [
+          "PHY001"
+        ],
+        "clause_id": "7.3"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or aesthetic treatment of any description, unless required to restore function after an accident covered by this policy.",
+        "keywords": [
+          "cosmetic",
+          "aesthetic",
+          "rhinoplasty",
+          "liposuction",
+          "scar revision"
+        ],
+        "codes": [
+          "SUR-COS"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment or surgery of any kind unless necessitated by an accidental injury and requiring hospitalisation.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "orthodontic"
+        ],
+        "codes": [
+          "DEN-RCT",
+          "DEN-EXT"
+        ],
+        "clause_id": "10.4"
+      },
+      {
+        "exclusion_id": "OPD_CONSULT",
+        "text": "Out-patient consultation and treatment not resulting in hospitalisation or day care treatment.",
+        "keywords": [
+          "opd consultation",
+          "outpatient consultation"
+        ],
+        "codes": [
+          "CONS-OPD"
+        ],
+        "clause_id": "10.5"
+      }
+    ],
+    "non_payable_items": [
+      "Surgical gloves",
+      "Disposable syringe",
+      "Cotton roll",
+      "Thermometer",
+      "Admission kit",
+      "Toiletries",
+      "Mineral water",
+      "Diet charges for attendant",
+      "Telephone charges",
+      "Television charges",
+      "Documentation charges",
+      "Registration charges",
+      "Visitor pass",
+      "Nebuliser kit",
+      "Hot water bag",
+      "Slippers",
+      "Mask (non-surgical)",
+      "Tissue paper",
+      "Sanitiser",
+      "Bed pan",
+      "Urine pot",
+      "Belt / brace (non-implant)",
+      "Crepe bandage",
+      "Spirit / disinfectant",
+      "Attendant charges"
+    ],
+    "network_provider_ids": [],
+    "waiting_period_days": 30,
+    "ped_waiting_days": 730,
+    "declared_ped": [
+      "hypertension"
+    ],
+    "proportionate_deduction": true
+  },
+  {
+    "policy_number": "POL-IN-0006",
+    "product_id": "IN-HEALTH-RETAIL",
+    "holder_id": "M-0011",
+    "members": [
+      "M-0011",
+      "M-0012"
+    ],
+    "start_date": "2025-06-05",
+    "end_date": "2026-06-04",
+    "currency": "INR",
+    "annual_limit": 300000.0,
+    "deductible": {
+      "amount": 0.0,
+      "basis": "per_claim"
+    },
+    "copay": {
+      "inpatient_pct": 10.0,
+      "outpatient_pct": 10.0,
+      "pharmacy_pct": 10.0
+    },
+    "room_rent_limit_per_day": 3000.0,
+    "icu_limit_per_day": 6000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "CATARACT",
+        "name": "Cataract surgery (per eye, per claim)",
+        "limit": 40000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "cataract",
+          "phaco",
+          "iol"
+        ],
+        "codes": [
+          "SUR-CAT",
+          "MED-IOL",
+          "MED-IOL-PREM"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per delivery)",
+        "limit": 50000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "lscs"
+        ],
+        "codes": [
+          "SUR-LSCS",
+          "SUR-NVD"
+        ],
+        "clause_id": "7.2"
+      },
+      {
+        "sublimit_id": "PHYSIO_SESSIONS",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 20.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy"
+        ],
+        "codes": [
+          "PHY001"
+        ],
+        "clause_id": "7.3"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or aesthetic treatment of any description, unless required to restore function after an accident covered by this policy.",
+        "keywords": [
+          "cosmetic",
+          "aesthetic",
+          "rhinoplasty",
+          "liposuction",
+          "scar revision"
+        ],
+        "codes": [
+          "SUR-COS"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment or surgery of any kind unless necessitated by an accidental injury and requiring hospitalisation.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "orthodontic"
+        ],
+        "codes": [
+          "DEN-RCT",
+          "DEN-EXT"
+        ],
+        "clause_id": "10.4"
+      },
+      {
+        "exclusion_id": "OPD_CONSULT",
+        "text": "Out-patient consultation and treatment not resulting in hospitalisation or day care treatment.",
+        "keywords": [
+          "opd consultation",
+          "outpatient consultation"
+        ],
+        "codes": [
+          "CONS-OPD"
+        ],
+        "clause_id": "10.5"
+      }
+    ],
+    "non_payable_items": [
+      "Surgical gloves",
+      "Disposable syringe",
+      "Cotton roll",
+      "Thermometer",
+      "Admission kit",
+      "Toiletries",
+      "Mineral water",
+      "Diet charges for attendant",
+      "Telephone charges",
+      "Television charges",
+      "Documentation charges",
+      "Registration charges",
+      "Visitor pass",
+      "Nebuliser kit",
+      "Hot water bag",
+      "Slippers",
+      "Mask (non-surgical)",
+      "Tissue paper",
+      "Sanitiser",
+      "Bed pan",
+      "Urine pot",
+      "Belt / brace (non-implant)",
+      "Crepe bandage",
+      "Spirit / disinfectant",
+      "Attendant charges"
+    ],
+    "network_provider_ids": [],
+    "waiting_period_days": 30,
+    "ped_waiting_days": 730,
+    "declared_ped": [],
+    "proportionate_deduction": true
+  },
+  {
+    "policy_number": "POL-IN-0007",
+    "product_id": "IN-HEALTH-RETAIL",
+    "holder_id": "M-0013",
+    "members": [
+      "M-0013",
+      "M-0014"
+    ],
+    "start_date": "2025-06-18",
+    "end_date": "2026-06-17",
+    "currency": "INR",
+    "annual_limit": 500000.0,
+    "deductible": {
+      "amount": 0.0,
+      "basis": "per_claim"
+    },
+    "copay": {
+      "inpatient_pct": 0.0,
+      "outpatient_pct": 0.0,
+      "pharmacy_pct": 0.0
+    },
+    "room_rent_limit_per_day": 5000.0,
+    "icu_limit_per_day": 10000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "CATARACT",
+        "name": "Cataract surgery (per eye, per claim)",
+        "limit": 40000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "cataract",
+          "phaco",
+          "iol"
+        ],
+        "codes": [
+          "SUR-CAT",
+          "MED-IOL",
+          "MED-IOL-PREM"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per delivery)",
+        "limit": 50000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "lscs"
+        ],
+        "codes": [
+          "SUR-LSCS",
+          "SUR-NVD"
+        ],
+        "clause_id": "7.2"
+      },
+      {
+        "sublimit_id": "PHYSIO_SESSIONS",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 20.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy"
+        ],
+        "codes": [
+          "PHY001"
+        ],
+        "clause_id": "7.3"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or aesthetic treatment of any description, unless required to restore function after an accident covered by this policy.",
+        "keywords": [
+          "cosmetic",
+          "aesthetic",
+          "rhinoplasty",
+          "liposuction",
+          "scar revision"
+        ],
+        "codes": [
+          "SUR-COS"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment or surgery of any kind unless necessitated by an accidental injury and requiring hospitalisation.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "orthodontic"
+        ],
+        "codes": [
+          "DEN-RCT",
+          "DEN-EXT"
+        ],
+        "clause_id": "10.4"
+      },
+      {
+        "exclusion_id": "OPD_CONSULT",
+        "text": "Out-patient consultation and treatment not resulting in hospitalisation or day care treatment.",
+        "keywords": [
+          "opd consultation",
+          "outpatient consultation"
+        ],
+        "codes": [
+          "CONS-OPD"
+        ],
+        "clause_id": "10.5"
+      }
+    ],
+    "non_payable_items": [
+      "Surgical gloves",
+      "Disposable syringe",
+      "Cotton roll",
+      "Thermometer",
+      "Admission kit",
+      "Toiletries",
+      "Mineral water",
+      "Diet charges for attendant",
+      "Telephone charges",
+      "Television charges",
+      "Documentation charges",
+      "Registration charges",
+      "Visitor pass",
+      "Nebuliser kit",
+      "Hot water bag",
+      "Slippers",
+      "Mask (non-surgical)",
+      "Tissue paper",
+      "Sanitiser",
+      "Bed pan",
+      "Urine pot",
+      "Belt / brace (non-implant)",
+      "Crepe bandage",
+      "Spirit / disinfectant",
+      "Attendant charges"
+    ],
+    "network_provider_ids": [],
+    "waiting_period_days": 30,
+    "ped_waiting_days": 730,
+    "declared_ped": [
+      "diabetes"
+    ],
+    "proportionate_deduction": true
+  },
+  {
+    "policy_number": "POL-IN-0008",
+    "product_id": "IN-HEALTH-RETAIL",
+    "holder_id": "M-0015",
+    "members": [
+      "M-0015",
+      "M-0016"
+    ],
+    "start_date": "2025-07-01",
+    "end_date": "2026-06-30",
+    "currency": "INR",
+    "annual_limit": 400000.0,
+    "deductible": {
+      "amount": 0.0,
+      "basis": "per_claim"
+    },
+    "copay": {
+      "inpatient_pct": 10.0,
+      "outpatient_pct": 10.0,
+      "pharmacy_pct": 10.0
+    },
+    "room_rent_limit_per_day": 4000.0,
+    "icu_limit_per_day": 8000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "CATARACT",
+        "name": "Cataract surgery (per eye, per claim)",
+        "limit": 40000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "cataract",
+          "phaco",
+          "iol"
+        ],
+        "codes": [
+          "SUR-CAT",
+          "MED-IOL",
+          "MED-IOL-PREM"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per delivery)",
+        "limit": 50000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "lscs"
+        ],
+        "codes": [
+          "SUR-LSCS",
+          "SUR-NVD"
+        ],
+        "clause_id": "7.2"
+      },
+      {
+        "sublimit_id": "PHYSIO_SESSIONS",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 20.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy"
+        ],
+        "codes": [
+          "PHY001"
+        ],
+        "clause_id": "7.3"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or aesthetic treatment of any description, unless required to restore function after an accident covered by this policy.",
+        "keywords": [
+          "cosmetic",
+          "aesthetic",
+          "rhinoplasty",
+          "liposuction",
+          "scar revision"
+        ],
+        "codes": [
+          "SUR-COS"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment or surgery of any kind unless necessitated by an accidental injury and requiring hospitalisation.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "orthodontic"
+        ],
+        "codes": [
+          "DEN-RCT",
+          "DEN-EXT"
+        ],
+        "clause_id": "10.4"
+      },
+      {
+        "exclusion_id": "OPD_CONSULT",
+        "text": "Out-patient consultation and treatment not resulting in hospitalisation or day care treatment.",
+        "keywords": [
+          "opd consultation",
+          "outpatient consultation"
+        ],
+        "codes": [
+          "CONS-OPD"
+        ],
+        "clause_id": "10.5"
+      }
+    ],
+    "non_payable_items": [
+      "Surgical gloves",
+      "Disposable syringe",
+      "Cotton roll",
+      "Thermometer",
+      "Admission kit",
+      "Toiletries",
+      "Mineral water",
+      "Diet charges for attendant",
+      "Telephone charges",
+      "Television charges",
+      "Documentation charges",
+      "Registration charges",
+      "Visitor pass",
+      "Nebuliser kit",
+      "Hot water bag",
+      "Slippers",
+      "Mask (non-surgical)",
+      "Tissue paper",
+      "Sanitiser",
+      "Bed pan",
+      "Urine pot",
+      "Belt / brace (non-implant)",
+      "Crepe bandage",
+      "Spirit / disinfectant",
+      "Attendant charges"
+    ],
+    "network_provider_ids": [],
+    "waiting_period_days": 30,
+    "ped_waiting_days": 730,
+    "declared_ped": [],
+    "proportionate_deduction": true
+  },
+  {
+    "policy_number": "POL-IN-0009",
+    "product_id": "IN-HEALTH-RETAIL",
+    "holder_id": "M-0017",
+    "members": [
+      "M-0017",
+      "M-0018"
+    ],
+    "start_date": "2025-07-14",
+    "end_date": "2026-07-13",
+    "currency": "INR",
+    "annual_limit": 1000000.0,
+    "deductible": {
+      "amount": 0.0,
+      "basis": "per_claim"
+    },
+    "copay": {
+      "inpatient_pct": 0.0,
+      "outpatient_pct": 0.0,
+      "pharmacy_pct": 0.0
+    },
+    "room_rent_limit_per_day": 10000.0,
+    "icu_limit_per_day": 20000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "CATARACT",
+        "name": "Cataract surgery (per eye, per claim)",
+        "limit": 40000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "cataract",
+          "phaco",
+          "iol"
+        ],
+        "codes": [
+          "SUR-CAT",
+          "MED-IOL",
+          "MED-IOL-PREM"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per delivery)",
+        "limit": 50000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "lscs"
+        ],
+        "codes": [
+          "SUR-LSCS",
+          "SUR-NVD"
+        ],
+        "clause_id": "7.2"
+      },
+      {
+        "sublimit_id": "PHYSIO_SESSIONS",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 20.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy"
+        ],
+        "codes": [
+          "PHY001"
+        ],
+        "clause_id": "7.3"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or aesthetic treatment of any description, unless required to restore function after an accident covered by this policy.",
+        "keywords": [
+          "cosmetic",
+          "aesthetic",
+          "rhinoplasty",
+          "liposuction",
+          "scar revision"
+        ],
+        "codes": [
+          "SUR-COS"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment or surgery of any kind unless necessitated by an accidental injury and requiring hospitalisation.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "orthodontic"
+        ],
+        "codes": [
+          "DEN-RCT",
+          "DEN-EXT"
+        ],
+        "clause_id": "10.4"
+      },
+      {
+        "exclusion_id": "OPD_CONSULT",
+        "text": "Out-patient consultation and treatment not resulting in hospitalisation or day care treatment.",
+        "keywords": [
+          "opd consultation",
+          "outpatient consultation"
+        ],
+        "codes": [
+          "CONS-OPD"
+        ],
+        "clause_id": "10.5"
+      }
+    ],
+    "non_payable_items": [
+      "Surgical gloves",
+      "Disposable syringe",
+      "Cotton roll",
+      "Thermometer",
+      "Admission kit",
+      "Toiletries",
+      "Mineral water",
+      "Diet charges for attendant",
+      "Telephone charges",
+      "Television charges",
+      "Documentation charges",
+      "Registration charges",
+      "Visitor pass",
+      "Nebuliser kit",
+      "Hot water bag",
+      "Slippers",
+      "Mask (non-surgical)",
+      "Tissue paper",
+      "Sanitiser",
+      "Bed pan",
+      "Urine pot",
+      "Belt / brace (non-implant)",
+      "Crepe bandage",
+      "Spirit / disinfectant",
+      "Attendant charges"
+    ],
+    "network_provider_ids": [],
+    "waiting_period_days": 30,
+    "ped_waiting_days": 730,
+    "declared_ped": [
+      "hypertension"
+    ],
+    "proportionate_deduction": true
+  },
+  {
+    "policy_number": "POL-IN-0010",
+    "product_id": "IN-HEALTH-RETAIL",
+    "holder_id": "M-0019",
+    "members": [
+      "M-0019",
+      "M-0020"
+    ],
+    "start_date": "2025-07-27",
+    "end_date": "2026-07-26",
+    "currency": "INR",
+    "annual_limit": 750000.0,
+    "deductible": {
+      "amount": 0.0,
+      "basis": "per_claim"
+    },
+    "copay": {
+      "inpatient_pct": 10.0,
+      "outpatient_pct": 10.0,
+      "pharmacy_pct": 10.0
+    },
+    "room_rent_limit_per_day": 7500.0,
+    "icu_limit_per_day": 15000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "CATARACT",
+        "name": "Cataract surgery (per eye, per claim)",
+        "limit": 40000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "cataract",
+          "phaco",
+          "iol"
+        ],
+        "codes": [
+          "SUR-CAT",
+          "MED-IOL",
+          "MED-IOL-PREM"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per delivery)",
+        "limit": 50000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "lscs"
+        ],
+        "codes": [
+          "SUR-LSCS",
+          "SUR-NVD"
+        ],
+        "clause_id": "7.2"
+      },
+      {
+        "sublimit_id": "PHYSIO_SESSIONS",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 20.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy"
+        ],
+        "codes": [
+          "PHY001"
+        ],
+        "clause_id": "7.3"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or aesthetic treatment of any description, unless required to restore function after an accident covered by this policy.",
+        "keywords": [
+          "cosmetic",
+          "aesthetic",
+          "rhinoplasty",
+          "liposuction",
+          "scar revision"
+        ],
+        "codes": [
+          "SUR-COS"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment or surgery of any kind unless necessitated by an accidental injury and requiring hospitalisation.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "orthodontic"
+        ],
+        "codes": [
+          "DEN-RCT",
+          "DEN-EXT"
+        ],
+        "clause_id": "10.4"
+      },
+      {
+        "exclusion_id": "OPD_CONSULT",
+        "text": "Out-patient consultation and treatment not resulting in hospitalisation or day care treatment.",
+        "keywords": [
+          "opd consultation",
+          "outpatient consultation"
+        ],
+        "codes": [
+          "CONS-OPD"
+        ],
+        "clause_id": "10.5"
+      }
+    ],
+    "non_payable_items": [
+      "Surgical gloves",
+      "Disposable syringe",
+      "Cotton roll",
+      "Thermometer",
+      "Admission kit",
+      "Toiletries",
+      "Mineral water",
+      "Diet charges for attendant",
+      "Telephone charges",
+      "Television charges",
+      "Documentation charges",
+      "Registration charges",
+      "Visitor pass",
+      "Nebuliser kit",
+      "Hot water bag",
+      "Slippers",
+      "Mask (non-surgical)",
+      "Tissue paper",
+      "Sanitiser",
+      "Bed pan",
+      "Urine pot",
+      "Belt / brace (non-implant)",
+      "Crepe bandage",
+      "Spirit / disinfectant",
+      "Attendant charges"
+    ],
+    "network_provider_ids": [],
+    "waiting_period_days": 30,
+    "ped_waiting_days": 730,
+    "declared_ped": [],
+    "proportionate_deduction": true
+  },
+  {
+    "policy_number": "POL-IN-0011",
+    "product_id": "IN-HEALTH-RETAIL",
+    "holder_id": "M-0021",
+    "members": [
+      "M-0021",
+      "M-0022"
+    ],
+    "start_date": "2025-08-09",
+    "end_date": "2026-08-08",
+    "currency": "INR",
+    "annual_limit": 300000.0,
+    "deductible": {
+      "amount": 0.0,
+      "basis": "per_claim"
+    },
+    "copay": {
+      "inpatient_pct": 0.0,
+      "outpatient_pct": 0.0,
+      "pharmacy_pct": 0.0
+    },
+    "room_rent_limit_per_day": 3000.0,
+    "icu_limit_per_day": 6000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "CATARACT",
+        "name": "Cataract surgery (per eye, per claim)",
+        "limit": 40000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "cataract",
+          "phaco",
+          "iol"
+        ],
+        "codes": [
+          "SUR-CAT",
+          "MED-IOL",
+          "MED-IOL-PREM"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per delivery)",
+        "limit": 50000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "lscs"
+        ],
+        "codes": [
+          "SUR-LSCS",
+          "SUR-NVD"
+        ],
+        "clause_id": "7.2"
+      },
+      {
+        "sublimit_id": "PHYSIO_SESSIONS",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 20.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy"
+        ],
+        "codes": [
+          "PHY001"
+        ],
+        "clause_id": "7.3"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or aesthetic treatment of any description, unless required to restore function after an accident covered by this policy.",
+        "keywords": [
+          "cosmetic",
+          "aesthetic",
+          "rhinoplasty",
+          "liposuction",
+          "scar revision"
+        ],
+        "codes": [
+          "SUR-COS"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment or surgery of any kind unless necessitated by an accidental injury and requiring hospitalisation.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "orthodontic"
+        ],
+        "codes": [
+          "DEN-RCT",
+          "DEN-EXT"
+        ],
+        "clause_id": "10.4"
+      },
+      {
+        "exclusion_id": "OPD_CONSULT",
+        "text": "Out-patient consultation and treatment not resulting in hospitalisation or day care treatment.",
+        "keywords": [
+          "opd consultation",
+          "outpatient consultation"
+        ],
+        "codes": [
+          "CONS-OPD"
+        ],
+        "clause_id": "10.5"
+      }
+    ],
+    "non_payable_items": [
+      "Surgical gloves",
+      "Disposable syringe",
+      "Cotton roll",
+      "Thermometer",
+      "Admission kit",
+      "Toiletries",
+      "Mineral water",
+      "Diet charges for attendant",
+      "Telephone charges",
+      "Television charges",
+      "Documentation charges",
+      "Registration charges",
+      "Visitor pass",
+      "Nebuliser kit",
+      "Hot water bag",
+      "Slippers",
+      "Mask (non-surgical)",
+      "Tissue paper",
+      "Sanitiser",
+      "Bed pan",
+      "Urine pot",
+      "Belt / brace (non-implant)",
+      "Crepe bandage",
+      "Spirit / disinfectant",
+      "Attendant charges"
+    ],
+    "network_provider_ids": [],
+    "waiting_period_days": 30,
+    "ped_waiting_days": 730,
+    "declared_ped": [
+      "diabetes"
+    ],
+    "proportionate_deduction": true
+  },
+  {
+    "policy_number": "POL-IN-0012",
+    "product_id": "IN-HEALTH-RETAIL",
+    "holder_id": "M-0023",
+    "members": [
+      "M-0023",
+      "M-0024"
+    ],
+    "start_date": "2025-08-22",
+    "end_date": "2026-08-21",
+    "currency": "INR",
+    "annual_limit": 500000.0,
+    "deductible": {
+      "amount": 0.0,
+      "basis": "per_claim"
+    },
+    "copay": {
+      "inpatient_pct": 10.0,
+      "outpatient_pct": 10.0,
+      "pharmacy_pct": 10.0
+    },
+    "room_rent_limit_per_day": 5000.0,
+    "icu_limit_per_day": 10000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "CATARACT",
+        "name": "Cataract surgery (per eye, per claim)",
+        "limit": 40000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "cataract",
+          "phaco",
+          "iol"
+        ],
+        "codes": [
+          "SUR-CAT",
+          "MED-IOL",
+          "MED-IOL-PREM"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per delivery)",
+        "limit": 50000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "lscs"
+        ],
+        "codes": [
+          "SUR-LSCS",
+          "SUR-NVD"
+        ],
+        "clause_id": "7.2"
+      },
+      {
+        "sublimit_id": "PHYSIO_SESSIONS",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 20.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy"
+        ],
+        "codes": [
+          "PHY001"
+        ],
+        "clause_id": "7.3"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or aesthetic treatment of any description, unless required to restore function after an accident covered by this policy.",
+        "keywords": [
+          "cosmetic",
+          "aesthetic",
+          "rhinoplasty",
+          "liposuction",
+          "scar revision"
+        ],
+        "codes": [
+          "SUR-COS"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment or surgery of any kind unless necessitated by an accidental injury and requiring hospitalisation.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "orthodontic"
+        ],
+        "codes": [
+          "DEN-RCT",
+          "DEN-EXT"
+        ],
+        "clause_id": "10.4"
+      },
+      {
+        "exclusion_id": "OPD_CONSULT",
+        "text": "Out-patient consultation and treatment not resulting in hospitalisation or day care treatment.",
+        "keywords": [
+          "opd consultation",
+          "outpatient consultation"
+        ],
+        "codes": [
+          "CONS-OPD"
+        ],
+        "clause_id": "10.5"
+      }
+    ],
+    "non_payable_items": [
+      "Surgical gloves",
+      "Disposable syringe",
+      "Cotton roll",
+      "Thermometer",
+      "Admission kit",
+      "Toiletries",
+      "Mineral water",
+      "Diet charges for attendant",
+      "Telephone charges",
+      "Television charges",
+      "Documentation charges",
+      "Registration charges",
+      "Visitor pass",
+      "Nebuliser kit",
+      "Hot water bag",
+      "Slippers",
+      "Mask (non-surgical)",
+      "Tissue paper",
+      "Sanitiser",
+      "Bed pan",
+      "Urine pot",
+      "Belt / brace (non-implant)",
+      "Crepe bandage",
+      "Spirit / disinfectant",
+      "Attendant charges"
+    ],
+    "network_provider_ids": [],
+    "waiting_period_days": 30,
+    "ped_waiting_days": 730,
+    "declared_ped": [],
+    "proportionate_deduction": true
+  },
+  {
+    "policy_number": "POL-IN-0013",
+    "product_id": "IN-HEALTH-RETAIL",
+    "holder_id": "M-0025",
+    "members": [
+      "M-0025",
+      "M-0026"
+    ],
+    "start_date": "2025-09-04",
+    "end_date": "2026-09-03",
+    "currency": "INR",
+    "annual_limit": 400000.0,
+    "deductible": {
+      "amount": 0.0,
+      "basis": "per_claim"
+    },
+    "copay": {
+      "inpatient_pct": 0.0,
+      "outpatient_pct": 0.0,
+      "pharmacy_pct": 0.0
+    },
+    "room_rent_limit_per_day": 4000.0,
+    "icu_limit_per_day": 8000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "CATARACT",
+        "name": "Cataract surgery (per eye, per claim)",
+        "limit": 40000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "cataract",
+          "phaco",
+          "iol"
+        ],
+        "codes": [
+          "SUR-CAT",
+          "MED-IOL",
+          "MED-IOL-PREM"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per delivery)",
+        "limit": 50000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "lscs"
+        ],
+        "codes": [
+          "SUR-LSCS",
+          "SUR-NVD"
+        ],
+        "clause_id": "7.2"
+      },
+      {
+        "sublimit_id": "PHYSIO_SESSIONS",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 20.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy"
+        ],
+        "codes": [
+          "PHY001"
+        ],
+        "clause_id": "7.3"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or aesthetic treatment of any description, unless required to restore function after an accident covered by this policy.",
+        "keywords": [
+          "cosmetic",
+          "aesthetic",
+          "rhinoplasty",
+          "liposuction",
+          "scar revision"
+        ],
+        "codes": [
+          "SUR-COS"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment or surgery of any kind unless necessitated by an accidental injury and requiring hospitalisation.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "orthodontic"
+        ],
+        "codes": [
+          "DEN-RCT",
+          "DEN-EXT"
+        ],
+        "clause_id": "10.4"
+      },
+      {
+        "exclusion_id": "OPD_CONSULT",
+        "text": "Out-patient consultation and treatment not resulting in hospitalisation or day care treatment.",
+        "keywords": [
+          "opd consultation",
+          "outpatient consultation"
+        ],
+        "codes": [
+          "CONS-OPD"
+        ],
+        "clause_id": "10.5"
+      }
+    ],
+    "non_payable_items": [
+      "Surgical gloves",
+      "Disposable syringe",
+      "Cotton roll",
+      "Thermometer",
+      "Admission kit",
+      "Toiletries",
+      "Mineral water",
+      "Diet charges for attendant",
+      "Telephone charges",
+      "Television charges",
+      "Documentation charges",
+      "Registration charges",
+      "Visitor pass",
+      "Nebuliser kit",
+      "Hot water bag",
+      "Slippers",
+      "Mask (non-surgical)",
+      "Tissue paper",
+      "Sanitiser",
+      "Bed pan",
+      "Urine pot",
+      "Belt / brace (non-implant)",
+      "Crepe bandage",
+      "Spirit / disinfectant",
+      "Attendant charges"
+    ],
+    "network_provider_ids": [],
+    "waiting_period_days": 30,
+    "ped_waiting_days": 730,
+    "declared_ped": [],
+    "proportionate_deduction": true
+  },
+  {
+    "policy_number": "POL-IN-0014",
+    "product_id": "IN-HEALTH-RETAIL",
+    "holder_id": "M-0027",
+    "members": [
+      "M-0027",
+      "M-0028"
+    ],
+    "start_date": "2025-09-17",
+    "end_date": "2026-09-16",
+    "currency": "INR",
+    "annual_limit": 1000000.0,
+    "deductible": {
+      "amount": 0.0,
+      "basis": "per_claim"
+    },
+    "copay": {
+      "inpatient_pct": 10.0,
+      "outpatient_pct": 10.0,
+      "pharmacy_pct": 10.0
+    },
+    "room_rent_limit_per_day": 10000.0,
+    "icu_limit_per_day": 20000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "CATARACT",
+        "name": "Cataract surgery (per eye, per claim)",
+        "limit": 40000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "cataract",
+          "phaco",
+          "iol"
+        ],
+        "codes": [
+          "SUR-CAT",
+          "MED-IOL",
+          "MED-IOL-PREM"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per delivery)",
+        "limit": 50000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "lscs"
+        ],
+        "codes": [
+          "SUR-LSCS",
+          "SUR-NVD"
+        ],
+        "clause_id": "7.2"
+      },
+      {
+        "sublimit_id": "PHYSIO_SESSIONS",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 20.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy"
+        ],
+        "codes": [
+          "PHY001"
+        ],
+        "clause_id": "7.3"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or aesthetic treatment of any description, unless required to restore function after an accident covered by this policy.",
+        "keywords": [
+          "cosmetic",
+          "aesthetic",
+          "rhinoplasty",
+          "liposuction",
+          "scar revision"
+        ],
+        "codes": [
+          "SUR-COS"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment or surgery of any kind unless necessitated by an accidental injury and requiring hospitalisation.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "orthodontic"
+        ],
+        "codes": [
+          "DEN-RCT",
+          "DEN-EXT"
+        ],
+        "clause_id": "10.4"
+      },
+      {
+        "exclusion_id": "OPD_CONSULT",
+        "text": "Out-patient consultation and treatment not resulting in hospitalisation or day care treatment.",
+        "keywords": [
+          "opd consultation",
+          "outpatient consultation"
+        ],
+        "codes": [
+          "CONS-OPD"
+        ],
+        "clause_id": "10.5"
+      }
+    ],
+    "non_payable_items": [
+      "Surgical gloves",
+      "Disposable syringe",
+      "Cotton roll",
+      "Thermometer",
+      "Admission kit",
+      "Toiletries",
+      "Mineral water",
+      "Diet charges for attendant",
+      "Telephone charges",
+      "Television charges",
+      "Documentation charges",
+      "Registration charges",
+      "Visitor pass",
+      "Nebuliser kit",
+      "Hot water bag",
+      "Slippers",
+      "Mask (non-surgical)",
+      "Tissue paper",
+      "Sanitiser",
+      "Bed pan",
+      "Urine pot",
+      "Belt / brace (non-implant)",
+      "Crepe bandage",
+      "Spirit / disinfectant",
+      "Attendant charges"
+    ],
+    "network_provider_ids": [],
+    "waiting_period_days": 30,
+    "ped_waiting_days": 730,
+    "declared_ped": [],
+    "proportionate_deduction": true
+  },
+  {
+    "policy_number": "POL-IN-0015",
+    "product_id": "IN-HEALTH-RETAIL",
+    "holder_id": "M-0029",
+    "members": [
+      "M-0029",
+      "M-0030"
+    ],
+    "start_date": "2025-09-30",
+    "end_date": "2026-09-29",
+    "currency": "INR",
+    "annual_limit": 750000.0,
+    "deductible": {
+      "amount": 0.0,
+      "basis": "per_claim"
+    },
+    "copay": {
+      "inpatient_pct": 0.0,
+      "outpatient_pct": 0.0,
+      "pharmacy_pct": 0.0
+    },
+    "room_rent_limit_per_day": 7500.0,
+    "icu_limit_per_day": 15000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "CATARACT",
+        "name": "Cataract surgery (per eye, per claim)",
+        "limit": 40000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "cataract",
+          "phaco",
+          "iol"
+        ],
+        "codes": [
+          "SUR-CAT",
+          "MED-IOL",
+          "MED-IOL-PREM"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per delivery)",
+        "limit": 50000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "lscs"
+        ],
+        "codes": [
+          "SUR-LSCS",
+          "SUR-NVD"
+        ],
+        "clause_id": "7.2"
+      },
+      {
+        "sublimit_id": "PHYSIO_SESSIONS",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 20.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy"
+        ],
+        "codes": [
+          "PHY001"
+        ],
+        "clause_id": "7.3"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or aesthetic treatment of any description, unless required to restore function after an accident covered by this policy.",
+        "keywords": [
+          "cosmetic",
+          "aesthetic",
+          "rhinoplasty",
+          "liposuction",
+          "scar revision"
+        ],
+        "codes": [
+          "SUR-COS"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment or surgery of any kind unless necessitated by an accidental injury and requiring hospitalisation.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "orthodontic"
+        ],
+        "codes": [
+          "DEN-RCT",
+          "DEN-EXT"
+        ],
+        "clause_id": "10.4"
+      },
+      {
+        "exclusion_id": "OPD_CONSULT",
+        "text": "Out-patient consultation and treatment not resulting in hospitalisation or day care treatment.",
+        "keywords": [
+          "opd consultation",
+          "outpatient consultation"
+        ],
+        "codes": [
+          "CONS-OPD"
+        ],
+        "clause_id": "10.5"
+      }
+    ],
+    "non_payable_items": [
+      "Surgical gloves",
+      "Disposable syringe",
+      "Cotton roll",
+      "Thermometer",
+      "Admission kit",
+      "Toiletries",
+      "Mineral water",
+      "Diet charges for attendant",
+      "Telephone charges",
+      "Television charges",
+      "Documentation charges",
+      "Registration charges",
+      "Visitor pass",
+      "Nebuliser kit",
+      "Hot water bag",
+      "Slippers",
+      "Mask (non-surgical)",
+      "Tissue paper",
+      "Sanitiser",
+      "Bed pan",
+      "Urine pot",
+      "Belt / brace (non-implant)",
+      "Crepe bandage",
+      "Spirit / disinfectant",
+      "Attendant charges"
+    ],
+    "network_provider_ids": [],
+    "waiting_period_days": 30,
+    "ped_waiting_days": 730,
+    "declared_ped": [
+      "diabetes"
+    ],
+    "proportionate_deduction": true
+  },
+  {
+    "policy_number": "POL-IN-0016",
+    "product_id": "IN-HEALTH-RETAIL",
+    "holder_id": "M-0031",
+    "members": [
+      "M-0031",
+      "M-0032"
+    ],
+    "start_date": "2025-10-13",
+    "end_date": "2026-10-12",
+    "currency": "INR",
+    "annual_limit": 300000.0,
+    "deductible": {
+      "amount": 0.0,
+      "basis": "per_claim"
+    },
+    "copay": {
+      "inpatient_pct": 10.0,
+      "outpatient_pct": 10.0,
+      "pharmacy_pct": 10.0
+    },
+    "room_rent_limit_per_day": 3000.0,
+    "icu_limit_per_day": 6000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "CATARACT",
+        "name": "Cataract surgery (per eye, per claim)",
+        "limit": 40000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "cataract",
+          "phaco",
+          "iol"
+        ],
+        "codes": [
+          "SUR-CAT",
+          "MED-IOL",
+          "MED-IOL-PREM"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per delivery)",
+        "limit": 50000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "lscs"
+        ],
+        "codes": [
+          "SUR-LSCS",
+          "SUR-NVD"
+        ],
+        "clause_id": "7.2"
+      },
+      {
+        "sublimit_id": "PHYSIO_SESSIONS",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 20.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy"
+        ],
+        "codes": [
+          "PHY001"
+        ],
+        "clause_id": "7.3"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or aesthetic treatment of any description, unless required to restore function after an accident covered by this policy.",
+        "keywords": [
+          "cosmetic",
+          "aesthetic",
+          "rhinoplasty",
+          "liposuction",
+          "scar revision"
+        ],
+        "codes": [
+          "SUR-COS"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment or surgery of any kind unless necessitated by an accidental injury and requiring hospitalisation.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "orthodontic"
+        ],
+        "codes": [
+          "DEN-RCT",
+          "DEN-EXT"
+        ],
+        "clause_id": "10.4"
+      },
+      {
+        "exclusion_id": "OPD_CONSULT",
+        "text": "Out-patient consultation and treatment not resulting in hospitalisation or day care treatment.",
+        "keywords": [
+          "opd consultation",
+          "outpatient consultation"
+        ],
+        "codes": [
+          "CONS-OPD"
+        ],
+        "clause_id": "10.5"
+      }
+    ],
+    "non_payable_items": [
+      "Surgical gloves",
+      "Disposable syringe",
+      "Cotton roll",
+      "Thermometer",
+      "Admission kit",
+      "Toiletries",
+      "Mineral water",
+      "Diet charges for attendant",
+      "Telephone charges",
+      "Television charges",
+      "Documentation charges",
+      "Registration charges",
+      "Visitor pass",
+      "Nebuliser kit",
+      "Hot water bag",
+      "Slippers",
+      "Mask (non-surgical)",
+      "Tissue paper",
+      "Sanitiser",
+      "Bed pan",
+      "Urine pot",
+      "Belt / brace (non-implant)",
+      "Crepe bandage",
+      "Spirit / disinfectant",
+      "Attendant charges"
+    ],
+    "network_provider_ids": [],
+    "waiting_period_days": 30,
+    "ped_waiting_days": 730,
+    "declared_ped": [],
+    "proportionate_deduction": true
+  },
+  {
+    "policy_number": "POL-IN-0017",
+    "product_id": "IN-HEALTH-RETAIL",
+    "holder_id": "M-0033",
+    "members": [
+      "M-0033",
+      "M-0034"
+    ],
+    "start_date": "2025-10-26",
+    "end_date": "2026-10-25",
+    "currency": "INR",
+    "annual_limit": 500000.0,
+    "deductible": {
+      "amount": 0.0,
+      "basis": "per_claim"
+    },
+    "copay": {
+      "inpatient_pct": 10.0,
+      "outpatient_pct": 10.0,
+      "pharmacy_pct": 10.0
+    },
+    "room_rent_limit_per_day": 5000.0,
+    "icu_limit_per_day": 10000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "CATARACT",
+        "name": "Cataract surgery (per eye, per claim)",
+        "limit": 40000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "cataract",
+          "phaco",
+          "iol"
+        ],
+        "codes": [
+          "SUR-CAT",
+          "MED-IOL",
+          "MED-IOL-PREM"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per delivery)",
+        "limit": 50000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "lscs"
+        ],
+        "codes": [
+          "SUR-LSCS",
+          "SUR-NVD"
+        ],
+        "clause_id": "7.2"
+      },
+      {
+        "sublimit_id": "PHYSIO_SESSIONS",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 20.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy"
+        ],
+        "codes": [
+          "PHY001"
+        ],
+        "clause_id": "7.3"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or aesthetic treatment of any description, unless required to restore function after an accident covered by this policy.",
+        "keywords": [
+          "cosmetic",
+          "aesthetic",
+          "rhinoplasty",
+          "liposuction",
+          "scar revision"
+        ],
+        "codes": [
+          "SUR-COS"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment or surgery of any kind unless necessitated by an accidental injury and requiring hospitalisation.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "orthodontic"
+        ],
+        "codes": [
+          "DEN-RCT",
+          "DEN-EXT"
+        ],
+        "clause_id": "10.4"
+      },
+      {
+        "exclusion_id": "OPD_CONSULT",
+        "text": "Out-patient consultation and treatment not resulting in hospitalisation or day care treatment.",
+        "keywords": [
+          "opd consultation",
+          "outpatient consultation"
+        ],
+        "codes": [
+          "CONS-OPD"
+        ],
+        "clause_id": "10.5"
+      }
+    ],
+    "non_payable_items": [
+      "Surgical gloves",
+      "Disposable syringe",
+      "Cotton roll",
+      "Thermometer",
+      "Admission kit",
+      "Toiletries",
+      "Mineral water",
+      "Diet charges for attendant",
+      "Telephone charges",
+      "Television charges",
+      "Documentation charges",
+      "Registration charges",
+      "Visitor pass",
+      "Nebuliser kit",
+      "Hot water bag",
+      "Slippers",
+      "Mask (non-surgical)",
+      "Tissue paper",
+      "Sanitiser",
+      "Bed pan",
+      "Urine pot",
+      "Belt / brace (non-implant)",
+      "Crepe bandage",
+      "Spirit / disinfectant",
+      "Attendant charges"
+    ],
+    "network_provider_ids": [],
+    "waiting_period_days": 30,
+    "ped_waiting_days": 730,
+    "declared_ped": [],
+    "proportionate_deduction": true
+  },
+  {
+    "policy_number": "POL-IN-0018",
+    "product_id": "IN-HEALTH-RETAIL",
+    "holder_id": "M-0035",
+    "members": [
+      "M-0035",
+      "M-0036"
+    ],
+    "start_date": "2025-11-08",
+    "end_date": "2026-11-07",
+    "currency": "INR",
+    "annual_limit": 400000.0,
+    "deductible": {
+      "amount": 0.0,
+      "basis": "per_claim"
+    },
+    "copay": {
+      "inpatient_pct": 10.0,
+      "outpatient_pct": 10.0,
+      "pharmacy_pct": 10.0
+    },
+    "room_rent_limit_per_day": 4000.0,
+    "icu_limit_per_day": 8000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "CATARACT",
+        "name": "Cataract surgery (per eye, per claim)",
+        "limit": 40000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "cataract",
+          "phaco",
+          "iol"
+        ],
+        "codes": [
+          "SUR-CAT",
+          "MED-IOL",
+          "MED-IOL-PREM"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per delivery)",
+        "limit": 50000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "lscs"
+        ],
+        "codes": [
+          "SUR-LSCS",
+          "SUR-NVD"
+        ],
+        "clause_id": "7.2"
+      },
+      {
+        "sublimit_id": "PHYSIO_SESSIONS",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 20.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy"
+        ],
+        "codes": [
+          "PHY001"
+        ],
+        "clause_id": "7.3"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or aesthetic treatment of any description, unless required to restore function after an accident covered by this policy.",
+        "keywords": [
+          "cosmetic",
+          "aesthetic",
+          "rhinoplasty",
+          "liposuction",
+          "scar revision"
+        ],
+        "codes": [
+          "SUR-COS"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment or surgery of any kind unless necessitated by an accidental injury and requiring hospitalisation.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "orthodontic"
+        ],
+        "codes": [
+          "DEN-RCT",
+          "DEN-EXT"
+        ],
+        "clause_id": "10.4"
+      },
+      {
+        "exclusion_id": "OPD_CONSULT",
+        "text": "Out-patient consultation and treatment not resulting in hospitalisation or day care treatment.",
+        "keywords": [
+          "opd consultation",
+          "outpatient consultation"
+        ],
+        "codes": [
+          "CONS-OPD"
+        ],
+        "clause_id": "10.5"
+      }
+    ],
+    "non_payable_items": [
+      "Surgical gloves",
+      "Disposable syringe",
+      "Cotton roll",
+      "Thermometer",
+      "Admission kit",
+      "Toiletries",
+      "Mineral water",
+      "Diet charges for attendant",
+      "Telephone charges",
+      "Television charges",
+      "Documentation charges",
+      "Registration charges",
+      "Visitor pass",
+      "Nebuliser kit",
+      "Hot water bag",
+      "Slippers",
+      "Mask (non-surgical)",
+      "Tissue paper",
+      "Sanitiser",
+      "Bed pan",
+      "Urine pot",
+      "Belt / brace (non-implant)",
+      "Crepe bandage",
+      "Spirit / disinfectant",
+      "Attendant charges"
+    ],
+    "network_provider_ids": [],
+    "waiting_period_days": 30,
+    "ped_waiting_days": 730,
+    "declared_ped": [],
+    "proportionate_deduction": true
+  },
+  {
+    "policy_number": "POL-IN-0019",
+    "product_id": "IN-HEALTH-RETAIL",
+    "holder_id": "M-0037",
+    "members": [
+      "M-0037",
+      "M-0038"
+    ],
+    "start_date": "2025-04-01",
+    "end_date": "2026-03-31",
+    "currency": "INR",
+    "annual_limit": 500000.0,
+    "deductible": {
+      "amount": 0.0,
+      "basis": "per_claim"
+    },
+    "copay": {
+      "inpatient_pct": 0.0,
+      "outpatient_pct": 0.0,
+      "pharmacy_pct": 0.0
+    },
+    "room_rent_limit_per_day": 5000.0,
+    "icu_limit_per_day": 10000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "CATARACT",
+        "name": "Cataract surgery (per eye, per claim)",
+        "limit": 40000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "cataract",
+          "phaco",
+          "iol"
+        ],
+        "codes": [
+          "SUR-CAT",
+          "MED-IOL",
+          "MED-IOL-PREM"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per delivery)",
+        "limit": 50000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "lscs"
+        ],
+        "codes": [
+          "SUR-LSCS",
+          "SUR-NVD"
+        ],
+        "clause_id": "7.2"
+      },
+      {
+        "sublimit_id": "PHYSIO_SESSIONS",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 20.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy"
+        ],
+        "codes": [
+          "PHY001"
+        ],
+        "clause_id": "7.3"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or aesthetic treatment of any description, unless required to restore function after an accident covered by this policy.",
+        "keywords": [
+          "cosmetic",
+          "aesthetic",
+          "rhinoplasty",
+          "liposuction",
+          "scar revision"
+        ],
+        "codes": [
+          "SUR-COS"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment or surgery of any kind unless necessitated by an accidental injury and requiring hospitalisation.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "orthodontic"
+        ],
+        "codes": [
+          "DEN-RCT",
+          "DEN-EXT"
+        ],
+        "clause_id": "10.4"
+      },
+      {
+        "exclusion_id": "OPD_CONSULT",
+        "text": "Out-patient consultation and treatment not resulting in hospitalisation or day care treatment.",
+        "keywords": [
+          "opd consultation",
+          "outpatient consultation"
+        ],
+        "codes": [
+          "CONS-OPD"
+        ],
+        "clause_id": "10.5"
+      }
+    ],
+    "non_payable_items": [
+      "Surgical gloves",
+      "Disposable syringe",
+      "Cotton roll",
+      "Thermometer",
+      "Admission kit",
+      "Toiletries",
+      "Mineral water",
+      "Diet charges for attendant",
+      "Telephone charges",
+      "Television charges",
+      "Documentation charges",
+      "Registration charges",
+      "Visitor pass",
+      "Nebuliser kit",
+      "Hot water bag",
+      "Slippers",
+      "Mask (non-surgical)",
+      "Tissue paper",
+      "Sanitiser",
+      "Bed pan",
+      "Urine pot",
+      "Belt / brace (non-implant)",
+      "Crepe bandage",
+      "Spirit / disinfectant",
+      "Attendant charges"
+    ],
+    "network_provider_ids": [],
+    "waiting_period_days": 30,
+    "ped_waiting_days": 730,
+    "declared_ped": [],
+    "proportionate_deduction": true
+  },
+  {
+    "policy_number": "POL-IN-0020",
+    "product_id": "IN-HEALTH-RETAIL",
+    "holder_id": "M-0039",
+    "members": [
+      "M-0039",
+      "M-0040"
+    ],
+    "start_date": "2026-02-15",
+    "end_date": "2027-02-14",
+    "currency": "INR",
+    "annual_limit": 400000.0,
+    "deductible": {
+      "amount": 0.0,
+      "basis": "per_claim"
+    },
+    "copay": {
+      "inpatient_pct": 0.0,
+      "outpatient_pct": 0.0,
+      "pharmacy_pct": 0.0
+    },
+    "room_rent_limit_per_day": 4000.0,
+    "icu_limit_per_day": 8000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "CATARACT",
+        "name": "Cataract surgery (per eye, per claim)",
+        "limit": 40000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "cataract",
+          "phaco",
+          "iol"
+        ],
+        "codes": [
+          "SUR-CAT",
+          "MED-IOL",
+          "MED-IOL-PREM"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per delivery)",
+        "limit": 50000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "lscs"
+        ],
+        "codes": [
+          "SUR-LSCS",
+          "SUR-NVD"
+        ],
+        "clause_id": "7.2"
+      },
+      {
+        "sublimit_id": "PHYSIO_SESSIONS",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 20.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy"
+        ],
+        "codes": [
+          "PHY001"
+        ],
+        "clause_id": "7.3"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or aesthetic treatment of any description, unless required to restore function after an accident covered by this policy.",
+        "keywords": [
+          "cosmetic",
+          "aesthetic",
+          "rhinoplasty",
+          "liposuction",
+          "scar revision"
+        ],
+        "codes": [
+          "SUR-COS"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment or surgery of any kind unless necessitated by an accidental injury and requiring hospitalisation.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "orthodontic"
+        ],
+        "codes": [
+          "DEN-RCT",
+          "DEN-EXT"
+        ],
+        "clause_id": "10.4"
+      },
+      {
+        "exclusion_id": "OPD_CONSULT",
+        "text": "Out-patient consultation and treatment not resulting in hospitalisation or day care treatment.",
+        "keywords": [
+          "opd consultation",
+          "outpatient consultation"
+        ],
+        "codes": [
+          "CONS-OPD"
+        ],
+        "clause_id": "10.5"
+      }
+    ],
+    "non_payable_items": [
+      "Surgical gloves",
+      "Disposable syringe",
+      "Cotton roll",
+      "Thermometer",
+      "Admission kit",
+      "Toiletries",
+      "Mineral water",
+      "Diet charges for attendant",
+      "Telephone charges",
+      "Television charges",
+      "Documentation charges",
+      "Registration charges",
+      "Visitor pass",
+      "Nebuliser kit",
+      "Hot water bag",
+      "Slippers",
+      "Mask (non-surgical)",
+      "Tissue paper",
+      "Sanitiser",
+      "Bed pan",
+      "Urine pot",
+      "Belt / brace (non-implant)",
+      "Crepe bandage",
+      "Spirit / disinfectant",
+      "Attendant charges"
+    ],
+    "network_provider_ids": [],
+    "waiting_period_days": 30,
+    "ped_waiting_days": 730,
+    "declared_ped": [],
+    "proportionate_deduction": true
+  },
+  {
+    "policy_number": "POL-AE-0001",
+    "product_id": "AE-HEALTH-GROUP",
+    "holder_id": "M-0041",
+    "members": [
+      "M-0041",
+      "M-0042"
+    ],
+    "start_date": "2026-01-01",
+    "end_date": "2026-12-31",
+    "currency": "AED",
+    "annual_limit": 150000.0,
+    "deductible": {
+      "amount": 50.0,
+      "basis": "per_visit"
+    },
+    "copay": {
+      "inpatient_pct": 0.0,
+      "outpatient_pct": 20.0,
+      "pharmacy_pct": 30.0
+    },
+    "room_rent_limit_per_day": 1500.0,
+    "icu_limit_per_day": 5000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per pregnancy)",
+        "limit": 10000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "obstetric"
+        ],
+        "codes": [
+          "59510",
+          "59400"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "PHYSIO",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 15.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy",
+          "therapeutic exercises"
+        ],
+        "codes": [
+          "97110"
+        ],
+        "clause_id": "7.2"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment, dental surgery and orthodontics, except emergency treatment of accidental injury to sound natural teeth.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "endodontic",
+          "oral evaluation"
+        ],
+        "codes": [
+          "D7140",
+          "D3310",
+          "D0120"
+        ],
+        "clause_id": "10.2"
+      },
+      {
+        "exclusion_id": "OPTICAL",
+        "text": "Optical services: eye tests for refractive error, spectacles, contact lenses and refractive surgery.",
+        "keywords": [
+          "optical",
+          "refractive",
+          "spectacles"
+        ],
+        "codes": [
+          "92015"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or plastic surgery and treatment to change appearance, unless reconstructive after a covered accident or surgery.",
+        "keywords": [
+          "cosmetic",
+          "blepharoplasty",
+          "aesthetic"
+        ],
+        "codes": [
+          "15823"
+        ],
+        "clause_id": "10.4"
+      }
+    ],
+    "non_payable_items": [
+      "Non-prescription items",
+      "Cosmetics",
+      "Vitamins without prescription",
+      "Medical report fee",
+      "Telephone charges",
+      "Extra meals",
+      "Companion bed",
+      "Parking",
+      "Toiletries",
+      "Sick leave certificate fee",
+      "Administrative fee",
+      "Newspaper / magazines"
+    ],
+    "network_provider_ids": [
+      "P-004",
+      "P-005"
+    ],
+    "waiting_period_days": 0,
+    "ped_waiting_days": 0,
+    "declared_ped": [],
+    "proportionate_deduction": false
+  },
+  {
+    "policy_number": "POL-AE-0002",
+    "product_id": "AE-HEALTH-GROUP",
+    "holder_id": "M-0043",
+    "members": [
+      "M-0043",
+      "M-0044"
+    ],
+    "start_date": "2026-01-01",
+    "end_date": "2026-12-31",
+    "currency": "AED",
+    "annual_limit": 150000.0,
+    "deductible": {
+      "amount": 50.0,
+      "basis": "per_visit"
+    },
+    "copay": {
+      "inpatient_pct": 0.0,
+      "outpatient_pct": 20.0,
+      "pharmacy_pct": 30.0
+    },
+    "room_rent_limit_per_day": 1500.0,
+    "icu_limit_per_day": 5000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per pregnancy)",
+        "limit": 10000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "obstetric"
+        ],
+        "codes": [
+          "59510",
+          "59400"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "PHYSIO",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 15.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy",
+          "therapeutic exercises"
+        ],
+        "codes": [
+          "97110"
+        ],
+        "clause_id": "7.2"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment, dental surgery and orthodontics, except emergency treatment of accidental injury to sound natural teeth.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "endodontic",
+          "oral evaluation"
+        ],
+        "codes": [
+          "D7140",
+          "D3310",
+          "D0120"
+        ],
+        "clause_id": "10.2"
+      },
+      {
+        "exclusion_id": "OPTICAL",
+        "text": "Optical services: eye tests for refractive error, spectacles, contact lenses and refractive surgery.",
+        "keywords": [
+          "optical",
+          "refractive",
+          "spectacles"
+        ],
+        "codes": [
+          "92015"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or plastic surgery and treatment to change appearance, unless reconstructive after a covered accident or surgery.",
+        "keywords": [
+          "cosmetic",
+          "blepharoplasty",
+          "aesthetic"
+        ],
+        "codes": [
+          "15823"
+        ],
+        "clause_id": "10.4"
+      }
+    ],
+    "non_payable_items": [
+      "Non-prescription items",
+      "Cosmetics",
+      "Vitamins without prescription",
+      "Medical report fee",
+      "Telephone charges",
+      "Extra meals",
+      "Companion bed",
+      "Parking",
+      "Toiletries",
+      "Sick leave certificate fee",
+      "Administrative fee",
+      "Newspaper / magazines"
+    ],
+    "network_provider_ids": [
+      "P-004",
+      "P-005"
+    ],
+    "waiting_period_days": 0,
+    "ped_waiting_days": 0,
+    "declared_ped": [],
+    "proportionate_deduction": false
+  },
+  {
+    "policy_number": "POL-AE-0003",
+    "product_id": "AE-HEALTH-GROUP",
+    "holder_id": "M-0045",
+    "members": [
+      "M-0045",
+      "M-0046"
+    ],
+    "start_date": "2026-01-01",
+    "end_date": "2026-12-31",
+    "currency": "AED",
+    "annual_limit": 150000.0,
+    "deductible": {
+      "amount": 50.0,
+      "basis": "per_visit"
+    },
+    "copay": {
+      "inpatient_pct": 0.0,
+      "outpatient_pct": 20.0,
+      "pharmacy_pct": 30.0
+    },
+    "room_rent_limit_per_day": 1500.0,
+    "icu_limit_per_day": 5000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per pregnancy)",
+        "limit": 10000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "obstetric"
+        ],
+        "codes": [
+          "59510",
+          "59400"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "PHYSIO",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 15.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy",
+          "therapeutic exercises"
+        ],
+        "codes": [
+          "97110"
+        ],
+        "clause_id": "7.2"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment, dental surgery and orthodontics, except emergency treatment of accidental injury to sound natural teeth.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "endodontic",
+          "oral evaluation"
+        ],
+        "codes": [
+          "D7140",
+          "D3310",
+          "D0120"
+        ],
+        "clause_id": "10.2"
+      },
+      {
+        "exclusion_id": "OPTICAL",
+        "text": "Optical services: eye tests for refractive error, spectacles, contact lenses and refractive surgery.",
+        "keywords": [
+          "optical",
+          "refractive",
+          "spectacles"
+        ],
+        "codes": [
+          "92015"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or plastic surgery and treatment to change appearance, unless reconstructive after a covered accident or surgery.",
+        "keywords": [
+          "cosmetic",
+          "blepharoplasty",
+          "aesthetic"
+        ],
+        "codes": [
+          "15823"
+        ],
+        "clause_id": "10.4"
+      }
+    ],
+    "non_payable_items": [
+      "Non-prescription items",
+      "Cosmetics",
+      "Vitamins without prescription",
+      "Medical report fee",
+      "Telephone charges",
+      "Extra meals",
+      "Companion bed",
+      "Parking",
+      "Toiletries",
+      "Sick leave certificate fee",
+      "Administrative fee",
+      "Newspaper / magazines"
+    ],
+    "network_provider_ids": [
+      "P-004",
+      "P-005"
+    ],
+    "waiting_period_days": 0,
+    "ped_waiting_days": 0,
+    "declared_ped": [],
+    "proportionate_deduction": false
+  },
+  {
+    "policy_number": "POL-AE-0004",
+    "product_id": "AE-HEALTH-GROUP",
+    "holder_id": "M-0047",
+    "members": [
+      "M-0047",
+      "M-0048"
+    ],
+    "start_date": "2026-01-01",
+    "end_date": "2026-12-31",
+    "currency": "AED",
+    "annual_limit": 150000.0,
+    "deductible": {
+      "amount": 50.0,
+      "basis": "per_visit"
+    },
+    "copay": {
+      "inpatient_pct": 0.0,
+      "outpatient_pct": 20.0,
+      "pharmacy_pct": 30.0
+    },
+    "room_rent_limit_per_day": 1500.0,
+    "icu_limit_per_day": 5000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per pregnancy)",
+        "limit": 10000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "obstetric"
+        ],
+        "codes": [
+          "59510",
+          "59400"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "PHYSIO",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 15.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy",
+          "therapeutic exercises"
+        ],
+        "codes": [
+          "97110"
+        ],
+        "clause_id": "7.2"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment, dental surgery and orthodontics, except emergency treatment of accidental injury to sound natural teeth.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "endodontic",
+          "oral evaluation"
+        ],
+        "codes": [
+          "D7140",
+          "D3310",
+          "D0120"
+        ],
+        "clause_id": "10.2"
+      },
+      {
+        "exclusion_id": "OPTICAL",
+        "text": "Optical services: eye tests for refractive error, spectacles, contact lenses and refractive surgery.",
+        "keywords": [
+          "optical",
+          "refractive",
+          "spectacles"
+        ],
+        "codes": [
+          "92015"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or plastic surgery and treatment to change appearance, unless reconstructive after a covered accident or surgery.",
+        "keywords": [
+          "cosmetic",
+          "blepharoplasty",
+          "aesthetic"
+        ],
+        "codes": [
+          "15823"
+        ],
+        "clause_id": "10.4"
+      }
+    ],
+    "non_payable_items": [
+      "Non-prescription items",
+      "Cosmetics",
+      "Vitamins without prescription",
+      "Medical report fee",
+      "Telephone charges",
+      "Extra meals",
+      "Companion bed",
+      "Parking",
+      "Toiletries",
+      "Sick leave certificate fee",
+      "Administrative fee",
+      "Newspaper / magazines"
+    ],
+    "network_provider_ids": [
+      "P-004",
+      "P-005"
+    ],
+    "waiting_period_days": 0,
+    "ped_waiting_days": 0,
+    "declared_ped": [],
+    "proportionate_deduction": false
+  },
+  {
+    "policy_number": "POL-AE-0005",
+    "product_id": "AE-HEALTH-GROUP",
+    "holder_id": "M-0049",
+    "members": [
+      "M-0049",
+      "M-0050"
+    ],
+    "start_date": "2026-01-01",
+    "end_date": "2026-12-31",
+    "currency": "AED",
+    "annual_limit": 150000.0,
+    "deductible": {
+      "amount": 50.0,
+      "basis": "per_visit"
+    },
+    "copay": {
+      "inpatient_pct": 0.0,
+      "outpatient_pct": 20.0,
+      "pharmacy_pct": 30.0
+    },
+    "room_rent_limit_per_day": 1500.0,
+    "icu_limit_per_day": 5000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per pregnancy)",
+        "limit": 10000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "obstetric"
+        ],
+        "codes": [
+          "59510",
+          "59400"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "PHYSIO",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 15.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy",
+          "therapeutic exercises"
+        ],
+        "codes": [
+          "97110"
+        ],
+        "clause_id": "7.2"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment, dental surgery and orthodontics, except emergency treatment of accidental injury to sound natural teeth.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "endodontic",
+          "oral evaluation"
+        ],
+        "codes": [
+          "D7140",
+          "D3310",
+          "D0120"
+        ],
+        "clause_id": "10.2"
+      },
+      {
+        "exclusion_id": "OPTICAL",
+        "text": "Optical services: eye tests for refractive error, spectacles, contact lenses and refractive surgery.",
+        "keywords": [
+          "optical",
+          "refractive",
+          "spectacles"
+        ],
+        "codes": [
+          "92015"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or plastic surgery and treatment to change appearance, unless reconstructive after a covered accident or surgery.",
+        "keywords": [
+          "cosmetic",
+          "blepharoplasty",
+          "aesthetic"
+        ],
+        "codes": [
+          "15823"
+        ],
+        "clause_id": "10.4"
+      }
+    ],
+    "non_payable_items": [
+      "Non-prescription items",
+      "Cosmetics",
+      "Vitamins without prescription",
+      "Medical report fee",
+      "Telephone charges",
+      "Extra meals",
+      "Companion bed",
+      "Parking",
+      "Toiletries",
+      "Sick leave certificate fee",
+      "Administrative fee",
+      "Newspaper / magazines"
+    ],
+    "network_provider_ids": [
+      "P-004",
+      "P-005"
+    ],
+    "waiting_period_days": 0,
+    "ped_waiting_days": 0,
+    "declared_ped": [],
+    "proportionate_deduction": false
+  },
+  {
+    "policy_number": "POL-AE-0006",
+    "product_id": "AE-HEALTH-GROUP",
+    "holder_id": "M-0051",
+    "members": [
+      "M-0051",
+      "M-0052"
+    ],
+    "start_date": "2026-01-01",
+    "end_date": "2026-12-31",
+    "currency": "AED",
+    "annual_limit": 150000.0,
+    "deductible": {
+      "amount": 50.0,
+      "basis": "per_visit"
+    },
+    "copay": {
+      "inpatient_pct": 0.0,
+      "outpatient_pct": 20.0,
+      "pharmacy_pct": 30.0
+    },
+    "room_rent_limit_per_day": 1500.0,
+    "icu_limit_per_day": 5000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per pregnancy)",
+        "limit": 10000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "obstetric"
+        ],
+        "codes": [
+          "59510",
+          "59400"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "PHYSIO",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 15.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy",
+          "therapeutic exercises"
+        ],
+        "codes": [
+          "97110"
+        ],
+        "clause_id": "7.2"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment, dental surgery and orthodontics, except emergency treatment of accidental injury to sound natural teeth.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "endodontic",
+          "oral evaluation"
+        ],
+        "codes": [
+          "D7140",
+          "D3310",
+          "D0120"
+        ],
+        "clause_id": "10.2"
+      },
+      {
+        "exclusion_id": "OPTICAL",
+        "text": "Optical services: eye tests for refractive error, spectacles, contact lenses and refractive surgery.",
+        "keywords": [
+          "optical",
+          "refractive",
+          "spectacles"
+        ],
+        "codes": [
+          "92015"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or plastic surgery and treatment to change appearance, unless reconstructive after a covered accident or surgery.",
+        "keywords": [
+          "cosmetic",
+          "blepharoplasty",
+          "aesthetic"
+        ],
+        "codes": [
+          "15823"
+        ],
+        "clause_id": "10.4"
+      }
+    ],
+    "non_payable_items": [
+      "Non-prescription items",
+      "Cosmetics",
+      "Vitamins without prescription",
+      "Medical report fee",
+      "Telephone charges",
+      "Extra meals",
+      "Companion bed",
+      "Parking",
+      "Toiletries",
+      "Sick leave certificate fee",
+      "Administrative fee",
+      "Newspaper / magazines"
+    ],
+    "network_provider_ids": [
+      "P-004",
+      "P-005"
+    ],
+    "waiting_period_days": 0,
+    "ped_waiting_days": 0,
+    "declared_ped": [],
+    "proportionate_deduction": false
+  },
+  {
+    "policy_number": "POL-AE-0007",
+    "product_id": "AE-HEALTH-GROUP",
+    "holder_id": "M-0053",
+    "members": [
+      "M-0053",
+      "M-0054"
+    ],
+    "start_date": "2026-01-01",
+    "end_date": "2026-12-31",
+    "currency": "AED",
+    "annual_limit": 150000.0,
+    "deductible": {
+      "amount": 50.0,
+      "basis": "per_visit"
+    },
+    "copay": {
+      "inpatient_pct": 0.0,
+      "outpatient_pct": 20.0,
+      "pharmacy_pct": 30.0
+    },
+    "room_rent_limit_per_day": 1500.0,
+    "icu_limit_per_day": 5000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per pregnancy)",
+        "limit": 10000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "obstetric"
+        ],
+        "codes": [
+          "59510",
+          "59400"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "PHYSIO",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 15.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy",
+          "therapeutic exercises"
+        ],
+        "codes": [
+          "97110"
+        ],
+        "clause_id": "7.2"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment, dental surgery and orthodontics, except emergency treatment of accidental injury to sound natural teeth.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "endodontic",
+          "oral evaluation"
+        ],
+        "codes": [
+          "D7140",
+          "D3310",
+          "D0120"
+        ],
+        "clause_id": "10.2"
+      },
+      {
+        "exclusion_id": "OPTICAL",
+        "text": "Optical services: eye tests for refractive error, spectacles, contact lenses and refractive surgery.",
+        "keywords": [
+          "optical",
+          "refractive",
+          "spectacles"
+        ],
+        "codes": [
+          "92015"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or plastic surgery and treatment to change appearance, unless reconstructive after a covered accident or surgery.",
+        "keywords": [
+          "cosmetic",
+          "blepharoplasty",
+          "aesthetic"
+        ],
+        "codes": [
+          "15823"
+        ],
+        "clause_id": "10.4"
+      }
+    ],
+    "non_payable_items": [
+      "Non-prescription items",
+      "Cosmetics",
+      "Vitamins without prescription",
+      "Medical report fee",
+      "Telephone charges",
+      "Extra meals",
+      "Companion bed",
+      "Parking",
+      "Toiletries",
+      "Sick leave certificate fee",
+      "Administrative fee",
+      "Newspaper / magazines"
+    ],
+    "network_provider_ids": [
+      "P-004",
+      "P-005"
+    ],
+    "waiting_period_days": 0,
+    "ped_waiting_days": 0,
+    "declared_ped": [],
+    "proportionate_deduction": false
+  },
+  {
+    "policy_number": "POL-AE-0008",
+    "product_id": "AE-HEALTH-GROUP",
+    "holder_id": "M-0055",
+    "members": [
+      "M-0055",
+      "M-0056"
+    ],
+    "start_date": "2026-01-01",
+    "end_date": "2026-12-31",
+    "currency": "AED",
+    "annual_limit": 150000.0,
+    "deductible": {
+      "amount": 50.0,
+      "basis": "per_visit"
+    },
+    "copay": {
+      "inpatient_pct": 0.0,
+      "outpatient_pct": 20.0,
+      "pharmacy_pct": 30.0
+    },
+    "room_rent_limit_per_day": 1500.0,
+    "icu_limit_per_day": 5000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per pregnancy)",
+        "limit": 10000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "obstetric"
+        ],
+        "codes": [
+          "59510",
+          "59400"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "PHYSIO",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 15.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy",
+          "therapeutic exercises"
+        ],
+        "codes": [
+          "97110"
+        ],
+        "clause_id": "7.2"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment, dental surgery and orthodontics, except emergency treatment of accidental injury to sound natural teeth.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "endodontic",
+          "oral evaluation"
+        ],
+        "codes": [
+          "D7140",
+          "D3310",
+          "D0120"
+        ],
+        "clause_id": "10.2"
+      },
+      {
+        "exclusion_id": "OPTICAL",
+        "text": "Optical services: eye tests for refractive error, spectacles, contact lenses and refractive surgery.",
+        "keywords": [
+          "optical",
+          "refractive",
+          "spectacles"
+        ],
+        "codes": [
+          "92015"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or plastic surgery and treatment to change appearance, unless reconstructive after a covered accident or surgery.",
+        "keywords": [
+          "cosmetic",
+          "blepharoplasty",
+          "aesthetic"
+        ],
+        "codes": [
+          "15823"
+        ],
+        "clause_id": "10.4"
+      }
+    ],
+    "non_payable_items": [
+      "Non-prescription items",
+      "Cosmetics",
+      "Vitamins without prescription",
+      "Medical report fee",
+      "Telephone charges",
+      "Extra meals",
+      "Companion bed",
+      "Parking",
+      "Toiletries",
+      "Sick leave certificate fee",
+      "Administrative fee",
+      "Newspaper / magazines"
+    ],
+    "network_provider_ids": [],
+    "waiting_period_days": 0,
+    "ped_waiting_days": 0,
+    "declared_ped": [],
+    "proportionate_deduction": false
+  },
+  {
+    "policy_number": "POL-AE-0009",
+    "product_id": "AE-HEALTH-GROUP",
+    "holder_id": "M-0057",
+    "members": [
+      "M-0057",
+      "M-0058"
+    ],
+    "start_date": "2026-01-01",
+    "end_date": "2026-12-31",
+    "currency": "AED",
+    "annual_limit": 150000.0,
+    "deductible": {
+      "amount": 50.0,
+      "basis": "per_visit"
+    },
+    "copay": {
+      "inpatient_pct": 0.0,
+      "outpatient_pct": 20.0,
+      "pharmacy_pct": 30.0
+    },
+    "room_rent_limit_per_day": 1500.0,
+    "icu_limit_per_day": 5000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per pregnancy)",
+        "limit": 10000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "obstetric"
+        ],
+        "codes": [
+          "59510",
+          "59400"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "PHYSIO",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 15.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy",
+          "therapeutic exercises"
+        ],
+        "codes": [
+          "97110"
+        ],
+        "clause_id": "7.2"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment, dental surgery and orthodontics, except emergency treatment of accidental injury to sound natural teeth.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "endodontic",
+          "oral evaluation"
+        ],
+        "codes": [
+          "D7140",
+          "D3310",
+          "D0120"
+        ],
+        "clause_id": "10.2"
+      },
+      {
+        "exclusion_id": "OPTICAL",
+        "text": "Optical services: eye tests for refractive error, spectacles, contact lenses and refractive surgery.",
+        "keywords": [
+          "optical",
+          "refractive",
+          "spectacles"
+        ],
+        "codes": [
+          "92015"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or plastic surgery and treatment to change appearance, unless reconstructive after a covered accident or surgery.",
+        "keywords": [
+          "cosmetic",
+          "blepharoplasty",
+          "aesthetic"
+        ],
+        "codes": [
+          "15823"
+        ],
+        "clause_id": "10.4"
+      }
+    ],
+    "non_payable_items": [
+      "Non-prescription items",
+      "Cosmetics",
+      "Vitamins without prescription",
+      "Medical report fee",
+      "Telephone charges",
+      "Extra meals",
+      "Companion bed",
+      "Parking",
+      "Toiletries",
+      "Sick leave certificate fee",
+      "Administrative fee",
+      "Newspaper / magazines"
+    ],
+    "network_provider_ids": [],
+    "waiting_period_days": 0,
+    "ped_waiting_days": 0,
+    "declared_ped": [],
+    "proportionate_deduction": false
+  },
+  {
+    "policy_number": "POL-AE-0010",
+    "product_id": "AE-HEALTH-GROUP",
+    "holder_id": "M-0059",
+    "members": [
+      "M-0059",
+      "M-0060"
+    ],
+    "start_date": "2026-01-01",
+    "end_date": "2026-12-31",
+    "currency": "AED",
+    "annual_limit": 150000.0,
+    "deductible": {
+      "amount": 50.0,
+      "basis": "per_visit"
+    },
+    "copay": {
+      "inpatient_pct": 0.0,
+      "outpatient_pct": 20.0,
+      "pharmacy_pct": 30.0
+    },
+    "room_rent_limit_per_day": 1500.0,
+    "icu_limit_per_day": 5000.0,
+    "sublimits": [
+      {
+        "sublimit_id": "MATERNITY",
+        "name": "Maternity (per pregnancy)",
+        "limit": 10000.0,
+        "basis": "per_claim",
+        "keywords": [
+          "maternity",
+          "delivery",
+          "caesarean",
+          "obstetric"
+        ],
+        "codes": [
+          "59510",
+          "59400"
+        ],
+        "clause_id": "7.1"
+      },
+      {
+        "sublimit_id": "PHYSIO",
+        "name": "Physiotherapy sessions per policy year",
+        "limit": 15.0,
+        "basis": "sessions_per_year",
+        "keywords": [
+          "physiotherapy",
+          "therapeutic exercises"
+        ],
+        "codes": [
+          "97110"
+        ],
+        "clause_id": "7.2"
+      }
+    ],
+    "exclusions": [
+      {
+        "exclusion_id": "DENTAL",
+        "text": "Dental treatment, dental surgery and orthodontics, except emergency treatment of accidental injury to sound natural teeth.",
+        "keywords": [
+          "dental",
+          "tooth",
+          "root canal",
+          "endodontic",
+          "oral evaluation"
+        ],
+        "codes": [
+          "D7140",
+          "D3310",
+          "D0120"
+        ],
+        "clause_id": "10.2"
+      },
+      {
+        "exclusion_id": "OPTICAL",
+        "text": "Optical services: eye tests for refractive error, spectacles, contact lenses and refractive surgery.",
+        "keywords": [
+          "optical",
+          "refractive",
+          "spectacles"
+        ],
+        "codes": [
+          "92015"
+        ],
+        "clause_id": "10.3"
+      },
+      {
+        "exclusion_id": "COSMETIC",
+        "text": "Cosmetic or plastic surgery and treatment to change appearance, unless reconstructive after a covered accident or surgery.",
+        "keywords": [
+          "cosmetic",
+          "blepharoplasty",
+          "aesthetic"
+        ],
+        "codes": [
+          "15823"
+        ],
+        "clause_id": "10.4"
+      }
+    ],
+    "non_payable_items": [
+      "Non-prescription items",
+      "Cosmetics",
+      "Vitamins without prescription",
+      "Medical report fee",
+      "Telephone charges",
+      "Extra meals",
+      "Companion bed",
+      "Parking",
+      "Toiletries",
+      "Sick leave certificate fee",
+      "Administrative fee",
+      "Newspaper / magazines"
+    ],
+    "network_provider_ids": [],
+    "waiting_period_days": 0,
+    "ped_waiting_days": 0,
+    "declared_ped": [],
+    "proportionate_deduction": false
+  }
+]

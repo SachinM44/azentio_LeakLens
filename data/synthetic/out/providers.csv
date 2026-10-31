@@ -1,0 +1,9 @@
+provider_id,provider_name,market,city,provider_type,in_network,profile,invoice_prefix,address,phone,licence_no
+P-001,Meridian Care Hospital,IN,Pune,hospital,True,normal,MCH,"14 Lakeview Road, Pune 411001",+91 20 4455 0100,MH-HOSP-20481
+P-002,Lotus Valley Multispeciality Hospital,IN,Jaipur,hospital,True,normal,LVH,"Plot 7, Ridge Avenue, Jaipur 302001",+91 141 320 7700,RJ-HOSP-11207
+P-003,Sunrise Medical Centre,IN,Lucknow,hospital,True,normal,SMC,"9 Orchard Lane, Lucknow 226001",+91 522 410 2200,UP-HOSP-33015
+P-004,Pearl Coast Hospital,AE,Dubai,hospital,True,normal,PCH,"Marina Crescent, Dubai",+971 4 330 1200,FL-DXB-5021
+P-005,Desert Rose Clinic,AE,Abu Dhabi,clinic,True,normal,DRC,"Corniche Gardens, Abu Dhabi",+971 2 610 4400,FL-AUH-2277
+P-006,Falcon Bay Medical Centre,AE,Sharjah,hospital,False,normal,FBM,"Harbour Street 3, Sharjah",+971 6 520 8800,FL-SHJ-1903
+P-007,Crestview Super Speciality Hospital,IN,Indore,hospital,True,inflated,CSH,"22 Summit Road, Indore 452001",+91 731 255 9900,MP-HOSP-40872
+P-008,Riverbend Nursing Home,IN,Nagpur,hospital,True,related-party,RNH,"5 Canal Side, Nagpur 440001",+91 712 266 3100,MH-HOSP-27730
