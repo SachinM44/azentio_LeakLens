@@ -1548,7 +1548,12 @@ def render_documents(ctx: Context, b: Bundle, plan: Dict[str, object], claim: Cl
 
 
 def write_json(path: Path, data: object) -> None:
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:      # LF on every OS, so reruns diff clean
+        fh.write(json.dumps(data, indent=2, ensure_ascii=False))
+
+
+def write_csv(path: Path, rows: List[Dict[str, object]]) -> None:
+    pd.DataFrame(rows).to_csv(path, index=False, lineterminator="\n")
 
 
 def pin_xlsx(path: Path) -> None:
@@ -1648,12 +1653,12 @@ def finalise(ctx: Context, out_dir: Path) -> Dict[str, int]:
                                                      "claims": manifest})
     claims_flat = [flat(c, ["invoice_numbers"], drop=["extra"]) for c in claims]
     history_flat = [flat(h, ["invoice_numbers"], drop=["lines"]) for h in history]
-    pd.DataFrame(claims_flat).to_csv(out_dir / "claims.csv", index=False)
-    pd.DataFrame(lines).to_csv(out_dir / "invoice_lines.csv", index=False)
-    pd.DataFrame(history_flat).to_csv(out_dir / "history.csv", index=False)
-    pd.DataFrame(history_lines_rows).to_csv(out_dir / "history_lines.csv", index=False)
-    pd.DataFrame(providers).to_csv(out_dir / "providers.csv", index=False)
-    pd.DataFrame(claimants).to_csv(out_dir / "claimants.csv", index=False)
+    write_csv(out_dir / "claims.csv", claims_flat)
+    write_csv(out_dir / "invoice_lines.csv", lines)
+    write_csv(out_dir / "history.csv", history_flat)
+    write_csv(out_dir / "history_lines.csv", history_lines_rows)
+    write_csv(out_dir / "providers.csv", providers)
+    write_csv(out_dir / "claimants.csv", claimants)
     with pd.ExcelWriter(out_dir / "claims.xlsx", engine="openpyxl") as xl:
         pd.DataFrame(claims_flat).to_excel(xl, sheet_name="claims", index=False)
         pd.DataFrame(lines).to_excel(xl, sheet_name="invoice_lines", index=False)
