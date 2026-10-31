@@ -22,6 +22,7 @@ from core.schemas.finding import ValidationIssue
 from core.schemas.master import Claim, HistoryRecord, InvoiceLine, Policy, ProductConfig
 
 from backend.master import manifest_for_claim, refresh_master_records
+from backend.settings import get_settings
 from backend.store import Repository, now_iso
 
 logger = logging.getLogger(__name__)
@@ -425,7 +426,8 @@ def ingest_files(store: Repository, files: List[Tuple[str, bytes]], actor: str) 
         if meta.get("claim_id"):
             affected.add(meta["claim_id"])
     result.claims_created = len(known["claims"] - existing_claims)
-    imported = import_manifest_documents(store=store, claim_ids=sorted(known["claims"] - existing_claims))
+    imported = (import_manifest_documents(store=store, claim_ids=sorted(known["claims"] - existing_claims))
+                if get_settings().import_dataset_documents else [])
     if imported:
         result.documents.extend(imported)
         result.counts["documents"] = result.counts.get("documents", 0) + len(imported)

@@ -67,6 +67,7 @@ def client(tmp_path_factory: pytest.TempPathFactory) -> Iterator[TestClient]:
     os.environ["MONGODB_URI"] = ""
     os.environ["DOCUMENTS_OFFLINE"] = "1"  # document models answer from the (empty) cache: no network, no spend
     os.environ["INVESTIGATOR_ENABLED"] = "0"  # the agent is exercised through a patched investigate() below
+    os.environ["IMPORT_DATASET_DOCUMENTS"] = "1"  # these tests cover the dataset's document files being attached
     from backend import graph, settings, store
     from backend.main import create_app
 

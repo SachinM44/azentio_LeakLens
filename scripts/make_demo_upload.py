@@ -20,9 +20,7 @@ def main() -> None:
     parser.add_argument("--out", default=str(ROOT.parent / "demo_upload"))
     args = parser.parse_args()
     dest = Path(args.out)
-    if dest.exists():
-        shutil.rmtree(dest)
-    dest.mkdir(parents=True)
+    dest.mkdir(parents=True, exist_ok=True)  # files are overwritten in place (a file open in Explorer cannot be deleted)
 
     for name in ("products.json", "policies.json", "providers.csv", "claimants.csv", "invoice_lines.csv", "history.json"):
         shutil.copy2(OUT / name, dest / name)
@@ -39,10 +37,12 @@ def main() -> None:
     bad.iloc[2, bad.columns.get_loc("incident_date")] = "2026-13-45"
     bad.to_csv(dest / "claims_with_errors.csv", index=False)
 
+    # Every scanned document of the dataset (bills and discharge summaries of 8 claims; one bill is a phone scan).
+    # The file name starts with the claim id, which is how ingest attaches it to its claim.
     docs = dest / "documents"
-    docs.mkdir()
-    for pdf in sorted((OUT / "documents" / "CLM-2026-0033").glob("*.pdf")):
-        shutil.copy2(pdf, docs / pdf.name)
+    docs.mkdir(exist_ok=True)
+    for doc in sorted((OUT / "documents").glob("*/*.*")):
+        shutil.copy2(doc, docs / doc.name)
     print(f"demo upload folder: {dest}")
     for p in sorted(dest.rglob("*")):
         if p.is_file():

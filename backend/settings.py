@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     policies_dir: Path = Field(default=Path("data/policies"), description="Policy wording per product: <product_id>.md")
     documents_offline: bool = Field(default=False, description="Document models answer from the cache only (no network)")
     investigator_enabled: bool = Field(default=True, description="Run the investigator agent over suspected findings")
+    import_dataset_documents: bool = Field(default=False, description="Also store the synthetic dataset's document files "
+                                           "at ingest; off = only the documents the user uploads are stored")
 
     @property
     def data_dir_abs(self) -> Path:
