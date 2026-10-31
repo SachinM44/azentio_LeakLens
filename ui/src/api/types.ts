@@ -2,9 +2,54 @@
 
 export type Severity = 'low' | 'medium' | 'high'
 export type AmountKind = 'calculated' | 'suspected'
-export type FindingStatus = 'open' | 'auto_applied' | 'confirmed' | 'corrected' | 'dismissed' | 'clarification_requested'
+export type FindingStatus =
+  | 'open' | 'auto_applied' | 'confirmed' | 'corrected' | 'dismissed' | 'clarification_requested' | 'escalated' | 'correction_accepted'
 export type CheckCategory = 'duplicate' | 'policy_rule' | 'settlement' | 'pattern' | 'evidence'
-export type ReviewAction = 'confirm' | 'correct' | 'dismiss' | 'clarify'
+export type ReviewAction =
+  | 'confirm' | 'false_positive' | 'request_evidence' | 'escalate' | 'accept_correction' | 'correct' | 'dismiss' | 'clarify'
+export type EscalateTo = 'senior_reviewer' | 'siu'
+
+export interface ReviewBody {
+  action: ReviewAction
+  reason?: string
+  note?: string
+  amount?: number
+  escalate_to?: EscalateTo
+}
+
+export interface Correction {
+  action: string
+  label: string
+  original_amount: number
+  corrected_amount: number
+  delta: number
+  basis: string
+  calculation: string
+  rule_id: string
+  rule_text: string
+  clause_id?: string | null
+}
+
+export interface FindingOriginal {
+  amount: number
+  amount_kind: string
+  status: string
+  correction?: Correction | null
+  recommendation?: string | null
+  recommendation_note?: string
+  captured_at?: string
+}
+
+export interface DecisionEntry {
+  ts?: string
+  by?: string | null
+  action?: string
+  from_status?: string
+  to_status?: string
+  reason?: string | null
+  amount?: number | null
+  escalate_to?: string | null
+}
 
 export interface Evidence {
   source: string
@@ -39,6 +84,16 @@ export interface Finding {
   reviewer_note: string
   corrected_amount?: number | null
   created_at?: string
+  recommendation?: string | null
+  recommendation_confidence?: number | null
+  recommendation_note?: string
+  correction?: Correction | null
+  original?: FindingOriginal | null
+  decision_reason?: string
+  escalated_to?: string | null
+  decided_by?: string | null
+  decided_at?: string | null
+  decision_history?: DecisionEntry[]
 }
 
 export interface ClaimSummary {
@@ -253,6 +308,118 @@ export interface ClaimDetail {
   summary: ClaimSummary
   reconciled?: boolean | null
   printed_total?: number | null
+  policy_terms?: PolicyTerm[]
+  notes?: Note[]
+}
+
+export interface PolicyTerm {
+  term: string
+  value: string | number
+  clause_id?: string | null
+}
+
+export interface Note {
+  note_id: string
+  claim_id: string
+  author: string
+  ts: string
+  text: string
+}
+
+export interface RelatedMatch {
+  attribute: string
+  label: string
+  value: string
+}
+
+export interface RelatedClaim {
+  claim_id: string
+  source: 'claim' | 'history' | string
+  claimant_id?: string
+  claimant_name?: string | null
+  provider_id?: string
+  provider_name?: string | null
+  policy_number?: string
+  incident_date?: string
+  requested_amount?: number
+  currency?: string
+  status?: string
+  strength: 'strong' | 'medium' | 'weak'
+  matches: RelatedMatch[]
+  finding_ids: string[]
+}
+
+export interface RelatedResponse {
+  claim_id: string
+  related: RelatedClaim[]
+}
+
+export interface DocSource {
+  document_id: string
+  document_name: string
+  page?: number | null
+}
+
+export interface ComparisonField {
+  field: string
+  label: string
+  claim_value: string | number | null
+  document_value: string | number | null
+  status: 'match' | 'mismatch' | 'only_in_claim' | 'only_in_document' | 'not_read'
+  source: DocSource | null
+}
+
+export interface ComparisonLine {
+  status: 'match' | 'amount_differs' | 'only_in_document' | 'only_in_claim'
+  description: string
+  code?: string | null
+  claim_amount?: number | null
+  document_amount?: number | null
+  difference?: number | null
+  claim_line_id?: string | null
+  source: DocSource | null
+}
+
+export interface Comparison {
+  claim_id: string
+  extracted: boolean
+  extracted_by: 'ai-text' | 'ai-vision' | null
+  extracted_at?: string | null
+  model?: string | null
+  read_seconds?: number | null
+  documents: { document_id: string; name: string; type?: string | null; pages: number }[]
+  fields: ComparisonField[]
+  lines: ComparisonLine[]
+  summary: {
+    fields_checked: number
+    fields_mismatched: number
+    lines_matched: number
+    lines_only_in_document: number
+    lines_only_in_claim: number
+    lines_amount_differs: number
+    claim_total: number
+    document_total: number
+    total_difference: number
+  } | null
+}
+
+export interface PortalSubmitResponse {
+  claim_id: string
+  status: string
+  status_url?: string
+}
+
+export interface PortalStatus {
+  claim_id: string
+  status: 'received' | 'reading_documents' | 'waiting_for_analyst' | 'checking' | 'under_review' | 'settled' | 'failed' | string
+  steps: { name: string; label: string; status: string; seconds?: number | null }[]
+  documents: { name: string; pages: number; type?: string | null }[]
+  pages_read?: number
+  lines_read?: number
+  read_seconds?: number | null
+  amount_claimed?: number
+  currency?: string
+  message?: string
 }
 
 export interface ValidationIssue {
@@ -319,4 +486,5 @@ export interface ReviewResponse {
   findings: Finding[]
   settlement: Settlement | null
   summary: ClaimSummary | null
+  finding?: Finding
 }

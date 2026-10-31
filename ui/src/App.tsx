@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { Input, Tag } from 'antd'
 import { useQuery } from '@tanstack/react-query'
-import { FileSearch, LayoutDashboard, ListChecks, Search, Settings, ShieldCheck, SlidersHorizontal, UploadCloud } from 'lucide-react'
+import { ExternalLink, FileSearch, LayoutDashboard, ListChecks, Search, Settings, ShieldCheck, SlidersHorizontal, UploadCloud } from 'lucide-react'
 import { api, connection } from './api/client'
 import SettingsModal from './components/SettingsModal'
 import { Avatar } from './components/ui'
@@ -11,6 +11,8 @@ import ClaimDetailPage from './pages/ClaimDetailPage'
 import ConfigPage from './pages/ConfigPage'
 import DashboardPage from './pages/DashboardPage'
 import IngestPage from './pages/IngestPage'
+import PortalStatusPage from './pages/PortalStatusPage'
+import PortalSubmitPage from './pages/PortalSubmitPage'
 
 const NAV = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, group: 'Overview' },
@@ -34,6 +36,18 @@ export default function App() {
   const parts = loc.pathname.split('/').filter(Boolean)
   const section = TITLES[parts[0]] ?? 'LeakLens'
   const groups = Array.from(new Set(NAV.map((n) => n.group)))
+  const analyst = connection.analyst
+  const initials = analyst.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join('') || 'CA'
+
+  // The customer portal is a separate, public-facing page: no analyst sidebar or header.
+  if (parts[0] === 'submit') {
+    return (
+      <Routes>
+        <Route path="/submit" element={<PortalSubmitPage />} />
+        <Route path="/submit/:claimId" element={<PortalStatusPage />} />
+      </Routes>
+    )
+  }
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -64,6 +78,12 @@ export default function App() {
                   )}
                 </NavLink>
               ))}
+              {g === 'Work' && (
+                <a href="/submit" target="_blank" rel="noreferrer"
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium text-white/75 no-underline transition-all hover:bg-white/10 hover:text-white">
+                  <ExternalLink size={18} /><span className="flex-1">Customer portal</span>
+                </a>
+              )}
             </div>
           ))}
         </nav>
@@ -98,9 +118,9 @@ export default function App() {
               value={jump} onChange={(e) => setJump(e.target.value)} className="!w-72 !rounded-full"
               onPressEnter={() => { if (jump.trim()) { nav(`/claims/${encodeURIComponent(jump.trim().toUpperCase())}`); setJump('') } }} />
             <div className="flex items-center gap-2.5">
-              <Avatar text="CH" tone="navy" size={38} />
+              <Avatar text={initials} tone="navy" size={38} />
               <div className="hidden leading-tight lg:block">
-                <div className="text-[13px] font-semibold">Claims Handler</div>
+                <div className="text-[13px] font-semibold">{analyst}</div>
                 <div className="muted flex items-center gap-1.5 text-[11.5px]"><span className="live-dot" /> On duty</div>
               </div>
             </div>

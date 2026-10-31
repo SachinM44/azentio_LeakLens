@@ -2,12 +2,16 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Alert, Button, Empty, Segmented, Skeleton, Steps, Tabs, Tag, message } from 'antd'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Play } from 'lucide-react'
+import { ArrowLeft, Download, Play, Printer } from 'lucide-react'
 import { api } from '../api/client'
-import type { ClaimDetail, ReviewAction, Run } from '../api/types'
+import type { ClaimDetail, ReviewBody, Run } from '../api/types'
 import { Avatar } from '../components/ui'
 import AuditTab from '../components/claim/AuditTab'
 import ClassificationTab from '../components/claim/ClassificationTab'
+import ComparisonTab from '../components/claim/ComparisonTab'
+import NotesTab from '../components/claim/NotesTab'
+import PolicyTermsTab from '../components/claim/PolicyTermsTab'
+import RelatedTab from '../components/claim/RelatedTab'
 import DocumentsTab from '../components/claim/DocumentsTab'
 import MasterDataTab from '../components/claim/MasterDataTab'
 import SettlementTab from '../components/claim/SettlementTab'
@@ -53,6 +57,42 @@ export default function ClaimDetailPage() {
   const [filter, setFilter] = useState<'all' | 'open' | 'reviewed'>('all')
   const [highlight, setHighlight] = useState<string | null>(null)
   const [reviewing, setReviewing] = useState<string | null>(null)
+  const [docSelect, setDocSelect] = useState<string | null>(null)
+  const [reportBusy, setReportBusy] = useState<'json' | 'html' | null>(null)
+
+  const downloadReport = async () => {
+    setReportBusy('json')
+    try {
+      const blob = await api.reportJson(claimId)
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `investigation_${claimId}.json`
+      a.click()
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+    } catch (e) {
+      message.error((e as Error).message)
+    } finally {
+      setReportBusy(null)
+    }
+  }
+
+  const printableReport = async () => {
+    // Open the tab inside the click so the browser does not block it, then fill it once the report arrives.
+    const win = window.open('', '_blank')
+    setReportBusy('html')
+    try {
+      const html = await api.reportHtml(claimId)
+      const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }))
+      if (win) win.location.href = url
+      else window.open(url, '_blank')
+    } catch (e) {
+      win?.close()
+      message.error((e as Error).message)
+    } finally {
+      setReportBusy(null)
+    }
+  }
 
   const detail = useQuery({ queryKey: ['claim', claimId], queryFn: () => api.getClaim(claimId) })
   const run = useQuery({
@@ -72,8 +112,7 @@ export default function ClaimDetailPage() {
   })
 
   const review = useMutation({
-    mutationFn: (v: { findingId: string; action: ReviewAction; note: string; amount?: number }) =>
-      api.reviewFinding(claimId, v.findingId, { action: v.action, note: v.note, amount: v.amount }),
+    mutationFn: (v: { findingId: string; body: ReviewBody }) => api.reviewFinding(claimId, v.findingId, v.body),
     onMutate: (v) => setReviewing(v.findingId),
     onSuccess: (res) => {
       qc.setQueryData<ClaimDetail>(['claim', claimId], (cur) => (cur ? { ...cur, findings: res.findings, settlement: res.settlement ?? cur.settlement, summary: res.summary ?? cur.summary } : cur))
@@ -110,7 +149,7 @@ export default function ClaimDetailPage() {
       {shown.map((f) => (
         <FindingCard key={f.finding_id} finding={f} busy={reviewing === f.finding_id}
           onLineClick={(id) => { setHighlight(id); setTab('master') }}
-          onReview={(action, note, amount) => review.mutate({ findingId: f.finding_id, action, note, amount })} />
+          onReview={(body) => review.mutate({ findingId: f.finding_id, body })} />
       ))}
     </div>
   )
@@ -132,6 +171,10 @@ export default function ClaimDetailPage() {
                 <span className="hero-chip">{titleCase(claim.status)}</span>
                 <span className="hero-chip"><span className="inline-block h-2 w-2 rounded-full" style={{ background: summary.severity ? SEVERITY_COLOR[summary.severity] : '#9aa6b2' }} /> {summary.severity ? `${titleCase(summary.severity)} severity` : 'No severity'}</span>
                 <span className="hero-chip">{d.findings.length} finding{d.findings.length === 1 ? '' : 's'}{open.length ? ` · ${open.length} open` : ''}</span>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button size="small" icon={<Download size={13} />} loading={reportBusy === 'json'} onClick={downloadReport}>Download report</Button>
+                <Button size="small" icon={<Printer size={13} />} loading={reportBusy === 'html'} onClick={printableReport}>Printable report</Button>
               </div>
             </div>
           </div>
@@ -169,8 +212,13 @@ export default function ClaimDetailPage() {
         { key: 'findings', label: `Findings${open.length ? ` (${open.length} open)` : ''}`, children: findingsTab },
         { key: 'settlement', label: 'Settlement', children: <SettlementTab settlement={d.settlement} /> },
         { key: 'master', label: 'Master data', children: <MasterDataTab detail={d} highlightLine={highlight} /> },
-        { key: 'documents', label: `Documents (${d.documents.length})`, children: <DocumentsTab documents={d.documents} /> },
+        { key: 'policy', label: 'Policy terms', children: <PolicyTermsTab terms={d.policy_terms ?? []} /> },
+        { key: 'related', label: 'Related claims', children: <RelatedTab claimId={claimId} /> },
+        { key: 'comparison', label: 'Document comparison',
+          children: <ComparisonTab claimId={claimId} currency={claim.currency} onOpenDocument={(id) => { setDocSelect(id); setTab('documents') }} /> },
+        { key: 'documents', label: `Documents (${d.documents.length})`, children: <DocumentsTab documents={d.documents} selectId={docSelect} /> },
         { key: 'classification', label: 'Classification', children: <ClassificationTab claimId={claimId} rows={d.classification} documentCount={d.documents.length} /> },
+        { key: 'notes', label: `Notes${d.notes?.length ? ` (${d.notes.length})` : ''}`, children: <NotesTab claimId={claimId} notes={d.notes ?? []} /> },
         { key: 'audit', label: `Audit (${d.audit.length})`, children: <AuditTab rows={d.audit} /> },
       ]} />
     </div>

@@ -7,6 +7,7 @@ import { CloudUpload, Play } from 'lucide-react'
 import { api } from '../api/client'
 import type { IngestResult, ValidationIssue } from '../api/types'
 import { titleCase } from '../lib/format'
+import { ingestStore, useIngestState } from '../lib/ingestStore'
 import { runMany } from '../lib/runs'
 
 const ACCEPT = '.csv,.xlsx,.xls,.json,.pdf,.jpg,.jpeg,.png'
@@ -15,8 +16,9 @@ export default function IngestPage() {
   const nav = useNavigate()
   const qc = useQueryClient()
   const [files, setFiles] = useState<UploadFile[]>([])
-  const [result, setResult] = useState<IngestResult | null>(null)
-  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null)
+  const { result, progress } = useIngestState()
+  const setResult = (r: IngestResult | null) => ingestStore.set({ result: r })
+  const setProgress = (p: { done: number; total: number } | null) => ingestStore.set({ progress: p })
 
   const ingest = useMutation({
     mutationFn: () => api.ingest(files.map((f) => f.originFileObj as File)),
@@ -32,7 +34,7 @@ export default function IngestPage() {
     setProgress(null)
     qc.invalidateQueries()
     if (failed.length) message.warning(`${failed.length} claim(s) failed to run`)
-    nav('/claims')
+    if (window.location.pathname === '/ingest') nav('/claims')
   }
 
   const rejected = result?.validation.filter((v) => !v.accepted) ?? []

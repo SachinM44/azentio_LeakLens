@@ -2,7 +2,7 @@
 // built and demoed before the backend is up. Synthetic people, providers and amounts only.
 import type {
   AuditRow, Claim, ClaimDetail, ClaimFilters, ClaimSummary, ClassificationRow, Dashboard, EvalSummary, Finding,
-  IngestResult, InvoiceLine, Policy, ProductConfig, ReviewAction, Run, Settlement, Severity,
+  FindingStatus, IngestResult, InvoiceLine, Policy, ProductConfig, ReviewAction, Run, Settlement, Severity,
 } from './types'
 
 const delay = (ms = 250) => new Promise((r) => setTimeout(r, ms))
@@ -310,7 +310,11 @@ export async function mockRequest<T>(method: string, path: string, params: Recor
     const f = findings.find((x) => x.finding_id === fid)
     if (!f) throw Object.assign(new Error('finding not found'), { status: 404 })
     const action = bodyObj.action as ReviewAction
-    f.status = ({ confirm: 'confirmed', correct: 'corrected', dismiss: 'dismissed', clarify: 'clarification_requested' } as const)[action]
+    const next: Record<ReviewAction, FindingStatus> = {
+      confirm: 'confirmed', correct: 'corrected', dismiss: 'dismissed', clarify: 'clarification_requested', false_positive: 'dismissed',
+      request_evidence: 'clarification_requested', escalate: 'escalated', accept_correction: 'correction_accepted',
+    }
+    f.status = next[action]
     f.reviewer_note = String(bodyObj.note ?? '')
     f.corrected_amount = action === 'correct' ? Number(bodyObj.amount) : null
     audits.push({ audit_id: `AUD-${audits.length}`, ts: iso(), actor: 'reviewer', action: `review_${action}`, claim_id: claimId, details: { finding_id: fid, note: f.reviewer_note, amount: bodyObj.amount ?? null } })

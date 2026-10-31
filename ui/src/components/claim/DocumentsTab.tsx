@@ -5,8 +5,13 @@ import { api } from '../../api/client'
 import type { DocumentView } from '../../api/types'
 import { fmtDateTime, titleCase } from '../../lib/format'
 
-export default function DocumentsTab({ documents }: { documents: DocumentView[] }) {
-  const [selected, setSelected] = useState<DocumentView | null>(documents[0] ?? null)
+export default function DocumentsTab({ documents, selectId }: { documents: DocumentView[]; selectId?: string | null }) {
+  const [selected, setSelected] = useState<DocumentView | null>(documents.find((d) => d.id === selectId) ?? documents[0] ?? null)
+
+  useEffect(() => {
+    const hit = selectId ? documents.find((d) => d.id === selectId) : undefined
+    if (hit) setSelected(hit)
+  }, [selectId, documents])
   const [url, setUrl] = useState<string | null>(null)
   const [mime, setMime] = useState<string>('')
   const [loading, setLoading] = useState(false)

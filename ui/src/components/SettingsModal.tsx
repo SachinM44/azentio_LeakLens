@@ -1,19 +1,20 @@
 import { useEffect, useState } from 'react'
 import { Alert, Button, Input, Modal, Switch, message } from 'antd'
-import { api, connection } from '../api/client'
+import { DEFAULT_ANALYST, api, connection } from '../api/client'
 
 export default function SettingsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [baseUrl, setBaseUrl] = useState('')
   const [apiKey, setApiKey] = useState('')
   const [useMocks, setUseMocks] = useState(false)
   const [testing, setTesting] = useState(false)
+  const [analyst, setAnalyst] = useState('')
 
   useEffect(() => {
-    if (open) { setBaseUrl(connection.baseUrl); setApiKey(connection.apiKey); setUseMocks(connection.useMocks) }
+    if (open) { setBaseUrl(connection.baseUrl); setApiKey(connection.apiKey); setUseMocks(connection.useMocks); setAnalyst(connection.analyst) }
   }, [open])
 
   const save = (reload = true) => {
-    connection.save({ baseUrl, apiKey, useMocks })
+    connection.save({ baseUrl, apiKey, useMocks, analyst: analyst.trim() || DEFAULT_ANALYST })
     if (reload) window.location.reload()
   }
 
@@ -35,6 +36,11 @@ export default function SettingsModal({ open, onClose }: { open: boolean; onClos
   return (
     <Modal open={open} onCancel={onClose} title="Connection" onOk={() => save()} okText="Save & reload">
       <div className="flex flex-col gap-4 py-2">
+        <label>
+          <div className="mb-1 font-medium">Your name</div>
+          <Input value={analyst} onChange={(e) => setAnalyst(e.target.value)} placeholder={DEFAULT_ANALYST} maxLength={60} />
+          <div className="muted mt-1 text-[12px]">Recorded on every decision, note and audit entry you make.</div>
+        </label>
         <label className="flex items-center justify-between gap-3">
           <span><b>Use mock data</b><br /><span className="muted text-[13px]">Demo the screens without a backend.</span></span>
           <Switch checked={useMocks} onChange={setUseMocks} />

@@ -62,7 +62,9 @@ export const STATUS_LABEL: Record<FindingStatus, string> = {
   confirmed: 'Confirmed',
   corrected: 'Corrected',
   dismissed: 'Dismissed',
-  clarification_requested: 'Clarification requested',
+  clarification_requested: 'Evidence requested',
+  escalated: 'Escalated',
+  correction_accepted: 'Correction accepted',
 }
 
 export const STATUS_COLOR: Record<FindingStatus, string> = {
@@ -72,6 +74,8 @@ export const STATUS_COLOR: Record<FindingStatus, string> = {
   corrected: 'purple',
   dismissed: 'default',
   clarification_requested: 'orange',
+  escalated: 'red',
+  correction_accepted: 'blue',
 }
 
 export const CLAIM_TYPES = ['inpatient', 'outpatient', 'pharmacy', 'daycare', 'motor']
