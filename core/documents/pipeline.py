@@ -29,7 +29,7 @@ from core.schemas.master import InvoiceLine, LineCategory
 ROOT = Path(__file__).resolve().parents[2]
 PAYLOAD_DEFAULTS: Dict[str, Dict[str, Any]] = json.loads(
     (ROOT / "core" / "prompts" / "digitise_payload_defaults.json").read_text(encoding="utf-8"))
-STAGE = "claim-settlement-v1"
+STAGE = "claim-review"
 # One page per request everywhere, all pages of all files at once: the wall time is the slowest page, not the sum.
 CLASSIFY_PAGES_PER_REQUEST = 1
 BILL_PAGES_PER_REQUEST = 1
