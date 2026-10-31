@@ -37,7 +37,8 @@ def matches_any(text: Optional[str], keywords: Iterable[str], threshold: float =
         k = norm(kw)
         if not k:
             continue
-        if f" {k} " in f" {n} " or (len(k) >= 5 and fuzz.partial_ratio(k, n) / 100.0 >= threshold):
+        # Whole words only: "aesthetic" must not match "anaesthetist"; token_set tolerates word order and extras.
+        if f" {k} " in f" {n} " or (len(k) >= 5 and fuzz.token_set_ratio(k, n) / 100.0 >= threshold):
             return kw
     return None
 
