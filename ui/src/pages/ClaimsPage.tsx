@@ -90,9 +90,11 @@ export default function ClaimsPage() {
           </div>
           <div className="flex items-center gap-3">
             {progress && <Progress type="circle" size={40} percent={Math.round((progress.done / progress.total) * 100)} strokeColor="#55ffbe" trailColor="rgba(255,255,255,.15)" format={(p) => <span className="text-[11px] text-white">{p}%</span>} />}
-            <Button type="primary" size="large" icon={<Play size={15} />} disabled={!counts.unchecked || !!progress} loading={!!progress} onClick={runAll}>
-              Run checks on {counts.unchecked} unchecked
-            </Button>
+            {counts.unchecked > 0 && (
+              <Button type="primary" size="large" icon={<Play size={15} />} disabled={!!progress} loading={!!progress} onClick={runAll}>
+                Run checks on {counts.unchecked} unchecked
+              </Button>
+            )}
           </div>
         </div>
       </section>

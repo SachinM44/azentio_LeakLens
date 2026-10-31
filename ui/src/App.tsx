@@ -36,7 +36,7 @@ export default function App() {
   const groups = Array.from(new Set(NAV.map((n) => n.group)))
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-screen overflow-hidden">
       <aside className="flex w-[240px] shrink-0 flex-col text-white"
         style={{ background: 'linear-gradient(180deg, #0d1c4f 0%, #16303d 45%, #16303d 100%)' }}>
         <div className="flex items-center gap-3 px-6 pb-4 pt-6">

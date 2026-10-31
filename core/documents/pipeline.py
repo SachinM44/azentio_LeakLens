@@ -31,6 +31,10 @@ STAGE = "claim-settlement-v1"
 CLASSIFY_PAGES_PER_REQUEST = 3
 BILL_PAGES_PER_REQUEST = 1
 DOC_PAGES_PER_REQUEST = 4
+# Rows a bill prints to summarise its items (section subtotals, gross / grand total, net payable): kept for the
+# reconciliation, never treated as charges.
+SUMMARY_ROW = re.compile(r"\b(sub[\s-]?total|gross total|grand total|net payable|net amount|amount payable|total payable|"
+                         r"bill total|balance due|amount due)\b|\btotal\s*$", re.I)
 ITEM_TYPE_TO_CATEGORY = {"lab": LineCategory.LAB, "room": LineCategory.ROOM, "medical": LineCategory.MEDICAL,
                          "pharma": LineCategory.PHARMA, "surgery": LineCategory.SURGERY, "taxes": LineCategory.TAXES,
                          "professional fees": LineCategory.PROFESSIONAL_FEES, "services": LineCategory.SERVICES,
@@ -92,6 +96,7 @@ def file_types(predictions: List[PagePrediction]) -> Dict[str, str]:
 class DigitisedClaim:
     lines: List[InvoiceLine] = field(default_factory=list)
     discount_rows: List[Dict[str, Any]] = field(default_factory=list)
+    summary_rows: List[Dict[str, Any]] = field(default_factory=list)
     document_facts: Dict[str, str] = field(default_factory=dict)
     printed_total: Optional[float] = None
     reconciled: Optional[bool] = None
@@ -168,6 +173,9 @@ def digitise_documents(pages: List[PageImage], confirmed: Dict[str, str], ask: A
             data = result.parsed.bill_data
             for item in (data.bill_items if data else []):
                 row = item.model_dump()
+                if SUMMARY_ROW.search(item.item_name or ""):
+                    out.summary_rows.append(row)
+                    continue
                 if bill_line_looks_like_discount(row):
                     out.discount_rows.append(row)
                     continue
