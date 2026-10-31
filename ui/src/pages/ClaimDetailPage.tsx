@@ -170,7 +170,7 @@ export default function ClaimDetailPage() {
         { key: 'settlement', label: 'Settlement', children: <SettlementTab settlement={d.settlement} /> },
         { key: 'master', label: 'Master data', children: <MasterDataTab detail={d} highlightLine={highlight} /> },
         { key: 'documents', label: `Documents (${d.documents.length})`, children: <DocumentsTab documents={d.documents} /> },
-        { key: 'classification', label: 'Classification', children: <ClassificationTab claimId={claimId} rows={d.classification} /> },
+        { key: 'classification', label: 'Classification', children: <ClassificationTab claimId={claimId} rows={d.classification} documentCount={d.documents.length} /> },
         { key: 'audit', label: `Audit (${d.audit.length})`, children: <AuditTab rows={d.audit} /> },
       ]} />
     </div>

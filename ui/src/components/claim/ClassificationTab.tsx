@@ -6,7 +6,7 @@ import type { ClassificationRow } from '../../api/types'
 import { DOCUMENT_TYPES, titleCase } from '../../lib/format'
 
 /** Human gate 1: the model proposes a type for every page; nothing is read until a person confirms the table. */
-export default function ClassificationTab({ claimId, rows }: { claimId: string; rows: ClassificationRow[] }) {
+export default function ClassificationTab({ claimId, rows, documentCount }: { claimId: string; rows: ClassificationRow[]; documentCount: number }) {
   const qc = useQueryClient()
   const initial = () => Object.fromEntries(rows.map((r) => [r.page_id, r.confirmed_type ?? r.predicted_type ?? 'other_documents']))
   const [choice, setChoice] = useState<Record<string, string>>(initial)
@@ -18,7 +18,20 @@ export default function ClassificationTab({ claimId, rows }: { claimId: string; 
     onError: (e: Error) => message.error(e.message),
   })
 
-  if (!rows.length) return <Empty description="No scanned documents on this claim, so there is nothing to classify." />
+  const classify = useMutation({
+    mutationFn: () => api.classifyDocuments(claimId),
+    onSuccess: () => { message.success('Pages classified — check them and confirm'); qc.invalidateQueries({ queryKey: ['claim', claimId] }) },
+    onError: (e: Error) => message.error(e.message),
+  })
+
+  if (!rows.length && !documentCount) return <Empty description="No scanned documents on this claim, so there is nothing to classify." />
+  if (!rows.length) {
+    return (
+      <Empty description={`${documentCount} document(s) attached. The AI reads every page and proposes its document type; you confirm before anything is extracted.`}>
+        <Button type="primary" loading={classify.isPending} onClick={() => classify.mutate()}>Classify pages with AI</Button>
+      </Empty>
+    )
+  }
   const pending = rows.some((r) => !r.confirmed_type)
 
   return (

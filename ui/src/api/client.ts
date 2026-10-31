@@ -101,6 +101,9 @@ export const api = {
   runClaim: (id: string) => request<{ run_id: string; claim_id: string; status: string }>('POST', `/claims/${encodeURIComponent(id)}/run`),
   getRun: (id: string) => request<Run>('GET', `/claims/${encodeURIComponent(id)}/run`),
 
+  classifyDocuments: (id: string) =>
+    request<{ claim_id: string; classification: ClassificationRow[] }>('POST', `/claims/${encodeURIComponent(id)}/documents/classify`),
+
   confirmClassification: (id: string, pages: { page_id: string; document_type: string }[]) =>
     request<{ claim_id: string; classification: ClassificationRow[]; run_id: string | null }>(
       'POST', `/claims/${encodeURIComponent(id)}/classification/confirm`, { body: pages }),
