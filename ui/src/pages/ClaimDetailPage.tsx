@@ -132,8 +132,10 @@ export default function ClaimDetailPage() {
 
   const d = detail.data
   const { claim, summary } = d
-  const open = d.findings.filter((f) => f.status === 'open')
-  const shown = d.findings.filter((f) => (filter === 'open' ? f.status === 'open' : filter === 'reviewed' ? f.status !== 'open' : true))
+  // Still waiting on a person: never decided, escalated, or waiting for evidence.
+  const isWaiting = (status: string) => status === 'open' || status === 'escalated' || status === 'clarification_requested'
+  const open = d.findings.filter((f) => isWaiting(f.status))
+  const shown = d.findings.filter((f) => (filter === 'open' ? isWaiting(f.status) : filter === 'reviewed' ? !isWaiting(f.status) : true))
   const awaitingClass = d.classification.some((c) => !c.confirmed_type)
 
   const findingsTab = (
