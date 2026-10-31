@@ -80,7 +80,7 @@ export default function ComparisonTab({ claimId, currency, onOpenDocument }: Pro
           <Segmented size="small" value={lineFilter} onChange={(v) => setLineFilter(String(v))}
             options={['all', 'match', 'amount_differs', 'only_in_document', 'only_in_claim'].map((k) => ({ value: k, label: `${titleCase(k)} ${counts[k] ?? 0}` }))} />
         </div>
-        <Table<ComparisonLine> size="small" rowKey={(r, i) => `${r.claim_line_id ?? r.description}-${i}`} dataSource={lines}
+        <Table<ComparisonLine> size="small" rowKey={(r) => `${r.status}|${r.claim_line_id ?? ""}|${r.code ?? ""}|${r.description}|${r.document_amount ?? ""}|${r.claim_amount ?? ""}`} dataSource={lines}
           pagination={{ pageSize: 15, hideOnSinglePage: true }} locale={{ emptyText: 'No lines in this view.' }}
           columns={[
             { title: 'Status', dataIndex: 'status', width: 150, render: (v: string) => <Tag color={LINE_COLOR[v] ?? 'default'} className="!m-0">{titleCase(v)}</Tag> },
