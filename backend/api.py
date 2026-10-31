@@ -3,15 +3,17 @@ from __future__ import annotations
 
 import io
 import logging
+import uuid
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
-from fastapi.responses import StreamingResponse
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Response, UploadFile
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
 from core.checks import recalculate_settlement
 from core.schemas.classification import DOCUMENT_TYPES
-from core.schemas.finding import Finding, FindingStatus
+from core.schemas.finding import Finding, FindingOriginal, FindingStatus
 from core.schemas.master import ProductConfig
 
 from backend import eval_summary
@@ -19,7 +21,9 @@ from backend.auth import require_api_key
 from backend.documents import claim_documents, classify_claim_documents, digitise_claim_documents
 from backend.graph import latest_run, paused_at, resume_run, start_run
 from backend.ingest import IngestResult, ingest_files
+from backend.investigation import comparison, related_claims
 from backend.master import build_master_record, load_product
+from backend.report import build_report, render_html
 from backend.settings import get_settings
 from backend.store import get_store, now_iso, to_doc
 from backend.views import ClaimFilters, claim_detail, claim_list, classification_rows, dashboard, write_audit
@@ -30,7 +34,13 @@ public = APIRouter()
 router = APIRouter(dependencies=[Depends(require_api_key)])
 
 REVIEW_STATUS = {"confirm": FindingStatus.CONFIRMED, "correct": FindingStatus.CORRECTED,
-                 "dismiss": FindingStatus.DISMISSED, "clarify": FindingStatus.CLARIFICATION_REQUESTED}
+                 "false_positive": FindingStatus.DISMISSED, "request_evidence": FindingStatus.CLARIFICATION_REQUESTED,
+                 "escalate": FindingStatus.ESCALATED, "accept_correction": FindingStatus.CORRECTION_ACCEPTED,
+                 "dismiss": FindingStatus.DISMISSED, "clarify": FindingStatus.CLARIFICATION_REQUESTED}  # last two: legacy
+# The review action in the investigator agent's vocabulary (confirm | dismiss | clarify), to tell an override.
+AS_RECOMMENDATION = {"confirm": "confirm", "accept_correction": "confirm", "correct": "confirm", "false_positive": "dismiss",
+                     "dismiss": "dismiss", "request_evidence": "clarify", "clarify": "clarify", "escalate": "escalate"}
+ESCALATION_TARGETS = ("senior_reviewer", "siu")
 
 
 class PageConfirmation(BaseModel):
@@ -39,9 +49,16 @@ class PageConfirmation(BaseModel):
 
 
 class ReviewRequest(BaseModel):
-    action: str = Field(..., description="confirm | correct | dismiss | clarify")
+    action: str = Field(..., description="confirm | false_positive | request_evidence | escalate | accept_correction | "
+                                         "correct (legacy: dismiss | clarify)")
+    reason: str = Field(default="", description="Why (required for false_positive and correct)")
     amount: Optional[float] = Field(default=None, ge=0, description="Corrected amount (action=correct)")
     note: str = Field(default="", description="Reviewer note")
+    escalate_to: Optional[str] = Field(default=None, description="senior_reviewer | siu (action=escalate)")
+
+
+class NoteRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=5000, description="The note")
 
 
 def _filters(type: Optional[str] = None, provider: Optional[str] = None, category: Optional[str] = None,
@@ -191,25 +208,43 @@ def review_finding(claim_id: str, finding_id: str, body: ReviewRequest, actor: s
     _claim_or_404(claim_id)
     store = get_store()
     if body.action not in REVIEW_STATUS:
-        raise HTTPException(status_code=422, detail="action must be confirm | correct | dismiss | clarify")
+        raise HTTPException(status_code=422, detail=f"action must be one of {' | '.join(REVIEW_STATUS)}")
     doc = store.get(collection="findings", doc_id=finding_id)
     if doc is None or doc.get("claim_id") != claim_id:
         raise HTTPException(status_code=404, detail=f"finding {finding_id} not found on claim {claim_id}")
-    if body.action == "correct" and body.amount is None:
-        raise HTTPException(status_code=422, detail="action=correct needs an amount")
     finding = Finding.model_validate(doc)
+    reason = body.reason.strip()
+    _validate_review(body=body, reason=reason, finding=finding)
     previous = finding.status
+    now = datetime.now(timezone.utc)
+    first_decision = finding.original is None
+    if first_decision:  # what the system raised, frozen before any human changes it
+        finding.original = FindingOriginal(amount=finding.amount, amount_kind=finding.amount_kind.value, status=previous.value,
+                                           correction=finding.correction, recommendation=finding.recommendation,
+                                           recommendation_note=finding.recommendation_note, captured_at=now)
     finding.status = REVIEW_STATUS[body.action]
     finding.reviewer_note = body.note
+    finding.decision_reason = reason or body.note
     finding.corrected_amount = body.amount if body.action == "correct" else None
+    finding.escalated_to = body.escalate_to if body.action == "escalate" else None
+    finding.decided_by = actor
+    finding.decided_at = now
+    finding.decision_history.append({"ts": now.isoformat(), "by": actor, "action": body.action, "from_status": previous.value,
+                                     "to_status": finding.status.value, "reason": finding.decision_reason,
+                                     "amount": body.amount, "escalate_to": finding.escalated_to})
     store.upsert(collection="findings", doc_id=finding_id, doc=to_doc(finding))
     review = {"review_id": f"{finding_id}:{now_iso()}", "claim_id": claim_id, "finding_id": finding_id, "actor": actor,
-              "action": body.action, "amount": body.amount, "note": body.note, "from_status": previous.value,
-              "to_status": finding.status.value, "ts": now_iso()}
+              "action": body.action, "amount": body.amount, "note": body.note, "reason": finding.decision_reason,
+              "escalate_to": finding.escalated_to, "from_status": previous.value, "to_status": finding.status.value, "ts": now_iso()}
     store.upsert(collection="reviews", doc_id=review["review_id"], doc=review)
-    write_audit(store=store, actor=actor, action=f"review_{body.action}", claim_id=claim_id,
-                details={"finding_id": finding_id, "check_id": finding.check_id.value, "amount": body.amount,
-                         "note": body.note, "from_status": previous.value, "to_status": finding.status.value})
+    details: Dict[str, Any] = {"finding_id": finding_id, "check_id": finding.check_id.value, "action": body.action,
+                               "from_status": previous.value, "to_status": finding.status.value,
+                               "reason": finding.decision_reason, "amount": body.amount, "note": body.note,
+                               "escalate_to": finding.escalated_to,
+                               "overrides_recommendation": _overrides(body=body, finding=finding)}
+    if first_decision:
+        details["original"] = to_doc(finding.original)
+    write_audit(store=store, actor=actor, action=f"review_{body.action}", claim_id=claim_id, details=details)
     run_id = None
     if paused_at(claim_id) == "review_gate":
         run_id = resume_run(claim_id=claim_id, payload={"finding_id": finding_id, "action": body.action})
@@ -217,7 +252,74 @@ def review_finding(claim_id: str, finding_id: str, body: ReviewRequest, actor: s
         _recompute_settlement(claim_id=claim_id)
     detail = claim_detail(store=store, claim_id=claim_id) or {}
     return {"claim_id": claim_id, "run_id": run_id, "findings": detail.get("findings", []),
+            "finding": next((f for f in detail.get("findings", []) if f["finding_id"] == finding_id), None),
             "settlement": detail.get("settlement"), "summary": detail.get("summary")}
+
+
+def _validate_review(body: ReviewRequest, reason: str, finding: Finding) -> None:
+    if body.action == "false_positive" and not reason:
+        raise HTTPException(status_code=400, detail="A reason is required to mark a finding as a false positive")
+    if body.action == "escalate" and body.escalate_to not in ESCALATION_TARGETS:
+        raise HTTPException(status_code=400, detail="escalate_to must be senior_reviewer or siu")
+    if body.action == "accept_correction" and finding.correction is None:
+        raise HTTPException(status_code=400, detail="This finding has no recommended correction to accept")
+    if body.action == "correct":
+        if body.amount is None:  # 422 kept from the first version of this endpoint
+            raise HTTPException(status_code=422, detail="action=correct needs an amount")
+        if not (reason or body.note.strip()):
+            raise HTTPException(status_code=400, detail="A reason is required to correct a finding")
+
+
+def _overrides(body: ReviewRequest, finding: Finding) -> bool:
+    """True when the analyst went against what the system proposed: a false positive, a different amount than the
+    recommended correction, or an action other than the AI recommendation."""
+    if body.action in ("false_positive", "dismiss"):
+        return True
+    if body.action == "correct":
+        proposed = finding.correction.delta if finding.correction is not None else finding.amount
+        if abs(float(body.amount or 0) - proposed) > 0.005:
+            return True
+    return bool(finding.recommendation) and AS_RECOMMENDATION[body.action] != finding.recommendation
+
+
+# ----------------------------------------------------------------------------------------------- investigation
+
+
+@router.post("/claims/{claim_id}/notes")
+def add_note(claim_id: str, body: NoteRequest, actor: str = Depends(require_api_key)) -> Dict[str, Any]:
+    _claim_or_404(claim_id)
+    store = get_store()
+    note = {"note_id": f"NOTE-{uuid.uuid4().hex[:12]}", "claim_id": claim_id, "author": actor, "ts": now_iso(),
+            "text": body.text.strip()}
+    store.upsert(collection="notes", doc_id=note["note_id"], doc=note)
+    write_audit(store=store, actor=actor, action="note_added", claim_id=claim_id, details={"note_id": note["note_id"]})
+    return note
+
+
+@router.get("/claims/{claim_id}/related")
+def get_related(claim_id: str) -> Dict[str, Any]:
+    claim = _claim_or_404(claim_id)
+    findings = get_store().list(collection="findings", filter_={"claim_id": claim_id})
+    return {"claim_id": claim_id, "related": related_claims(store=get_store(), claim=claim, findings=findings)}
+
+
+@router.get("/claims/{claim_id}/comparison")
+def get_comparison(claim_id: str) -> Dict[str, Any]:
+    return comparison(store=get_store(), claim=_claim_or_404(claim_id))
+
+
+@router.get("/claims/{claim_id}/report")
+def get_report(claim_id: str, format: str = Query(default="json", pattern="^(json|html)$"),
+               actor: str = Depends(require_api_key)) -> Response:
+    store = get_store()
+    detail = claim_detail(store=store, claim_id=claim_id)
+    if detail is None:
+        raise HTTPException(status_code=404, detail=f"claim {claim_id} not found")
+    report = build_report(store=store, detail=detail, generated_by=actor)
+    write_audit(store=store, actor=actor, action="report_generated", claim_id=claim_id, details={"format": format})
+    if format == "html":
+        return HTMLResponse(content=render_html(report=report))
+    return JSONResponse(content=report, headers={"Content-Disposition": f'attachment; filename="investigation_{claim_id}.json"'})
 
 
 def _recompute_settlement(claim_id: str) -> None:
@@ -229,7 +331,7 @@ def _recompute_settlement(claim_id: str) -> None:
     findings = [Finding.model_validate(doc) for doc in store.list(collection="findings", filter_={"claim_id": claim_id})]
     settlement = recalculate_settlement(record, findings)
     store.upsert(collection="settlements", doc_id=claim_id, doc=to_doc(settlement))
-    if findings and not any(f.status == FindingStatus.OPEN for f in findings):
+    if findings and not any(f.status in (FindingStatus.OPEN, FindingStatus.ESCALATED) for f in findings):
         claim = store.get(collection="claims", doc_id=claim_id)
         if claim and claim.get("status") in ("checked", "reviewed"):
             claim["status"] = "reviewed"

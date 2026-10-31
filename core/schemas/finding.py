@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from enum import Enum
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -32,6 +32,8 @@ class FindingStatus(str, Enum):
     CORRECTED = "corrected"
     DISMISSED = "dismissed"
     CLARIFICATION_REQUESTED = "clarification_requested"
+    ESCALATED = "escalated"                      # sent to a senior reviewer or the investigations unit
+    CORRECTION_ACCEPTED = "correction_accepted"  # the recommended correction was applied as is
 
 
 class CheckId(str, Enum):
@@ -101,6 +103,33 @@ class ClauseRef(BaseModel):
     score: float = Field(default=0.0, ge=0.0, le=1.0, description="Retrieval similarity 0..1")
 
 
+class Correction(BaseModel):
+    """The recommended settlement correction for a finding: what the amount was, what it should be."""
+    action: str = Field(..., description="remove_line | cap_room | reduce_days | fix_arithmetic | cap_sublimit | "
+                                         "cap_annual_limit | apply_copay | apply_deductible | recalc_settlement | "
+                                         "reject_claim | hold_for_investigation | pay_at_peer_median | request_documents")
+    label: str = Field(..., description="Plain-English action, e.g. 'Cap the room charge at the daily limit'")
+    original_amount: float = Field(..., description="Amount before the correction")
+    corrected_amount: float = Field(..., description="Amount after the correction")
+    delta: float = Field(..., description="original - corrected")
+    basis: str = Field(..., description="lines | proposed_settlement | requested")
+    calculation: str = Field(default="", description="The arithmetic")
+    rule_id: str = Field(default="", description="Rule applied")
+    rule_text: str = Field(default="", description="The rule in one sentence")
+    clause_id: Optional[str] = Field(default=None, description="Policy clause, when the rule comes from wording")
+
+
+class FindingOriginal(BaseModel):
+    """The finding as the system raised it, frozen at the first human decision and never overwritten."""
+    amount: float = Field(..., description="Amount as raised")
+    amount_kind: str = Field(..., description="calculated | suspected")
+    status: str = Field(..., description="Status before the first decision")
+    correction: Optional[Correction] = Field(default=None, description="Recommended correction as raised")
+    recommendation: Optional[str] = Field(default=None, description="AI recommendation at the time")
+    recommendation_note: str = Field(default="", description="AI note at the time")
+    captured_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), description="When it was frozen")
+
+
 class Finding(BaseModel):
     finding_id: str = Field(..., description="Stable id: <claim_id>:<check_id>:<n>")
     claim_id: str = Field(..., description="The claim the finding belongs to")
@@ -124,14 +153,25 @@ class Finding(BaseModel):
     recommendation_note: str = Field(default="", description="Investigator's note for the reviewer, with what it checked")
     reviewer_note: str = Field(default="", description="Reviewer's note")
     corrected_amount: Optional[float] = Field(default=None, description="Amount set by the reviewer on 'correct'")
+    correction: Optional[Correction] = Field(default=None, description="Recommended settlement correction")
+    original: Optional[FindingOriginal] = Field(default=None, description="Snapshot taken at the first decision")
+    decision_reason: str = Field(default="", description="Reason given with the latest decision")
+    escalated_to: Optional[str] = Field(default=None, description="senior_reviewer | siu while escalated")
+    decided_by: Optional[str] = Field(default=None, description="Analyst who made the latest decision")
+    decided_at: Optional[datetime] = Field(default=None, description="When the latest decision was made")
+    decision_history: List[Dict[str, Any]] = Field(default_factory=list,
+                                                   description="{ts, by, action, from_status, to_status, reason, amount, escalate_to}")
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), description="When it was raised")
 
     @property
     def effective_amount(self) -> float:
         """What the settlement deducts: a reviewer's correction or confirmation wins; an open or auto-applied
-        finding counts only when its amount is calculated; dismissed or awaiting clarification counts nothing."""
+        finding counts only when its amount is calculated; dismissed or awaiting clarification counts nothing.
+        An escalated finding counts as an open one; an accepted correction deducts the correction's delta."""
         if self.status in (FindingStatus.DISMISSED, FindingStatus.CLARIFICATION_REQUESTED):
             return 0.0
+        if self.status == FindingStatus.CORRECTION_ACCEPTED:
+            return self.correction.delta if self.correction is not None else self.amount
         if self.status == FindingStatus.CORRECTED:
             return self.corrected_amount if self.corrected_amount is not None else self.amount
         if self.status == FindingStatus.CONFIRMED:

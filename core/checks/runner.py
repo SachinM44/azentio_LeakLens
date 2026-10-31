@@ -6,6 +6,7 @@ from collections import Counter
 from typing import Dict, List
 
 from core.checks import duplicates, patterns, policy_rules
+from core.checks.corrections import attach_corrections
 from core.checks.settlement import recalculate, settlement_findings
 from core.schemas.finding import Finding
 from core.schemas.master import Claim, HistoryRecord, InvoiceLine, MasterRecord
@@ -55,4 +56,4 @@ def run_all(*, record: MasterRecord, history_index: Dict[str, HistoryRecord], ot
     findings = number(findings, record.claim.claim_id)
     settlement = recalculate(record=record, findings=findings)
     extra = number(settlement_findings(record, settlement), record.claim.claim_id)
-    return findings + extra
+    return attach_corrections(record=record, findings=findings + extra)

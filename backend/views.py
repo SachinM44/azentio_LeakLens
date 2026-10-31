@@ -9,11 +9,20 @@ from typing import Any, Dict, List, Optional, Tuple
 from core.schemas.finding import AmountKind, Finding, FindingStatus, Severity
 
 from backend.graph import latest_run
+from backend.investigation import claim_notes, policy_terms
 from backend.master import load_product
 from backend.store import Repository, now_iso
 
 SEVERITY_RANK = {Severity.LOW: 1, Severity.MEDIUM: 2, Severity.HIGH: 3}
-UNDECIDED = {FindingStatus.OPEN, FindingStatus.CLARIFICATION_REQUESTED}
+UNDECIDED = {FindingStatus.OPEN, FindingStatus.CLARIFICATION_REQUESTED, FindingStatus.ESCALATED}
+AWAITING_REVIEW = UNDECIDED  # what the dashboard counts as "awaiting review"
+
+
+def display_status(claim: Dict[str, Any], findings: List[Finding]) -> Optional[str]:
+    """The claim's status for lists: `escalated` while any finding is escalated, else the stored status."""
+    if any(f.status == FindingStatus.ESCALATED for f in findings):
+        return FindingStatus.ESCALATED.value
+    return claim.get("status")
 
 
 def suspected_amount(finding: Finding) -> float:
@@ -77,7 +86,9 @@ def claim_summary(claim: Dict[str, Any], findings: List[Finding]) -> Dict[str, A
             "product_id": claim.get("product_id"), "incident_date": claim.get("incident_date"),
             "requested_amount": claim.get("requested_amount"), "currency": claim.get("currency"),
             "leakage_calculated": calculated, "leakage_suspected": suspected, "severity": severity,
-            "findings": len(findings), "open_findings": open_count, "status": claim.get("status"),
+            "findings": len(findings), "open_findings": open_count,
+            "awaiting_review": sum(1 for f in findings if f.status in AWAITING_REVIEW),
+            "status": display_status(claim=claim, findings=findings),
             "updated_at": claim.get("updated_at") or claim.get("submitted_at")}
 
 
@@ -86,7 +97,7 @@ def _passes(claim: Dict[str, Any], findings: List[Finding], filters: ClaimFilter
         return False
     if filters.provider and filters.provider not in (claim.get("provider_id"), claim.get("provider_name")):
         return False
-    if filters.status and claim.get("status") != filters.status:
+    if filters.status and filters.status not in (claim.get("status"), display_status(claim=claim, findings=findings)):
         return False
     amount = float(claim.get("requested_amount") or 0.0)
     if filters.min_amount is not None and amount < filters.min_amount:
@@ -155,7 +166,9 @@ def claim_detail(store: Repository, claim_id: str) -> Optional[Dict[str, Any]]:
             "findings": [f.model_dump(mode="json") for f in findings],
             "settlement": store.get(collection="settlements", doc_id=claim_id), "audit": audit,
             "run": latest_run(store=store, claim_id=claim_id), "summary": claim_summary(claim=claim, findings=findings),
-            "reconciled": master.get("reconciled"), "printed_total": master.get("printed_total")}
+            "reconciled": master.get("reconciled"), "printed_total": master.get("printed_total"),
+            "policy_terms": policy_terms(policy=store.get(collection="policies", doc_id=claim["policy_number"]), product=product),
+            "notes": claim_notes(store=store, claim_id=claim_id)}
 
 
 # The dashboard adds claims from both markets, so amounts are reported in one currency. Rates are fixed for the
@@ -187,7 +200,7 @@ def dashboard(store: Repository, filters: ClaimFilters) -> Dict[str, Any]:
         live = [f for f in findings if f.status != FindingStatus.DISMISSED]
         if live:
             flagged += 1
-        if any(f.status == FindingStatus.OPEN for f in findings):
+        if any(f.status in AWAITING_REVIEW for f in findings):
             awaiting += 1
         provider_key = claim.get("provider_id") or "unknown"
         provider = by_provider.setdefault(provider_key, {"provider_id": provider_key, "provider_name": claim.get("provider_name") or provider_key,
