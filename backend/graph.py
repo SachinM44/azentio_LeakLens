@@ -1,10 +1,11 @@
 """The claim workflow as a LangGraph StateGraph, checkpointed to SQLite so a paused claim resumes after a restart.
 
-    load_record -> [classification_gate] -> run_checks -> assess -> settle -> [review_gate -> settle ...] -> done
+    load_record -> [classification_gate] -> run_checks -> assess -> investigate -> settle -> [review_gate -> settle ...] -> done
 
 `classification_gate` and `review_gate` call `interrupt()`: the graph pauses, the UI acts (confirm page types /
-review findings) and the API resumes the thread (thread_id = claim_id) with `Command(resume=...)`. Every node
-start / end / pause is recorded in the `runs` collection, which the UI polls.
+review findings) and the API resumes the thread (thread_id = claim_id) with `Command(resume=...)`. `investigate`
+runs the read-only investigator agent over suspected findings (recommendations only). Every node start / end /
+pause is recorded in the `runs` collection, which the UI polls.
 """
 from __future__ import annotations
 
@@ -21,15 +22,21 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.types import Command, interrupt
 
+from core.agent.investigator import investigate
 from core.checks import recalculate_settlement, run_checks
+from core.rag.policy_index import PolicyIndex, attach_clauses, index_for
 from core.schemas.finding import AmountKind, Finding, FindingStatus
 from core.schemas.master import MasterRecord
 
-from backend.master import build_master_record, history_index
+from backend.master import build_master_record, history_index, other_claims, peer_lines
 from backend.settings import get_settings
 from backend.store import Repository, get_store, now_iso, to_doc
 
 logger = logging.getLogger(__name__)
+
+# Investigator agent token prices (USD per million tokens), counted into runs.cost_usd.
+AGENT_USD_PER_M_INPUT = 0.72
+AGENT_USD_PER_M_OUTPUT = 3.60
 
 
 class ClaimState(TypedDict, total=False):
@@ -56,6 +63,16 @@ def _run_update(run_id: Optional[str], **fields: Any) -> None:
         return
     run.update(fields)
     store.upsert(collection="runs", doc_id=run_id, doc=run)
+
+
+def _add_run_cost(run_id: Optional[str], usd: float) -> None:
+    if not run_id or usd <= 0:
+        return
+    store = get_store()
+    run = store.get(collection="runs", doc_id=run_id)
+    if run is not None:
+        run["cost_usd"] = round(float(run.get("cost_usd") or 0.0) + usd, 5)
+        store.upsert(collection="runs", doc_id=run_id, doc=run)
 
 
 def _step_start(run_id: Optional[str], name: str) -> None:
@@ -164,12 +181,77 @@ def classification_gate(state: ClaimState) -> dict:
 def run_checks_node(state: ClaimState) -> dict:
     store = get_store()
     record = MasterRecord.model_validate(state["record"])
-    findings = run_checks(record, history_index(store=store))
-    store.delete_where(collection="findings", filter_={"claim_id": record.claim.claim_id}, id_field="finding_id")
+    claim_id = record.claim.claim_id
+    findings = run_checks(record, history_index(store=store), other_claims=other_claims(store=store, claim_id=claim_id),
+                          peer_lines=peer_lines(store=store, claim_id=claim_id))
+    retrieval_mode = _attach_policy_clauses(findings=findings, product_id=record.claim.product_id)
+    _run_update(state.get("run_id"), retrieval_mode=retrieval_mode)
+    store.delete_where(collection="findings", filter_={"claim_id": claim_id}, id_field="finding_id")
     docs = _persist_findings(store=store, findings=findings)
-    _set_claim_status(store=store, claim_id=record.claim.claim_id, status="checked")
-    logger.info("checks done", extra={"claim_id": record.claim.claim_id, "findings": len(findings)})
+    _set_claim_status(store=store, claim_id=claim_id, status="checked")
+    logger.info("checks done", extra={"claim_id": claim_id, "findings": len(findings), "retrieval_mode": retrieval_mode})
     return {"findings": docs}
+
+
+def _policy_index(product_id: str) -> Optional[PolicyIndex]:
+    """The product's clause index (cached per process by core.rag); None without a wording file or on failure."""
+    try:
+        return index_for(product_id, get_settings().policies_dir_abs)
+    except Exception as exc:
+        logger.warning("policy index unavailable", extra={"product_id": product_id, "error": str(exc)})
+        return None
+
+
+def _attach_policy_clauses(findings: List[Finding], product_id: str) -> Optional[str]:
+    """Policy-rule findings get their governing clause from the product's wording; returns the index mode
+    ('embeddings' or 'bm25'), or None when the product has no wording file or retrieval failed."""
+    index = _policy_index(product_id=product_id)
+    if index is None:
+        return None
+    try:
+        attach_clauses(findings, index)
+    except Exception as exc:
+        logger.warning("clause attachment failed", extra={"product_id": product_id, "error": str(exc)})
+    return index.mode
+
+
+@tracked("investigate")
+def investigate_node(state: ClaimState) -> dict:
+    """The investigator agent reads the SUSPECTED findings with read-only tools and leaves a recommendation and a
+    note on each; it never changes a status or an amount, and a failure never fails the run."""
+    findings = [Finding.model_validate(doc) for doc in state.get("findings", [])]
+    if not get_settings().investigator_enabled or not any(f.amount_kind == AmountKind.SUSPECTED for f in findings):
+        return {}
+    store = get_store()
+    record = MasterRecord.model_validate(state["record"])
+    claim_id = record.claim.claim_id
+    run_id = state.get("run_id")
+    try:
+        verdicts, trail = investigate(record, findings, index=_policy_index(product_id=record.claim.product_id),
+                                      peer_lines=peer_lines(store=store, claim_id=claim_id))
+    except Exception as exc:
+        logger.warning("investigator failed; findings go to review without a recommendation",
+                       extra={"claim_id": claim_id, "error": str(exc)})
+        _run_update(run_id, investigation={"error": str(exc), "steps": [], "model": None, "input_tokens": 0,
+                                           "output_tokens": 0, "verdicts": 0, "cost_usd": 0.0})
+        return {}
+    by_id = {f.finding_id: f for f in findings}
+    applied = 0
+    for verdict in verdicts:
+        finding = by_id.get(verdict.finding_id)
+        if finding is None:
+            continue
+        finding.recommendation = verdict.recommendation
+        finding.recommendation_confidence = verdict.confidence
+        finding.recommendation_note = verdict.note
+        applied += 1
+    docs = _persist_findings(store=store, findings=findings)
+    cost = round(trail.input_tokens * AGENT_USD_PER_M_INPUT / 1e6 + trail.output_tokens * AGENT_USD_PER_M_OUTPUT / 1e6, 5)
+    _run_update(run_id, investigation={"steps": trail.steps, "model": trail.model, "input_tokens": trail.input_tokens,
+                                       "output_tokens": trail.output_tokens, "verdicts": applied, "cost_usd": cost})
+    _add_run_cost(run_id, cost)
+    logger.info("investigation done", extra={"claim_id": claim_id, "verdicts": applied, "steps": len(trail.steps), "cost_usd": cost})
+    return {"findings": docs, "cost_usd": round(float(state.get("cost_usd") or 0.0) + cost, 5)}
 
 
 @tracked("assess")
@@ -232,6 +314,7 @@ def build_graph(checkpointer: Optional[SqliteSaver] = None) -> CompiledStateGrap
     builder.add_node("classification_gate", classification_gate)
     builder.add_node("run_checks", run_checks_node)
     builder.add_node("assess", assess)
+    builder.add_node("investigate", investigate_node)
     builder.add_node("settle", settle)
     builder.add_node("review_gate", review_gate)
     builder.add_node("done", done)
@@ -239,7 +322,8 @@ def build_graph(checkpointer: Optional[SqliteSaver] = None) -> CompiledStateGrap
     builder.add_conditional_edges("load_record", _after_load, ["classification_gate", "run_checks"])
     builder.add_edge("classification_gate", "run_checks")
     builder.add_edge("run_checks", "assess")
-    builder.add_edge("assess", "settle")
+    builder.add_edge("assess", "investigate")
+    builder.add_edge("investigate", "settle")
     builder.add_conditional_edges("settle", _after_settle, ["review_gate", "done"])
     builder.add_edge("review_gate", "settle")
     builder.add_edge("done", END)
@@ -306,22 +390,23 @@ def _invoke(payload: Any, claim_id: str, run_id: str) -> None:
             _run_update(run_id, status="failed", error=str(exc), ended=now_iso())
             return
         snapshot = graph.get_state(config)
-        cost = float(snapshot.values.get("cost_usd", 0.0) or 0.0)
         if snapshot.next:
-            _run_update(run_id, status="paused", cost_usd=cost)
+            _run_update(run_id, status="paused")
         else:
-            _run_update(run_id, status="completed", cost_usd=cost, ended=now_iso(), paused_at=None)
+            _run_update(run_id, status="completed", ended=now_iso(), paused_at=None)
 
 
 def create_run(claim_id: str) -> str:
     store = get_store()
-    if store.get(collection="claims", doc_id=claim_id) is None:
+    claim = store.get(collection="claims", doc_id=claim_id)
+    if claim is None:
         raise KeyError(claim_id)
     run_id = f"RUN-{uuid.uuid4().hex[:10]}"
     store.upsert(collection="runs", doc_id=run_id,
-                 doc={"run_id": run_id, "claim_id": claim_id, "status": "queued", "steps": [], "cost_usd": 0.0,
-                      "cost_cap_usd": get_settings().cost_cap_usd_per_claim, "started": now_iso(), "ended": None,
-                      "paused_at": None, "error": None})
+                 doc={"run_id": run_id, "claim_id": claim_id, "status": "queued", "steps": [],
+                      "cost_usd": round(float(claim.get("document_cost_usd") or 0.0), 5),  # document-path spend so far
+                      "cost_cap_usd": get_settings().cost_cap_usd_per_claim, "retrieval_mode": None,
+                      "started": now_iso(), "ended": None, "paused_at": None, "error": None})
     return run_id
 
 

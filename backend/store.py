@@ -67,6 +67,12 @@ class Repository(ABC):
     @abstractmethod
     def open_document(self, document_id: str) -> Tuple[bytes, str, str]: ...
 
+    def bulk_upsert(self, collection: str, docs: Dict[str, Doc]) -> int:
+        """Upsert many documents ({id: doc}) in one write; stores override this for speed."""
+        for doc_id, doc in docs.items():
+            self.upsert(collection=collection, doc_id=doc_id, doc=doc)
+        return len(docs)
+
     def delete_where(self, collection: str, filter_: Doc, id_field: str) -> int:
         """Delete every document matching the filter; returns the count."""
         removed = 0
@@ -107,6 +113,14 @@ class JsonFileStore(Repository):
             data[doc_id] = doc
             self._flush(collection)
         return doc
+
+    def bulk_upsert(self, collection: str, docs: Dict[str, Doc]) -> int:
+        if not docs:
+            return 0
+        with self._lock:
+            self._load(collection).update(docs)
+            self._flush(collection)
+        return len(docs)
 
     def get(self, collection: str, doc_id: str) -> Optional[Doc]:
         with self._lock:
@@ -156,6 +170,15 @@ class MongoStore(Repository):
     def upsert(self, collection: str, doc_id: str, doc: Doc) -> Doc:
         self.db[collection].replace_one({"_id": doc_id}, {**doc, "_id": doc_id}, upsert=True)
         return doc
+
+    def bulk_upsert(self, collection: str, docs: Dict[str, Doc]) -> int:
+        from pymongo import ReplaceOne
+
+        if not docs:
+            return 0
+        self.db[collection].bulk_write([ReplaceOne({"_id": doc_id}, {**doc, "_id": doc_id}, upsert=True)
+                                        for doc_id, doc in docs.items()], ordered=False)
+        return len(docs)
 
     def get(self, collection: str, doc_id: str) -> Optional[Doc]:
         return self.db[collection].find_one({"_id": doc_id}, {"_id": 0})

@@ -13,6 +13,13 @@ from backend.master import load_product
 from backend.store import Repository, now_iso
 
 SEVERITY_RANK = {Severity.LOW: 1, Severity.MEDIUM: 2, Severity.HIGH: 3}
+UNDECIDED = {FindingStatus.OPEN, FindingStatus.CLARIFICATION_REQUESTED}
+
+
+def suspected_amount(finding: Finding) -> float:
+    """A suspected finding's amount counts as 'suspected' only while no human has decided on it; once confirmed
+    or corrected it moves into the deductions (effective_amount), dismissed it vanishes."""
+    return finding.amount if finding.amount_kind == AmountKind.SUSPECTED and finding.status in UNDECIDED else 0.0
 
 
 @dataclass
@@ -51,8 +58,7 @@ def leakage_totals(findings: List[Finding]) -> Tuple[float, float, Optional[str]
         if finding.status == FindingStatus.DISMISSED:
             continue
         calculated += finding.effective_amount
-        if finding.amount_kind == AmountKind.SUSPECTED and finding.status != FindingStatus.CORRECTED:
-            suspected += finding.amount
+        suspected += suspected_amount(finding=finding)
         if top is None or SEVERITY_RANK[finding.severity] > SEVERITY_RANK[top]:
             top = finding.severity
     return round(calculated, 2), round(suspected, 2), (top.value if top else None)
@@ -109,9 +115,11 @@ def claim_list(store: Repository, filters: ClaimFilters) -> List[Dict[str, Any]]
     return [claim_summary(claim=claim, findings=findings) for claim, findings in filtered_claims(store=store, filters=filters)]
 
 
-def document_view(doc: Dict[str, Any]) -> Dict[str, Any]:
-    return {"id": doc["document_id"], "name": doc.get("name"), "type": doc.get("document_type"), "pages": doc.get("pages", 1),
-            "mime": doc.get("mime"), "uploaded_at": doc.get("uploaded_at")}
+def document_view(doc: Dict[str, Any], known_types: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+    """`type` = the confirmed type, else what the master record knows (documents manifest), else None."""
+    doc_type = doc.get("document_type") or (known_types or {}).get(doc["document_id"])
+    return {"id": doc["document_id"], "name": doc.get("name"), "type": doc_type, "confirmed": bool(doc.get("document_type")),
+            "pages": doc.get("pages", 1), "mime": doc.get("mime"), "uploaded_at": doc.get("uploaded_at")}
 
 
 def classification_rows(documents: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -139,9 +147,11 @@ def claim_detail(store: Repository, claim_id: str) -> Optional[Dict[str, Any]]:
     audit.sort(key=lambda row: row["ts"])
     product = load_product(store=store, product_id=claim["product_id"], currency=claim.get("currency", "INR"))
     master = store.get(collection="master_records", doc_id=claim_id) or {}
+    known_types = master.get("document_types") or {}
     return {"claim": claim, "policy": store.get(collection="policies", doc_id=claim["policy_number"]),
             "product": product.model_dump(mode="json"), "lines": lines,
-            "documents": [document_view(doc) for doc in documents], "classification": classification_rows(documents),
+            "documents": [document_view(doc, known_types=known_types) for doc in documents], "classification": classification_rows(documents),
+            "document_lines": master.get("document_lines", []), "document_facts": master.get("document_facts", {}),
             "findings": [f.model_dump(mode="json") for f in findings],
             "settlement": store.get(collection="settlements", doc_id=claim_id), "audit": audit,
             "run": latest_run(store=store, claim_id=claim_id), "summary": claim_summary(claim=claim, findings=findings),
@@ -176,7 +186,7 @@ def dashboard(store: Repository, filters: ClaimFilters) -> Dict[str, Any]:
         provider["leakage_suspected"] = round(provider["leakage_suspected"] + suspected, 2)
         for finding in live:
             cal = finding.effective_amount
-            sus = finding.amount if finding.amount_kind == AmountKind.SUSPECTED and finding.status != FindingStatus.CORRECTED else 0.0
+            sus = suspected_amount(finding=finding)
             for bucket, key in ((by_category, finding.category.value), (by_check, finding.check_id.value)):
                 entry = bucket.setdefault(key, {"key": key, "count": 0, "amount_calculated": 0.0, "amount_suspected": 0.0})
                 entry["count"] += 1

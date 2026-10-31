@@ -1,0 +1,41 @@
+[
+  {
+    "product_id": "IN-HEALTH-RETAIL",
+    "name": "Retail Health (India)",
+    "insurer": "Meridian Health Assurance",
+    "market": "IN",
+    "currency": "INR",
+    "required_documents": {
+      "inpatient": ["claim_form", "itemized_final_hospital_bill", "discharge_summary", "diagnostic_reports", "kyc_document"],
+      "daycare": ["claim_form", "itemized_final_hospital_bill", "discharge_summary"],
+      "outpatient": ["itemized_final_hospital_bill", "prescriptions"],
+      "pharmacy": ["medicine_pharmacy_bills", "prescriptions"]
+    },
+    "non_payable_items": ["gloves", "syringe", "cotton", "admission kit", "registration charges"],
+    "auto_triage_threshold": 1000,
+    "near_duplicate_amount_tolerance_pct": 2.0,
+    "near_duplicate_days": 3,
+    "repeatable_service_codes": ["PHY-SES", "DIA-SES"],
+    "provider_outlier_zscore": 2.5,
+    "policy_wording_file": null
+  },
+  {
+    "product_id": "AE-HEALTH-GROUP",
+    "name": "Group Health (UAE)",
+    "insurer": "Gulf Crescent Takaful",
+    "market": "AE",
+    "currency": "AED",
+    "required_documents": {
+      "inpatient": ["claim_form", "itemized_final_hospital_bill", "discharge_summary", "pre_auth_form"],
+      "outpatient": ["itemized_final_hospital_bill", "prescriptions"],
+      "pharmacy": ["medicine_pharmacy_bills", "prescriptions"]
+    },
+    "non_payable_items": [],
+    "auto_triage_threshold": 100,
+    "near_duplicate_amount_tolerance_pct": 2.0,
+    "near_duplicate_days": 3,
+    "repeatable_service_codes": ["97110"],
+    "provider_outlier_zscore": 2.5,
+    "policy_wording_file": null
+  }
+]

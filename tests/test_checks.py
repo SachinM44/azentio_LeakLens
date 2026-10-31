@@ -97,10 +97,11 @@ def test_settlement_applies_deductions_then_copay_and_flags_missing_copay():
     assert settlement.copay_amount == round(settlement.after_deductions * 0.10, 2)
     assert settlement.payable == round(settlement.after_deductions - settlement.copay_amount, 2)
 
-    rec.claim.proposed_settlement = settlement.after_deductions  # the handler forgot the copay
+    rec.claim.proposed_settlement = settlement.lines_total  # the handler proposed the full bill: copay skipped
     findings2 = run_checks(rec, {})
     got = by_check(findings2)
-    assert [f.amount for f in got[CheckId.COPAY_NOT_APPLIED]] == [settlement.copay_amount]
+    assert [f.amount for f in got[CheckId.COPAY_NOT_APPLIED]] == [round(settlement.lines_total * 0.10, 2)]
+    assert CheckId.SETTLEMENT_MISMATCH not in got, "the other findings are not counted twice"
 
 
 def test_dismissing_a_finding_moves_the_money_back():

@@ -1,0 +1,21 @@
+line_id,claim_id,invoice_no,serial_no,service_date,code,code_system,description,category,quantity,unit_price,amount,provider_id
+CLM-2026-0001:INV-1001:1,CLM-2026-0001,INV-1001,1,2026-03-10,RM-SGL,internal,Room charges - single room,room,3,7000,21000,PRV-IN-01
+CLM-2026-0001:INV-1001:2,CLM-2026-0001,INV-1001,2,2026-03-11,SUR-APP,internal,Surgeon fee - laparoscopic appendectomy,surgery,1,25000,25000,PRV-IN-01
+CLM-2026-0001:INV-1001:3,CLM-2026-0001,INV-1001,3,2026-03-11,OT-01,internal,Operation theatre charges,services,1,12000,12000,PRV-IN-01
+CLM-2026-0001:INV-1001:4,CLM-2026-0001,INV-1001,4,2026-03-11,ANA-01,internal,Anaesthetist fee,professional fees,1,6000,6000,PRV-IN-01
+CLM-2026-0001:INV-1001:5,CLM-2026-0001,INV-1001,5,2026-03-10,LAB-CBC,internal,Complete blood count,lab,1,600,600,PRV-IN-01
+CLM-2026-0001:INV-1001:6,CLM-2026-0001,INV-1001,6,2026-03-10,LAB-CBC,internal,CBC,lab,1,600,600,PRV-IN-01
+CLM-2026-0001:INV-1001:7,CLM-2026-0001,INV-1001,7,2026-03-10,RAD-USG,internal,Ultrasound abdomen,radiology,1,2500,2500,PRV-IN-01
+CLM-2026-0001:INV-1001:8,CLM-2026-0001,INV-1001,8,2026-03-12,PH-MISC,internal,Medicines and injectables,pharma,1,9400,9400,PRV-IN-01
+CLM-2026-0001:INV-1001:9,CLM-2026-0001,INV-1001,9,2026-03-11,CON-GLV,internal,Surgical gloves,medical,10,50,500,PRV-IN-01
+CLM-2026-0001:INV-1001:10,CLM-2026-0001,INV-1001,10,2026-03-10,NUR-01,internal,Nursing charges,services,3,2800,8400,PRV-IN-01
+CLM-2026-0002:INV-2001:1,CLM-2026-0002,INV-2001,1,2026-04-02,99213,CPT,Consultation - established patient,professional fees,1,300,300,PRV-AE-01
+CLM-2026-0002:INV-2001:2,CLM-2026-0002,INV-2001,2,2026-04-02,80061,CPT,Lipid panel,lab,1,180,180,PRV-AE-01
+CLM-2026-0002:INV-2001:3,CLM-2026-0002,INV-2001,3,2026-04-02,71046,CPT,X-ray chest two views,radiology,1,260,260,PRV-AE-01
+CLM-2026-0002:INV-2001:4,CLM-2026-0002,INV-2001,4,2026-04-02,ATV-20,drug,Atorvastatin 20mg x 30,pharma,1,500,500,PRV-AE-01
+CLM-2026-0003:INV-3001:1,CLM-2026-0003,INV-3001,1,2026-05-20,RM-TWN,internal,Room charges - twin sharing,room,2,4500,9000,PRV-IN-02
+CLM-2026-0003:INV-3001:2,CLM-2026-0003,INV-3001,2,2026-05-21,SUR-CAT,internal,Cataract surgery - phacoemulsification,surgery,1,38000,38000,PRV-IN-02
+CLM-2026-0003:INV-3001:3,CLM-2026-0003,INV-3001,3,2026-05-21,IMP-IOL,internal,Intraocular lens,medical,1,4000,4000,PRV-IN-02
+CLM-2026-0003:INV-3001:4,CLM-2026-0003,INV-3001,4,2026-05-22,PH-DROP,internal,Post-operative eye drops,pharma,1,600,600,PRV-IN-02
+CLM-2026-0003:INV-3001:5,CLM-2026-0003,INV-3001,5,2026-05-20,LAB-PRE,internal,Pre-operative blood tests,lab,1,900,900,PRV-IN-02
+CLM-2026-0003:INV-3001:6,CLM-2026-0003,INV-3001,6,2026-05-20,CON-OPH,internal,Ophthalmologist consultation,professional fees,1,1500,1500,PRV-IN-02

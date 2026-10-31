@@ -21,7 +21,12 @@ class Settings(BaseSettings):
     data_dir: Path = Field(default=Path("data/store"), description="Local JSON store root (relative to the repo)")
     cost_cap_usd_per_claim: float = Field(default=2.0, description="Spend cap per claim, surfaced on the run")
     answer_key_path: Path = Field(default=Path("data/synthetic/out/answer_key.json"), description="Hidden answer key")
+    documents_manifest_path: Path = Field(default=Path("data/synthetic/out/documents_manifest.json"),
+                                          description="Synthetic documents manifest: document facts and types per claim")
     products_dir: Path = Field(default=Path("data/config/products"), description="Seed product configs (*.json)")
+    policies_dir: Path = Field(default=Path("data/policies"), description="Policy wording per product: <product_id>.md")
+    documents_offline: bool = Field(default=False, description="Document models answer from the cache only (no network)")
+    investigator_enabled: bool = Field(default=True, description="Run the investigator agent over suspected findings")
 
     @property
     def data_dir_abs(self) -> Path:
@@ -34,6 +39,19 @@ class Settings(BaseSettings):
     @property
     def products_dir_abs(self) -> Path:
         return self.products_dir if self.products_dir.is_absolute() else REPO_ROOT / self.products_dir
+
+    @property
+    def documents_manifest_abs(self) -> Path:
+        path = self.documents_manifest_path
+        return path if path.is_absolute() else REPO_ROOT / path
+
+    @property
+    def policies_dir_abs(self) -> Path:
+        return self.policies_dir if self.policies_dir.is_absolute() else REPO_ROOT / self.policies_dir
+
+    def cache_dir_for(self, claim_id: str) -> Path:
+        """Model-call cache per claim (under the gitignored store)."""
+        return self.data_dir_abs / "cache" / claim_id
 
 
 @lru_cache(maxsize=1)

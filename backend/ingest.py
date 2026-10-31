@@ -230,7 +230,7 @@ def _rules(entity: str, model: Any, known: Dict[str, Set[str]]) -> List[Tuple[st
         if model.quantity < 0:
             found.append(("quantity", "quantity is negative", True))
         if model.unit_price is not None and model.unit_price < 0:
-            found.append(("unit_price", "unit price is negative", True))
+            found.append(("unit_price", "negative unit price kept (return / discount)", False))
         if model.amount < 0:
             found.append(("amount", "negative line amount kept (return / discount)", False))
         if known["claims"] and model.claim_id not in known["claims"]:
@@ -379,14 +379,15 @@ def ingest_files(store: Repository, files: List[Tuple[str, bytes]], actor: str) 
             accepted, issues = validate_rows(entity=entity, rows=rows, file_name=name, row_offset=row_offset, known=known)
             result.validation.extend(issues)
             id_field = ENTITY_ID_FIELD[entity]
+            stamp = now_iso()
             for doc in accepted:
-                store.upsert(collection=entity, doc_id=str(doc[id_field]), doc=doc)
                 if entity == "claims":
-                    affected.add(doc["claim_id"])
-                elif entity == "invoice_lines":
+                    doc["updated_at"] = stamp
+                if entity in ("claims", "invoice_lines"):
                     affected.add(doc["claim_id"])
                 else:
                     refresh_all = True
+            store.bulk_upsert(collection=entity, docs={str(doc[id_field]): doc for doc in accepted})
             result.counts[entity] = result.counts.get(entity, 0) + len(accepted)
             logger.info("ingested table", extra={"batch_id": batch_id, "file": name, "entity": entity,
                                                  "accepted": len(accepted), "rows": len(rows)})

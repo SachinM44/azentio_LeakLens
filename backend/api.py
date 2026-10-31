@@ -16,6 +16,7 @@ from core.schemas.master import ProductConfig
 
 from backend import eval_summary
 from backend.auth import require_api_key
+from backend.documents import claim_documents, classify_claim_documents, digitise_claim_documents
 from backend.graph import latest_run, paused_at, resume_run, start_run
 from backend.ingest import IngestResult, ingest_files
 from backend.master import build_master_record, load_product
@@ -109,15 +110,39 @@ def get_run(claim_id: str) -> Dict[str, Any]:
     _claim_or_404(claim_id)
     run = latest_run(store=get_store(), claim_id=claim_id)
     if run is None:
-        return {"run_id": None, "claim_id": claim_id, "status": "not_run", "steps": [], "cost_usd": 0.0, "paused_at": None}
+        claim = get_store().get(collection="claims", doc_id=claim_id) or {}
+        return {"run_id": None, "claim_id": claim_id, "status": "not_run", "steps": [],
+                "cost_usd": round(float(claim.get("document_cost_usd") or 0.0), 5), "paused_at": None, "retrieval_mode": None}
+    run.setdefault("retrieval_mode", None)
     return run
+
+
+@router.post("/claims/{claim_id}/documents/classify")
+def classify_documents(claim_id: str, actor: str = Depends(require_api_key)) -> Dict[str, Any]:
+    """Model page classification over the claim's documents; predictions land in classification[] for the
+    review console. A model failure keeps the file-name guesses and is reported, never hidden."""
+    _claim_or_404(claim_id)
+    store = get_store()
+    error: Optional[str] = None
+    cost = 0.0
+    try:
+        documents, cost = classify_claim_documents(store=store, claim_id=claim_id)
+    except Exception as exc:
+        logger.warning("page classification failed", extra={"claim_id": claim_id, "error": str(exc)})
+        error = str(exc)
+        documents = claim_documents(store=store, claim_id=claim_id)
+    write_audit(store=store, actor=actor, action="documents_classify", claim_id=claim_id,
+                details={"documents": len(documents), "cost_usd": round(cost, 5), "error": error})
+    return {"claim_id": claim_id, "classified": error is None, "error": error, "cost_usd": round(cost, 5),
+            "needs_classification_review": bool(documents), "classification": classification_rows(documents)}
 
 
 @router.post("/claims/{claim_id}/classification/confirm")
 def confirm_classification(claim_id: str, pages: List[PageConfirmation], actor: str = Depends(require_api_key)) -> Dict[str, Any]:
+    """Human gate 1: store the confirmed page types, digitise the documents, then continue the workflow."""
     _claim_or_404(claim_id)
     store = get_store()
-    documents = {doc["document_id"]: doc for doc in store.list(collection="documents", filter_={"claim_id": claim_id})}
+    documents = {doc["document_id"]: doc for doc in claim_documents(store=store, claim_id=claim_id)}
     for page in pages:
         if page.document_type not in DOCUMENT_TYPES:
             raise HTTPException(status_code=422, detail=f"unknown document_type '{page.document_type}'")
@@ -134,13 +159,31 @@ def confirm_classification(claim_id: str, pages: List[PageConfirmation], actor: 
             doc["document_type"] = confirmed[0]
             doc["confirmed_at"] = now_iso()
         store.upsert(collection="documents", doc_id=doc["document_id"], doc=doc)
-    build_master_record(store=store, claim_id=claim_id)
+    digitisation: Optional[Dict[str, Any]] = None
+    error: Optional[str] = None
+    try:
+        digitisation = digitise_claim_documents(store=store, claim_id=claim_id, documents=list(documents.values()))
+    except Exception as exc:
+        logger.warning("digitisation failed; continuing with the structured lines", extra={"claim_id": claim_id, "error": str(exc)})
+        error = str(exc)
+    claim = store.get(collection="claims", doc_id=claim_id) or {}
+    claim["needs_classification_review"] = False
+    claim["digitisation_error"] = error
+    store.upsert(collection="claims", doc_id=claim_id, doc=claim)
+    record = build_master_record(store=store, claim_id=claim_id)
     write_audit(store=store, actor=actor, action="classification_confirm", claim_id=claim_id,
-                details={"pages": [page.model_dump() for page in pages]})
-    run_id = None
+                details={"pages": [page.model_dump() for page in pages], "digitised": digitisation is not None,
+                         "document_lines": len(digitisation["document_lines"]) if digitisation else 0,
+                         "reconciled": digitisation.get("reconciled") if digitisation else None, "error": error})
     if paused_at(claim_id) == "classification_gate":
         run_id = resume_run(claim_id=claim_id, payload=[page.model_dump() for page in pages], background=True)
-    return {"claim_id": claim_id, "classification": classification_rows(list(documents.values())), "run_id": run_id}
+    else:
+        run_id = start_run(claim_id=claim_id, background=True)
+    return {"claim_id": claim_id, "run_id": run_id, "classification": classification_rows(list(documents.values())),
+            "digitised": digitisation is not None, "digitisation_error": error,
+            "document_lines": len(digitisation["document_lines"]) if digitisation else 0,
+            "document_facts": record.document_facts if record else {}, "printed_total": record.printed_total if record else None,
+            "reconciled": record.reconciled if record else None, "source": claim.get("source")}
 
 
 @router.post("/claims/{claim_id}/findings/{finding_id}/review")

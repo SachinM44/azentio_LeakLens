@@ -1,0 +1,3 @@
+claim_id,policy_number,product_id,claimant_id,claimant_name,provider_id,provider_name,claim_type,incident_date,admission_date,discharge_date,diagnosis,requested_amount,proposed_settlement,currency,invoice_numbers
+CLM-2026-0004,POL-IN-0001,IN-HEALTH-RETAIL,MBR-0002,Rohan Verma,PRV-IN-01,Sunrise Multispeciality Hospital,daycare,2026-06-02,2026-06-02,2026-06-02,Inguinal hernia repair,32000,,INR,INV-4001
+CLM-2026-0005,POL-IN-0001,IN-HEALTH-RETAIL,MBR-0001,Asha Verma,PRV-IN-01,Sunrise Multispeciality Hospital,inpatient,2026-06-20,2026-06-22,2026-06-20,Dengue fever,not-a-number,,INR,INV-5001

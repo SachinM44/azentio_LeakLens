@@ -1,0 +1,30 @@
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	load_record(load_record)
+	classification_gate(classification_gate)
+	run_checks(run_checks)
+	assess(assess)
+	investigate(investigate)
+	settle(settle)
+	review_gate(review_gate)
+	done(done)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> load_record;
+	assess --> investigate;
+	classification_gate --> run_checks;
+	investigate --> settle;
+	load_record -.-> classification_gate;
+	load_record -.-> run_checks;
+	review_gate --> settle;
+	run_checks --> assess;
+	settle -.-> done;
+	settle -.-> review_gate;
+	done --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc

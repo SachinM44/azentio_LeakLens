@@ -1,8 +1,9 @@
 """GET /eval/summary: precision / recall / amount recovered of the stored findings against the hidden answer key.
 
-The key (data/synthetic/out/answer_key.json) is a list of planted items, or a dict holding one under
-`findings` / `items` / `planted`. Each item names `claim_id` and `check_id`, optionally `amount`, and may carry
-`should_flag: false` for a legitimate look-alike that must NOT be flagged. Matching is by (claim_id, check_id).
+The key (data/synthetic/out/answer_key.json) holds `positives` (planted leakage: claim_id, check_id, amount, ...)
+and `negatives` (legitimate look-alikes that must NOT be flagged). A plain list of items, or a dict with one under
+`findings` / `items` / `planted`, is accepted too; an item may carry `should_flag: false`. Matching is by
+(claim_id, check_id).
 """
 from __future__ import annotations
 
@@ -12,7 +13,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-from core.schemas.finding import FindingStatus
+from core.schemas.finding import Finding, FindingStatus
 
 from backend.store import Repository
 
@@ -23,13 +24,17 @@ Key = Tuple[str, str]
 
 def load_answer_key(path: Path) -> List[Dict[str, Any]]:
     payload = json.loads(path.read_text(encoding="utf-8"))
-    if isinstance(payload, dict):
+    if isinstance(payload, dict) and isinstance(payload.get("positives"), list):
+        items = [{**item, "should_flag": True} for item in payload["positives"]]
+        items += [{**item, "should_flag": False} for item in payload.get("negatives", []) if isinstance(item, dict)]
+        payload = items
+    elif isinstance(payload, dict):
         for name in ("findings", "items", "planted", "answer_key"):
             if isinstance(payload.get(name), list):
                 payload = payload[name]
                 break
     if not isinstance(payload, list):
-        raise ValueError("answer key must be a list of planted items")
+        raise ValueError("answer key must hold positives/negatives or a list of planted items")
     return [item for item in payload if isinstance(item, dict) and item.get("claim_id") and item.get("check_id")]
 
 
@@ -90,6 +95,8 @@ def summary(store: Repository, key_path: Path) -> Dict[str, Any]:
 
 
 def _effective(doc: Dict[str, Any]) -> float:
-    if doc.get("status") == FindingStatus.CORRECTED.value and doc.get("corrected_amount") is not None:
-        return float(doc["corrected_amount"])
-    return float(doc.get("amount") or 0.0) if doc.get("amount_kind") == "calculated" else 0.0
+    """The same rule the settlement uses (Finding.effective_amount), so 'recovered' matches the deductions."""
+    try:
+        return Finding.model_validate(doc).effective_amount
+    except Exception:
+        return 0.0

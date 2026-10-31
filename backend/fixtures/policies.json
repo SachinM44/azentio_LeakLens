@@ -1,0 +1,57 @@
+{
+  "policies": [
+    {
+      "policy_number": "POL-IN-0001",
+      "product_id": "IN-HEALTH-RETAIL",
+      "holder_id": "MBR-0001",
+      "members": ["MBR-0001", "MBR-0002"],
+      "start_date": "2026-01-01",
+      "end_date": "2026-12-31",
+      "currency": "INR",
+      "annual_limit": 500000,
+      "deductible": {"amount": 0, "basis": "per_claim"},
+      "copay": {"inpatient_pct": 10, "outpatient_pct": 0, "pharmacy_pct": 0},
+      "room_rent_limit_per_day": 5000,
+      "icu_limit_per_day": 10000,
+      "sublimits": [
+        {"sublimit_id": "CATARACT", "name": "Cataract per eye", "limit": 40000, "basis": "per_claim",
+         "keywords": ["cataract", "phaco"], "codes": ["SUR-CAT"], "clause_id": "C-4.3"}
+      ],
+      "exclusions": [
+        {"exclusion_id": "COSMETIC", "text": "Cosmetic or plastic surgery unless necessitated by an accident",
+         "keywords": ["cosmetic", "aesthetic"], "codes": [], "clause_id": "C-6.1"}
+      ],
+      "non_payable_items": ["gloves", "syringe", "cotton", "admission kit"],
+      "network_provider_ids": [],
+      "waiting_period_days": 30,
+      "ped_waiting_days": 730,
+      "declared_ped": [],
+      "proportionate_deduction": false
+    },
+    {
+      "policy_number": "POL-AE-0001",
+      "product_id": "AE-HEALTH-GROUP",
+      "holder_id": "MBR-0101",
+      "members": ["MBR-0101"],
+      "start_date": "2026-01-01",
+      "end_date": "2026-12-31",
+      "currency": "AED",
+      "annual_limit": 150000,
+      "deductible": {"amount": 50, "basis": "per_visit"},
+      "copay": {"inpatient_pct": 0, "outpatient_pct": 20, "pharmacy_pct": 30},
+      "room_rent_limit_per_day": null,
+      "icu_limit_per_day": null,
+      "sublimits": [],
+      "exclusions": [
+        {"exclusion_id": "DENTAL", "text": "Dental treatment unless arising from an accident",
+         "keywords": ["dental", "tooth"], "codes": [], "clause_id": "A-5.2"}
+      ],
+      "non_payable_items": [],
+      "network_provider_ids": ["PRV-AE-01", "PRV-AE-02"],
+      "waiting_period_days": 0,
+      "ped_waiting_days": 0,
+      "declared_ped": [],
+      "proportionate_deduction": false
+    }
+  ]
+}
