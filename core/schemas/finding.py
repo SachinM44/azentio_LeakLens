@@ -125,11 +125,14 @@ class Finding(BaseModel):
 
     @property
     def effective_amount(self) -> float:
-        """What the settlement uses: the reviewer's correction, else the amount, unless dismissed."""
-        if self.status == FindingStatus.DISMISSED:
+        """What the settlement deducts: a reviewer's correction or confirmation wins; an open or auto-applied
+        finding counts only when its amount is calculated; dismissed or awaiting clarification counts nothing."""
+        if self.status in (FindingStatus.DISMISSED, FindingStatus.CLARIFICATION_REQUESTED):
             return 0.0
-        if self.status == FindingStatus.CORRECTED and self.corrected_amount is not None:
-            return self.corrected_amount
+        if self.status == FindingStatus.CORRECTED:
+            return self.corrected_amount if self.corrected_amount is not None else self.amount
+        if self.status == FindingStatus.CONFIRMED:
+            return self.amount
         return self.amount if self.amount_kind == AmountKind.CALCULATED else 0.0
 
 
