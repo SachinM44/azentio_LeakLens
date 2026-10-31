@@ -117,7 +117,7 @@ export default function ClaimDetailPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <section className="hero rise p-7">
+      <section data-tour="claim-hero" className="hero rise p-7">
         <Link to="/claims" className="inline-flex items-center gap-1 text-[13px] text-white/60 no-underline hover:text-accent"><ArrowLeft size={14} /> Back to claims</Link>
         <div className="mt-3 flex flex-wrap items-start justify-between gap-6">
           <div className="flex items-center gap-4">
@@ -165,7 +165,7 @@ export default function ClaimDetailPage() {
           action={<Button size="small" onClick={() => setTab('classification')}>Review pages</Button>} />
       )}
 
-      <Tabs activeKey={tab} onChange={setTab} items={[
+      <Tabs data-tour="tabs" activeKey={tab} onChange={setTab} items={[
         { key: 'findings', label: `Findings${open.length ? ` (${open.length} open)` : ''}`, children: findingsTab },
         { key: 'settlement', label: 'Settlement', children: <SettlementTab settlement={d.settlement} /> },
         { key: 'master', label: 'Master data', children: <MasterDataTab detail={d} highlightLine={highlight} /> },

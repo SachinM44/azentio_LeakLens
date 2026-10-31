@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { Alert, Skeleton, Tag } from 'antd'
 import { useQuery } from '@tanstack/react-query'
-import { AlertTriangle, Calculator, ClipboardCheck, FileCheck2, HelpCircle, ArrowRight, Trophy } from 'lucide-react'
+import { AlertTriangle, Calculator, ClipboardCheck, FileCheck2, FileSearch, HelpCircle, ArrowRight, ShieldCheck, Trophy, UploadCloud, Wallet } from 'lucide-react'
 import { api } from '../api/client'
 import type { CheckCategory, Dashboard, EvalSummary } from '../api/types'
 import ErrorBox from '../components/ErrorBox'
@@ -91,7 +91,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="hero rise p-8">
+      <section data-tour="hero" className="hero rise p-8">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div className="max-w-xl">
             <div className="eyebrow">Claims leakage detection</div>
@@ -123,11 +123,37 @@ export default function DashboardPage() {
         </div>
       </section>
 
+      <section className="card rise p-5">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="m-0 text-[15px] font-semibold">How LeakLens works</h2>
+          <span className="muted text-[12px]">Click a step to open it</span>
+        </div>
+        <div className="grid gap-3 md:grid-cols-4">
+          {[
+            { icon: <UploadCloud size={18} />, n: '1', title: 'Ingest', text: 'Upload claims, policies and bills. Bad rows are reported.', path: '/ingest' },
+            { icon: <FileSearch size={18} />, n: '2', title: 'Check', text: 'Rules test every line for duplicates, limits and exclusions.', path: '/claims' },
+            { icon: <ShieldCheck size={18} />, n: '3', title: 'Review', text: 'A person confirms, corrects or dismisses each finding.', path: '/claims' },
+            { icon: <Wallet size={18} />, n: '4', title: 'Settle', text: 'The payout is recalculated and the decision is audited.', path: '/claims' },
+          ].map((s, i) => (
+            <button key={s.n} type="button" onClick={() => nav(s.path)}
+              className="relative cursor-pointer rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-accent hover:bg-mint/50">
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-mint text-brand">{s.icon}</span>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Step {s.n}</span>
+              </div>
+              <div className="mt-2 text-[15px] font-semibold">{s.title}</div>
+              <div className="muted mt-0.5 text-[12.5px] leading-snug">{s.text}</div>
+              {i < 3 && <ArrowRight size={16} className="absolute -right-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-white text-slate-300 md:block" />}
+            </button>
+          ))}
+        </div>
+      </section>
+
       <FilterBar showStatus={false} />
 
       {dash.isError ? <ErrorBox error={dash.error} onRetry={() => dash.refetch()} /> : !d ? <Skeleton active paragraph={{ rows: 8 }} /> : (
         <>
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <div data-tour="stats" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <StatCard icon={<FileCheck2 size={19} />} label="Claims processed" color="#2ed88e" value={<CountUp value={d.processed} format={(n) => `${Math.round(n)}`} />}
               hint={`of ${d.claims} in view`} />
             <StatCard icon={<AlertTriangle size={19} />} label="Flagged claims" color="#dc3545" value={<CountUp value={d.flagged} format={(n) => `${Math.round(n)}`} />}

@@ -110,7 +110,7 @@ export default function ClaimsPage() {
       </div>
 
       {claims.isError ? <ErrorBox error={claims.error} onRetry={() => claims.refetch()} /> : (
-        <div className="card overflow-hidden rise">
+        <div data-tour="claims-table" className="card overflow-hidden rise">
           <Table<ClaimSummary> rowKey="claim_id" size="middle" loading={claims.isLoading} columns={columns} dataSource={rows}
             pagination={{ pageSize: 12, showSizeChanger: false, showTotal: (t) => `${t} claims`, className: '!px-4' }} scroll={{ x: 1100 }}
             rowClassName="clickable" onRow={(r) => ({ onClick: () => nav(`/claims/${encodeURIComponent(r.claim_id)}`) })}

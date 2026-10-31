@@ -28,7 +28,7 @@ export default function FindingCard({ finding: f, busy, onReview, onLineClick }:
   const hasAmount = f.amount > 0
 
   return (
-    <div className={`card rise relative overflow-hidden p-5 pl-6 ${dismissed ? 'opacity-60' : ''} ${isEvidenceGap ? '!border-amber-300' : ''}`}>
+    <div data-tour="finding" className={`card rise relative overflow-hidden p-5 pl-6 ${dismissed ? 'opacity-60' : ''} ${isEvidenceGap ? '!border-amber-300' : ''}`}>
       <span className="absolute inset-y-0 left-0 w-1.5" style={{ background: isEvidenceGap ? '#ffc107' : SEVERITY_COLOR[f.severity] }} />
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
@@ -119,7 +119,7 @@ export default function FindingCard({ finding: f, busy, onReview, onLineClick }:
         <div className="mt-3 rounded-lg bg-slate-50 p-2.5 text-[13px]"><span className="font-medium">Reviewer note: </span>{f.reviewer_note}</div>
       )}
 
-      <div className="mt-4 border-t border-slate-100 pt-3">
+      <div data-tour="review" className="mt-4 border-t border-slate-100 pt-3">
         <Input.TextArea rows={1} autoSize={{ minRows: 1, maxRows: 3 }} value={note} onChange={(e) => setNote(e.target.value)}
           placeholder={decided ? 'Add a note and change the decision…' : 'Reviewer note (kept in the audit log)'} className="mb-2" />
         <Space wrap>
