@@ -12,6 +12,7 @@ import json
 import logging
 import mimetypes
 import os
+import time
 import threading
 import uuid
 from abc import ABC, abstractmethod
@@ -105,6 +106,13 @@ class JsonFileStore(Repository):
         path = self._path(collection)
         tmp = path.with_suffix(".json.tmp")
         tmp.write_text(json.dumps(self._cache[collection], ensure_ascii=False, indent=1), encoding="utf-8")
+        # Windows: a reader (or a virus scanner) can hold the target for a moment; retry the swap briefly.
+        for attempt in range(40):
+            try:
+                os.replace(tmp, path)
+                return
+            except PermissionError:
+                time.sleep(0.05 * (attempt + 1))
         os.replace(tmp, path)
 
     def upsert(self, collection: str, doc_id: str, doc: Doc) -> Doc:

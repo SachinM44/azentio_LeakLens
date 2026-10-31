@@ -14,8 +14,9 @@ import httpx
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "data" / "synthetic" / "out"
+# The documents manifest and the rendered PDFs are picked up from disk by the ingest of claims.csv (synthetic set).
 UPLOADS = ["products.json", "policies.json", "providers.csv", "claimants.csv", "claims.csv", "invoice_lines.csv",
-           "history.json", "documents_manifest.json"]
+           "history.json"]
 
 
 def main() -> None:
@@ -30,9 +31,6 @@ def main() -> None:
     print("1. health:", client.get("/health").json())
 
     files = [("files", (name, (OUT / name).read_bytes())) for name in UPLOADS if (OUT / name).exists()]
-    docs_root = OUT / "documents"
-    for pdf in sorted(docs_root.rglob("*.*"))[:40] if docs_root.exists() else []:
-        files.append(("files", (f"{pdf.parent.name}_{pdf.name}", pdf.read_bytes())))
     started = time.monotonic()
     r = client.post("/ingest", files=files)
     r.raise_for_status()
