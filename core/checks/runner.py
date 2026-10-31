@@ -42,9 +42,12 @@ def run_all(*, record: MasterRecord, history_index: Dict[str, HistoryRecord], ot
     findings += policy_rules.check_quantity_vs_stay(record)
     findings += policy_rules.check_dates(record)
     findings += policy_rules.check_arithmetic(record)
-    findings += duplicates.check_duplicate_claim(record, history_index, other_claims)
+    claim_level = duplicates.check_duplicate_claim(record, history_index, other_claims)
+    findings += claim_level
     findings += duplicates.check_duplicate_lines(record)
-    findings += duplicates.check_cross_claim_lines(record)
+    covered = {cid for f in claim_level for cid in f.related_claim_ids}
+    # A claim already flagged as a (near-)duplicate of claim X does not also get its lines flagged against X.
+    findings += [f for f in duplicates.check_cross_claim_lines(record) if not set(f.related_claim_ids) & covered]
     findings += policy_rules.check_benefit_limit(record)
     findings += patterns.check_consistency(record)
     findings += patterns.check_provider_outlier(record, peer_lines)

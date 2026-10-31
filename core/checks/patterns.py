@@ -101,7 +101,8 @@ def check_related_party(record: MasterRecord, other_claims: List[Claim]) -> List
         for k, v in theirs.items():
             if v and k in keys and norm(v) == keys[k]:
                 shared[k].append(other.claim_id)
-    if not shared:
+    # A shared address alone is not a pattern (families and shared buildings); phone or bank account is.
+    if not (shared.get("phone") or shared.get("bank account")):
         return []
     related = sorted({cid for ids in shared.values() for cid in ids})
     return [make_finding(

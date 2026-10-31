@@ -27,6 +27,16 @@ def copay_pct_for(record: MasterRecord) -> float:
     return 0.0
 
 
+def deductible_for(record: MasterRecord) -> float:
+    """A per-visit deductible applies to outpatient visits; per-claim and per-year ones to any claim."""
+    policy = record.policy
+    if policy is None or policy.deductible.amount <= 0:
+        return 0.0
+    if policy.deductible.basis == "per_visit" and record.claim.claim_type != ClaimType.OUTPATIENT:
+        return 0.0
+    return float(policy.deductible.amount)
+
+
 def _used_in_year(record: MasterRecord) -> float:
     from core.checks.policy_rules import used_in_policy_year
     return used_in_policy_year(record)
@@ -69,8 +79,8 @@ def recalculate(record: MasterRecord, findings: List[Finding]) -> Settlement:
     steps.append(f"After deductions {money(after, cur)}")
 
     deductible = 0.0
-    if policy and policy.deductible.amount > 0 and after > 0:
-        deductible = round(min(after, policy.deductible.amount), 2)
+    if policy and deductible_for(record) > 0 and after > 0:
+        deductible = round(min(after, deductible_for(record)), 2)
         steps.append(f"- deductible {money(deductible, cur)} ({policy.deductible.basis.replace('_', ' ')})")
     copay_pct = copay_pct_for(record)
     copay_amount = round((after - deductible) * copay_pct / 100.0, 2) if copay_pct else 0.0
@@ -99,35 +109,47 @@ def recalculate(record: MasterRecord, findings: List[Finding]) -> Settlement:
 
 
 def settlement_findings(record: MasterRecord, settlement: Settlement) -> List[Finding]:
-    """Where the handler's proposed figure is above the recalculation, name the step that was skipped."""
+    """The handler's proposed figure is checked against the policy arithmetic on the bill as submitted
+    (deductible, then copay). Deductions the other checks already found are their own findings and are not
+    counted again here; what is left of the gap is named: copay skipped, deductible skipped, or unexplained."""
     claim, cur = record.claim, record.claim.currency
-    if settlement.difference is None or settlement.difference <= 1.0:
+    if claim.proposed_settlement is None:
         return []
-    diff = settlement.difference
+    base = settlement.lines_total
+    ded = min(base, deductible_for(record))
+    pct = settlement.copay_pct
+    correct = round((base - ded) * (1 - pct / 100.0), 2)
+    diff = round(claim.proposed_settlement - correct, 2)
+    if diff <= 1.0:
+        return []
     evidence = [Evidence(source="claim", ref=claim.claim_id, quote=f"proposed settlement {money(claim.proposed_settlement, cur)}"),
-                Evidence(source="config", ref="settlement", quote=" | ".join(settlement.steps))]
+                Evidence(source="config", ref="settlement",
+                         quote=f"lines {money(base, cur)} - deductible {money(ded, cur)} = {money(base - ded, cur)}; "
+                               f"x (1 - {pct:g}%) = {money(correct, cur)} before the other findings")]
+    copay_gap = round((base - ded) * pct / 100.0, 2)          # proposed = base - ded (copay skipped)
+    ded_gap = round(ded * (1 - pct / 100.0), 2)                # proposed = base x (1 - pct) (deductible skipped)
     out: List[Finding] = []
     explained = 0.0
-    if settlement.copay_amount > 0 and diff >= settlement.copay_amount - 1.0:
+    if copay_gap > 0 and diff >= copay_gap - 1.0:
         out.append(make_finding(
-            record, CheckId.COPAY_NOT_APPLIED, amount=settlement.copay_amount, kind=AmountKind.CALCULATED, rule_id="SETL-COPAY",
-            rule_text=f"A {settlement.copay_pct:g}% copay applies to this claim type.",
-            calculation=f"{settlement.copay_pct:g}% x {money(settlement.after_deductions - settlement.deductible_amount, cur)} = {money(settlement.copay_amount, cur)}",
+            record, CheckId.COPAY_NOT_APPLIED, amount=copay_gap, kind=AmountKind.CALCULATED, rule_id="SETL-COPAY",
+            rule_text=f"A {pct:g}% copay applies to this claim type.",
+            calculation=f"{pct:g}% x {money(base - ded, cur)} = {money(copay_gap, cur)}; the proposed figure skips it",
             reason="The proposed settlement does not deduct the copay.", evidence=evidence))
-        explained += settlement.copay_amount
-    if settlement.deductible_amount > 0 and diff - explained >= settlement.deductible_amount - 1.0:
+        explained += copay_gap
+    if ded_gap > 0 and diff - explained >= ded_gap - 1.0:
         out.append(make_finding(
-            record, CheckId.DEDUCTIBLE_NOT_APPLIED, amount=settlement.deductible_amount, kind=AmountKind.CALCULATED,
-            rule_id="SETL-DEDUCTIBLE", rule_text="The policy deductible is taken off before payment.",
-            calculation=f"deductible {money(settlement.deductible_amount, cur)} not deducted from the proposed figure",
+            record, CheckId.DEDUCTIBLE_NOT_APPLIED, amount=ded_gap, kind=AmountKind.CALCULATED, rule_id="SETL-DEDUCTIBLE",
+            rule_text="The deductible is taken off before the copay is applied.",
+            calculation=f"deductible {money(ded, cur)} x (1 - {pct:g}%) = {money(ded_gap, cur)} missing from the proposed figure",
             reason="The proposed settlement does not deduct the deductible.", evidence=evidence))
-        explained += settlement.deductible_amount
+        explained += ded_gap
     rest = round(diff - explained, 2)
     if rest > 1.0:
         out.append(make_finding(
             record, CheckId.SETTLEMENT_MISMATCH, amount=rest, kind=AmountKind.CALCULATED, rule_id="SETL-RECALC",
             rule_text="The settlement is recomputed from the invoice lines and the policy rules.",
-            calculation=f"proposed {money(claim.proposed_settlement, cur)} - recalculated {money(settlement.payable, cur)}"
+            calculation=f"proposed {money(claim.proposed_settlement, cur)} - correct {money(correct, cur)}"
                         + (f" - already explained {money(explained, cur)}" if explained else "") + f" = {money(rest, cur)}",
-            reason="The proposed settlement is higher than the rules allow.", evidence=evidence))
+            reason="The proposed settlement is higher than the policy arithmetic allows.", evidence=evidence))
     return out

@@ -125,8 +125,6 @@ def check_non_payable(record: MasterRecord) -> List[Finding]:
         return []
     findings: List[Finding] = []
     for line in positive_lines(record):
-        if is_room_line(line) or is_icu_line(line):
-            continue
         hit = matches_any(line.description, items, threshold=0.92)
         if hit:
             findings.append(make_finding(
@@ -164,10 +162,9 @@ def check_room_limits(record: MasterRecord) -> List[Finding]:
 
 
 def _sublimit_lines(record: MasterRecord, sub: Sublimit) -> List[InvoiceLine]:
-    lines = [l for l in positive_lines(record) if code_in(l, sub.codes) or matches_any(l.description, sub.keywords)]
-    if not lines and record.claim.diagnosis and matches_any(record.claim.diagnosis, sub.keywords):
-        lines = positive_lines(record)  # the whole episode is the procedure (e.g. a cataract package)
-    return lines
+    if sub.basis != "sessions_per_year" and record.claim.diagnosis and matches_any(record.claim.diagnosis, sub.keywords):
+        return positive_lines(record)  # the whole episode is the capped procedure (cataract, maternity ...)
+    return [l for l in positive_lines(record) if code_in(l, sub.codes) or matches_any(l.description, sub.keywords)]
 
 
 def check_sublimits(record: MasterRecord) -> List[Finding]:
@@ -219,8 +216,8 @@ def used_in_policy_year(record: MasterRecord) -> float:
     if policy is None:
         return 0.0
     return round(sum(h.paid_amount for h in record.history
-                     if (h.claimant_id == claim.claimant_id or h.policy_number == policy.policy_number)
-                     and h.claim_id != claim.claim_id and within(h.incident_date, policy.start_date, policy.end_date)), 2)
+                     if h.claimant_id == claim.claimant_id and h.claim_id != claim.claim_id
+                     and within(h.incident_date, policy.start_date, policy.end_date)), 2)
 
 
 def check_benefit_limit(record: MasterRecord) -> List[Finding]:

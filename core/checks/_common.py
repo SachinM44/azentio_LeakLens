@@ -112,6 +112,10 @@ def product_for(record: MasterRecord) -> ProductConfig:
 
 _ICU_RE = re.compile(r"\b(icu|iccu|hdu|intensive care|critical care)\b", re.I)
 _ROOM_RE = re.compile(r"\b(room|bed|ward|accommodation)\b", re.I)
+# Rooms that are procedure areas, not accommodation, plus bed-related consumables.
+_NOT_ROOM_RE = re.compile(r"\b(bed ?pan|companion bed|attendant bed|bedside|bed side|ward boy|labou?r room|delivery room|"
+                          r"operating room|operation room|operation theat|ot room|recovery room|emergency room|procedure room|"
+                          r"treatment room|consult(ation|ing)? room|dressing room|dialysis room)\b", re.I)
 _PER_DAY_RE = re.compile(r"\b(per day|nursing|daily|day care)\b", re.I)
 
 
@@ -124,7 +128,8 @@ def is_icu_line(line: InvoiceLine) -> bool:
 def is_room_line(line: InvoiceLine) -> bool:
     if line.category and line.category.value == "room":
         return True
-    return bool(_ROOM_RE.search(line.description or "")) and not is_icu_line(line)
+    desc = line.description or ""
+    return bool(_ROOM_RE.search(desc)) and not _NOT_ROOM_RE.search(desc) and not is_icu_line(line)
 
 
 def per_day_line(line: InvoiceLine) -> bool:

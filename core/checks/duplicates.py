@@ -136,15 +136,14 @@ def check_duplicate_lines(record: MasterRecord) -> List[Finding]:
                     reason=f"'{a.description}' is billed twice for the same date.", lines=[a, b]))
                 flagged.add(a.line_id)
                 break
-            if repeatable and not same_day:
-                continue  # physiotherapy / dialysis / chemo sessions on different dates are separate services
-            if (gap is not None and gap <= product.near_duplicate_days
-                    and amounts_close(a.amount, b.amount, product.near_duplicate_amount_tolerance_pct)):
+            if not same_day:
+                continue  # the same test or session on another date of the stay is a repeat service, not a duplicate
+            if amounts_close(a.amount, b.amount, product.near_duplicate_amount_tolerance_pct):
                 findings.append(make_finding(
                     record, CheckId.NEAR_DUPLICATE, amount=a.amount, kind=AmountKind.SUSPECTED, rule_id="DUP-LINE-02",
                     rule_text="The same service a few days apart for almost the same amount needs a human look.",
-                    calculation=f"{gap} day(s) apart; {money(a.amount, record.claim.currency)} vs {money(b.amount, record.claim.currency)}",
-                    reason=f"'{a.description}' looks repeated with a small change in date or amount.", lines=[a, b]))
+                    calculation=f"same day; {money(a.amount, record.claim.currency)} vs {money(b.amount, record.claim.currency)}",
+                    reason=f"'{a.description}' appears twice on the same day with a small change in amount.", lines=[a, b]))
                 flagged.add(a.line_id)
                 break
     return findings
