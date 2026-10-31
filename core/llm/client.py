@@ -31,15 +31,14 @@ logger = logging.getLogger("leaklens.llm")
 
 PRIMARY_MODEL = os.environ.get("LEAKLENS_MODEL", "bedrock/moonshotai.kimi-k2.5")
 FALLBACK_MODELS = [m.strip() for m in os.environ.get(
-    "LEAKLENS_FALLBACK_MODELS", "gemini-3.5-flash,gemini-3.1-pro-preview").split(",") if m.strip()]
+    "LEAKLENS_FALLBACK_MODELS", "bedrock/anthropic.claude-sonnet-5-5").split(",") if m.strip()]
 AWS_REGION = os.environ.get("AWS_REGION_NAME", "ap-south-1")
 COST_CAP_USD = float(os.environ.get("COST_CAP_USD_PER_CLAIM", "2"))
 # USD per million tokens (input, output). Kimi list price; Claude via env.
 # by us; set from Google's price page before quoting a Gemini cost.
 PRICES: Dict[str, Tuple[float, float]] = {
     "bedrock/moonshotai.kimi-k2.5": (0.72, 3.60),
-    "gemini-3.5-flash": (float(os.environ.get("GEMINI_FLASH_PRICE_IN", "0")), float(os.environ.get("GEMINI_FLASH_PRICE_OUT", "0"))),
-    "gemini-3.1-pro-preview": (float(os.environ.get("GEMINI_PRO_PRICE_IN", "0")), float(os.environ.get("GEMINI_PRO_PRICE_OUT", "0"))),
+    "bedrock/anthropic.claude-sonnet-5-5": (float(os.environ.get("CLAUDE_PRICE_IN", "3.0")), float(os.environ.get("CLAUDE_PRICE_OUT", "15.0"))),
 }
 RETRY_BACKOFF_S = (2, 8, 20)
 SECRET_PATTERN = re.compile(r"AIza[0-9A-Za-z_\-]{20,}|(?:AKIA|ASIA)[0-9A-Z]{16}")
@@ -214,7 +213,7 @@ def call_model(prompt_name: str, payload: Union[Dict[str, Any], str], images: Se
     notes: List[str] = []
     attempts = 0
     for current in [model] + (FALLBACK_MODELS if use_fallback else []):
-        caller = _call_gemini if current.startswith("gemini") else _call_bedrock
+        caller = _call_bedrock
         turn_content = content
         reasked = False
         for backoff in (0,) + RETRY_BACKOFF_S:
