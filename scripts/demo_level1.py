@@ -48,13 +48,16 @@ def main() -> None:
     for row in claims[: args.limit]:
         client.post(f"/claims/{row['claim_id']}/run").raise_for_status()
     print(f"   runs started for {min(len(claims), args.limit)} claims in {time.monotonic() - started:.1f}s")
+    ids = [row["claim_id"] for row in claims[: args.limit]]
     for _ in range(600):
-        pending = [row for row in client.get("/claims").json()[: args.limit]
-                   if row.get("status") not in ("checked", "reviewed", "settled", "awaiting_review")]
-        if not pending:
+        states = {cid: client.get(f"/claims/{cid}/run").json().get("status") for cid in ids}
+        if all(s in ("paused", "done", "failed", "completed") for s in states.values()):
             break
-        time.sleep(1)
-    print(f"   runs finished in {time.monotonic() - started:.1f}s")
+        time.sleep(2)
+    from collections import Counter
+    print(f"   runs finished in {time.monotonic() - started:.1f}s: {dict(Counter(states.values()))}")
+    paused_at = Counter(client.get(f"/claims/{cid}/run").json().get("paused_at") for cid in ids if states[cid] == "paused")
+    print(f"   paused at: {dict(paused_at)}")
 
     dash = client.get("/dashboard").json()
     print("4. dashboard:", {k: dash.get(k) for k in ("processed", "flagged", "leakage_calculated", "leakage_suspected", "awaiting_review")})
