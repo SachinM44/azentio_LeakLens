@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
-import { Input, Tag } from 'antd'
+import { Button, Input, Tag, notification } from 'antd'
 import { useQuery } from '@tanstack/react-query'
-import { FileSearch, LayoutDashboard, ListChecks, Search, Settings, ShieldCheck, SlidersHorizontal, UploadCloud } from 'lucide-react'
+import { Compass, FileSearch, LayoutDashboard, ListChecks, Search, Settings, ShieldCheck, SlidersHorizontal, UploadCloud } from 'lucide-react'
 import { api, connection } from './api/client'
 import SettingsModal from './components/SettingsModal'
 import { Avatar } from './components/ui'
+import CommandPalette from './components/CommandPalette'
+import ProductTour from './components/ProductTour'
 import ClaimsPage from './pages/ClaimsPage'
 import ClaimDetailPage from './pages/ClaimDetailPage'
 import ConfigPage from './pages/ConfigPage'
@@ -24,6 +26,8 @@ const TITLES: Record<string, string> = { dashboard: 'Dashboard', claims: 'Claims
 export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [jump, setJump] = useState('')
+  const [tourOpen, setTourOpen] = useState(false)
+  const [paletteOpen, setPaletteOpen] = useState(false)
   const nav = useNavigate()
   const loc = useLocation()
   const health = useQuery({ queryKey: ['health'], queryFn: api.health, refetchInterval: 15_000, retry: false })
@@ -31,13 +35,41 @@ export default function App() {
   const mock = connection.useMocks
   const awaiting = dash.data?.awaiting_review ?? 0
 
+  // Ctrl/Cmd+K opens the quick-jump palette.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); setPaletteOpen(true) }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  // Offer the tour once per browser, without forcing it.
+  useEffect(() => {
+    let seen = false
+    try { seen = localStorage.getItem('leaklens_toured') === '1' } catch { /* ignore */ }
+    if (seen) return
+    const t = window.setTimeout(() => {
+      const key = 'welcome'
+      notification.open({
+        key, placement: 'bottomLeft', duration: 0, message: 'Welcome to LeakLens',
+        description: 'New here? Take a one-minute tour of how a claim goes from upload to a reviewed settlement.',
+        btn: <Button type="primary" size="small" onClick={() => { notification.destroy(key); setTourOpen(true) }}>Start tour</Button>,
+        onClose: () => { try { localStorage.setItem('leaklens_toured', '1') } catch { /* ignore */ } },
+      })
+    }, 1200)
+    return () => window.clearTimeout(t)
+  }, [])
+
+  const endTour = () => { setTourOpen(false); try { localStorage.setItem('leaklens_toured', '1') } catch { /* ignore */ } }
+
   const parts = loc.pathname.split('/').filter(Boolean)
   const section = TITLES[parts[0]] ?? 'LeakLens'
   const groups = Array.from(new Set(NAV.map((n) => n.group)))
 
   return (
-    <div className="flex h-full">
-      <aside className="flex w-[240px] shrink-0 flex-col text-white"
+    <div className="flex h-screen overflow-hidden">
+      <aside className="flex h-screen w-[240px] shrink-0 flex-col overflow-y-auto text-white"
         style={{ background: 'linear-gradient(180deg, #0d1c4f 0%, #16303d 45%, #16303d 100%)' }}>
         <div className="flex items-center gap-3 px-6 pb-4 pt-6">
           <span className="flex h-10 w-10 items-center justify-center rounded-2xl text-brand shadow-lg"
@@ -48,7 +80,7 @@ export default function App() {
           </div>
         </div>
 
-        <nav className="mt-2 flex flex-col gap-5 px-4">
+        <nav data-tour="nav" className="mt-2 flex flex-col gap-5 px-4">
           {groups.map((g) => (
             <div key={g} className="flex flex-col gap-1">
               <div className="px-3 pb-1 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-white/35">{g}</div>
@@ -86,15 +118,16 @@ export default function App() {
         </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-[68px] shrink-0 items-center justify-between gap-4 border-b border-slate-200/70 bg-white/80 px-8 backdrop-blur">
+      <div className="flex h-screen min-h-0 min-w-0 flex-1 flex-col">
+        <header className="z-20 flex h-[68px] shrink-0 items-center justify-between gap-4 border-b border-slate-200/70 bg-white/80 px-8 backdrop-blur">
           <div className="flex items-center gap-2 text-[14px]">
             <span className="muted">LeakLens</span><span className="text-slate-300">/</span>
             <span className="font-semibold">{section}</span>
             {parts[1] && <><span className="text-slate-300">/</span><span className="mono text-[13px] font-medium">{decodeURIComponent(parts[1])}</span></>}
           </div>
           <div className="flex items-center gap-4">
-            <Input allowClear prefix={<Search size={15} className="text-slate-400" />} placeholder="Jump to claim, e.g. CLM-1001"
+            <Button icon={<Compass size={15} />} className="!rounded-full" onClick={() => setTourOpen(true)}>Take a tour</Button>
+            <Input data-tour="search" allowClear prefix={<Search size={15} className="text-slate-400" />} placeholder="Jump to claim, e.g. CLM-1001   (Ctrl+K)"
               value={jump} onChange={(e) => setJump(e.target.value)} className="!w-72 !rounded-full"
               onPressEnter={() => { if (jump.trim()) { nav(`/claims/${encodeURIComponent(jump.trim().toUpperCase())}`); setJump('') } }} />
             <div className="flex items-center gap-2.5">
@@ -107,7 +140,7 @@ export default function App() {
           </div>
         </header>
 
-        <main className="min-w-0 flex-1 overflow-y-auto">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain">
           <div className="mx-auto max-w-[1320px] px-8 py-7">
             <Routes>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -121,6 +154,8 @@ export default function App() {
           </div>
         </main>
       </div>
+      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <ProductTour open={tourOpen} onClose={endTour} />
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   )

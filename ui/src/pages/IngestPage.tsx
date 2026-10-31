@@ -65,12 +65,12 @@ export default function IngestPage() {
         </div>
       </section>
 
-      <Upload.Dragger multiple accept={ACCEPT} fileList={files} beforeUpload={() => false}
+      <div data-tour="upload"><Upload.Dragger multiple accept={ACCEPT} fileList={files} beforeUpload={() => false}
         onChange={({ fileList }) => setFiles(fileList)} className="!bg-white">
         <p className="flex justify-center text-accent"><CloudUpload size={38} /></p>
         <p className="text-[16px] font-medium">Drop files here or click to choose</p>
         <p className="muted text-[13px]">.csv · .xlsx · .json · .pdf · .jpg · .png — any mix in one batch</p>
-      </Upload.Dragger>
+      </Upload.Dragger></div>
 
       <div>
         <Button type="primary" size="large" loading={ingest.isPending} disabled={!files.length} onClick={() => ingest.mutate()}>

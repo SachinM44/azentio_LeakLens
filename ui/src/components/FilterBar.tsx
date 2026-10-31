@@ -13,7 +13,7 @@ export default function FilterBar({ showStatus = true }: { showStatus?: boolean 
   const providers = useQuery({ queryKey: ['dashboard', {}], queryFn: () => api.dashboard({}), staleTime: 30_000 })
 
   return (
-    <div className="card flex flex-wrap items-center gap-2 p-3">
+    <div data-tour="filters" className="card flex flex-wrap items-center gap-2 p-3">
       <Select allowClear placeholder="Claim type" className="w-36" value={filters.type} onChange={(v) => patch({ type: v })}
         options={CLAIM_TYPES.map((t) => ({ value: t, label: titleCase(t) }))} />
       <Select allowClear showSearch optionFilterProp="label" placeholder="Provider" className="w-48" value={filters.provider}
