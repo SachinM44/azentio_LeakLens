@@ -16,20 +16,29 @@ export async function runAndWait(claimId: string, { timeoutMs = 120_000, interva
   }
 }
 
-/** Run claims one at a time (the backend runs each in the background); reports progress after every claim. */
+const PARALLEL_RUNS = 8
+
+/** Run claims a few at a time (each runs in the background on the server); reports progress after every claim. */
 export async function runMany(
   claimIds: string[],
   onProgress: (done: number, total: number, failed: string[]) => void,
 ): Promise<{ failed: string[] }> {
   const failed: string[] = []
-  for (let i = 0; i < claimIds.length; i++) {
-    try {
-      const run = await runAndWait(claimIds[i])
-      if (run.status === 'failed' || run.error) failed.push(claimIds[i])
-    } catch {
-      failed.push(claimIds[i])
+  let next = 0
+  let done = 0
+  const worker = async () => {
+    while (next < claimIds.length) {
+      const id = claimIds[next++]
+      try {
+        const run = await runAndWait(id, { timeoutMs: 300_000 })
+        if (run.status === 'failed' || run.error) failed.push(id)
+      } catch {
+        failed.push(id)
+      }
+      done += 1
+      onProgress(done, claimIds.length, [...failed])
     }
-    onProgress(i + 1, claimIds.length, [...failed])
   }
+  await Promise.all(Array.from({ length: Math.min(PARALLEL_RUNS, claimIds.length) }, worker))
   return { failed }
 }
