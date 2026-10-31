@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Alert, Button, Empty, Progress, Select, Table, message } from 'antd'
+import { Alert, Button, Empty, Progress, Select, Table, Tag, message } from 'antd'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../../api/client'
 import type { ClassificationRow } from '../../api/types'
@@ -33,9 +33,15 @@ export default function ClassificationTab({ claimId, rows, documentCount }: { cl
     )
   }
   const pending = rows.some((r) => !r.confirmed_type)
+  const guessedOnly = rows.some((r) => r.predicted_by !== 'model')
 
   return (
     <div className="flex flex-col gap-3">
+      {pending && guessedOnly && (
+        <Alert type="info" showIcon message="These types are only a guess from the file names"
+          description="Let the AI read every page and propose its type, then check and confirm."
+          action={<Button type="primary" loading={classify.isPending} onClick={() => classify.mutate()}>Classify pages with AI</Button>} />
+      )}
       {pending
         ? <Alert type="warning" showIcon message="Waiting for you" description="Check the predicted type of each page (low-confidence pages are marked), correct any that are wrong, then confirm. The workflow continues once you do." />
         : <Alert type="success" showIcon message="Classification confirmed" />}
@@ -43,7 +49,9 @@ export default function ClassificationTab({ claimId, rows, documentCount }: { cl
         columns={[
           { title: 'Document', dataIndex: 'document_name', render: (v: string | undefined, r) => <span className="mono text-[12px]">{v ?? r.document_id}</span> },
           { title: 'Page', dataIndex: 'page', width: 70 },
-          { title: 'Predicted', dataIndex: 'predicted_type', render: (v?: string | null) => (v ? titleCase(v) : '—') },
+          { title: 'Predicted', dataIndex: 'predicted_type', render: (v: string | null | undefined, r) => (
+              <span>{v ? titleCase(v) : '—'} <Tag className="!ml-1" color={r.predicted_by === 'model' ? 'green' : 'default'}>
+                {r.predicted_by === 'model' ? 'AI' : 'file name'}</Tag></span>) },
           { title: 'Confidence', dataIndex: 'confidence', width: 160,
             render: (v?: number | null) => (v == null ? '—' : <Progress percent={Math.round(v * 100)} size="small" status={v < 0.7 ? 'exception' : 'normal'} />) },
           { title: 'Confirmed type', key: 'choice', width: 280,
