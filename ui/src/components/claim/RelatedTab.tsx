@@ -21,11 +21,19 @@ export default function RelatedTab({ claimId }: { claimId: string }) {
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               {r.source === 'claim'
-                ? <Link to={`/claims/${encodeURIComponent(r.claim_id)}`} className="mono text-[15px] font-semibold">{r.claim_id}</Link>
+                ? <Link to={`/claims/${encodeURIComponent(r.claim_id)}`} className="mono text-[15px] font-semibold !text-[#2F7FF2] hover:underline">{r.claim_id}</Link>
                 : <span className="mono text-[15px] font-semibold">{r.claim_id}</span>}
               {r.source === 'history' && <Tag className="!m-0">Paid history</Tag>}
             </div>
-            <Tag color={STRENGTH_COLOR[r.strength] ?? 'default'} className="!m-0">{titleCase(r.strength)} link</Tag>
+            <div className="flex items-center gap-2">
+              <Tag color={STRENGTH_COLOR[r.strength] ?? 'default'} className="!m-0">{titleCase(r.strength)} link</Tag>
+              {r.source === 'claim' && (
+                <a href={`/claims/${encodeURIComponent(r.claim_id)}`} target="_blank" rel="noreferrer"
+                  className="rounded-md border border-[#2F7FF2] px-2 py-0.5 text-[12px] font-medium text-[#2F7FF2] no-underline hover:bg-[#2F7FF2] hover:text-white">
+                  Open claim ↗
+                </a>
+              )}
+            </div>
           </div>
           <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-[13px]">
             <div><span className="muted">Member </span>{r.claimant_name || r.claimant_id || '—'}</div>
