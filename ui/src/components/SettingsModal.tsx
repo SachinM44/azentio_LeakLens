@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Alert, Button, Input, Modal, Switch, message } from 'antd'
+import { Alert, Button, Input, Modal, message } from 'antd'
 import { DEFAULT_ANALYST, api, connection } from '../api/client'
 
 export default function SettingsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -40,10 +40,6 @@ export default function SettingsModal({ open, onClose }: { open: boolean; onClos
           <div className="mb-1 font-medium">Your name</div>
           <Input value={analyst} onChange={(e) => setAnalyst(e.target.value)} placeholder={DEFAULT_ANALYST} maxLength={60} />
           <div className="muted mt-1 text-[12px]">Recorded on every decision, note and audit entry you make.</div>
-        </label>
-        <label className="flex items-center justify-between gap-3">
-          <span><b>Use mock data</b><br /><span className="muted text-[13px]">Demo the screens without a backend.</span></span>
-          <Switch checked={useMocks} onChange={setUseMocks} />
         </label>
         <label>
           <div className="mb-1 font-medium">API base URL</div>

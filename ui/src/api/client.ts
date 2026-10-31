@@ -26,9 +26,9 @@ export const connection = {
   get apiKey(): string {
     return read(KEY_API) || import.meta.env.VITE_API_KEY || 'change-me'
   },
+  // The screens always talk to the backend; mock data is only for UI development (VITE_USE_MOCKS=true).
   get useMocks(): boolean {
-    const stored = read(KEY_MOCK)
-    return stored !== null ? stored === 'true' : import.meta.env.VITE_USE_MOCKS === 'true'
+    return import.meta.env.VITE_USE_MOCKS === 'true'
   },
   /** The person acting: sent as X-Analyst so the audit log and decisions carry a name. */
   get analyst(): string {
