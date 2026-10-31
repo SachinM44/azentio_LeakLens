@@ -89,6 +89,14 @@ load_record -> [classification_gate] -> run_checks -> assess -> investigate -> s
 A model failure never blocks the claim: classify keeps the file-name guesses and reports `error`; confirm stores
 the types, records `digitisation_error` on the claim and continues with the structured lines.
 
+### Synthetic documents manifest
+
+When `data/synthetic/out/documents_manifest.json` exists (`DOCUMENTS_MANIFEST_PATH`), ingesting the synthetic
+claims uses it: every document the manifest lists for a claim goes into the master record (`documents` =
+document ids, `document_types` = id -> type, `document_facts` = the header facts with nulls dropped), rendered
+files under `documents_root` are stored and attached to the claim at ingest, and `printed_total` / `reconciled`
+come from `net_payable`. A type confirmed through the review console wins over the manifest's.
+
 ## Endpoints
 
 | Method | Path | Notes |

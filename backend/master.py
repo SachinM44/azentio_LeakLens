@@ -7,12 +7,13 @@ from __future__ import annotations
 
 import json
 import logging
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from core.schemas.master import Claim, HistoryRecord, InvoiceLine, MasterRecord, Policy, ProductConfig
 
-from backend.settings import get_settings
+from backend.settings import REPO_ROOT, get_settings
 from backend.store import Repository, to_doc
 
 logger = logging.getLogger(__name__)
@@ -69,13 +70,40 @@ def claim_history(store: Repository, claim: Claim) -> List[HistoryRecord]:
 # ----------------------------------------------------------------------------------------------- documents manifest
 
 
-_MANIFEST_CACHE: Dict[str, Tuple[float, Dict[str, Dict[str, Any]]]] = {}  # path -> (mtime, entries)
+@dataclass
+class ManifestDocument:
+    """One document the manifest says was submitted with a claim; `path` is set when a file was rendered."""
+    document_id: str
+    document_type: str
+    name: Optional[str]
+    path: Optional[Path]
 
 
-def _manifest_entries(path: Path) -> Dict[str, Dict[str, Any]]:
-    """claim_id -> manifest entry. Accepts {claim_id: entry} or [{"claim_id": ..., ...}] (optionally under
-    `claims`); an entry may hold `document_facts` and a `documents` list of {name|file, type|document_type}.
-    Parsed once per file version: a refresh of every claim must not re-read the file per claim."""
+@dataclass
+class ManifestEntry:
+    claim_id: str
+    documents: List[ManifestDocument] = field(default_factory=list)
+    document_facts: Dict[str, str] = field(default_factory=dict)
+
+
+_MANIFEST_CACHE: Dict[str, Tuple[float, Dict[str, ManifestEntry]]] = {}  # path -> (mtime, entries)
+
+
+def _manifest_document(raw: Dict[str, Any], root: Path) -> Optional[ManifestDocument]:
+    doc_type = raw.get("document_type") or raw.get("type")
+    document_id = raw.get("document_id") or raw.get("id")
+    if not doc_type or not document_id:
+        return None
+    file_ = raw.get("file") or raw.get("name") or raw.get("filename")
+    path = (root / str(file_)) if file_ else None
+    return ManifestDocument(document_id=str(document_id), document_type=str(doc_type),
+                            name=Path(str(file_)).name if file_ else None, path=path)
+
+
+def manifest_entries(path: Path) -> Dict[str, ManifestEntry]:
+    """claim_id -> ManifestEntry from the synthetic documents manifest ({"documents_root", "claims": [...]}; a
+    bare list or {claim_id: entry} dict is accepted too). Parsed once per file version: a refresh of every claim
+    must not re-read the file per claim."""
     if not path.exists():
         return {}
     mtime = path.stat().st_mtime
@@ -87,33 +115,30 @@ def _manifest_entries(path: Path) -> Dict[str, Dict[str, Any]]:
     except Exception as exc:
         logger.warning("documents manifest unreadable", extra={"path": str(path), "error": str(exc)})
         return {}
+    root = path.parent
+    if isinstance(payload, dict) and payload.get("documents_root"):
+        declared = Path(str(payload["documents_root"]))
+        root = declared if declared.is_absolute() else REPO_ROOT / declared
     if isinstance(payload, dict) and isinstance(payload.get("claims"), (list, dict)):
         payload = payload["claims"]
-    entries: Dict[str, Dict[str, Any]] = {}
+    raw_entries: List[Dict[str, Any]] = []
     if isinstance(payload, list):
-        entries = {str(entry["claim_id"]): entry for entry in payload if isinstance(entry, dict) and entry.get("claim_id")}
+        raw_entries = [entry for entry in payload if isinstance(entry, dict) and entry.get("claim_id")]
     elif isinstance(payload, dict):
-        entries = {str(claim_id): entry for claim_id, entry in payload.items() if isinstance(entry, dict)}
+        raw_entries = [{**entry, "claim_id": claim_id} for claim_id, entry in payload.items() if isinstance(entry, dict)]
+    entries: Dict[str, ManifestEntry] = {}
+    for raw in raw_entries:
+        facts_raw = raw.get("document_facts") if isinstance(raw.get("document_facts"), dict) else {}
+        facts = {str(key): str(value) for key, value in facts_raw.items() if value is not None and str(value) != ""}
+        docs = [_manifest_document(raw=item, root=root) for item in raw.get("documents", []) if isinstance(item, dict)]
+        entries[str(raw["claim_id"])] = ManifestEntry(claim_id=str(raw["claim_id"]), document_facts=facts,
+                                                      documents=[doc for doc in docs if doc is not None])
     _MANIFEST_CACHE[str(path)] = (mtime, entries)
     return entries
 
 
-def manifest_for_claim(claim_id: str) -> Tuple[Dict[str, str], Dict[str, str]]:
-    """(document_facts, document name -> type) for the claim from the synthetic documents manifest, if any."""
-    entry = _manifest_entries(path=get_settings().documents_manifest_abs).get(claim_id)
-    if not entry:
-        return {}, {}
-    facts_raw = entry.get("document_facts") if isinstance(entry.get("document_facts"), dict) else {}
-    facts = {str(key): ("" if value is None else str(value)) for key, value in facts_raw.items()}
-    types: Dict[str, str] = {}
-    for doc in entry.get("documents", []) if isinstance(entry.get("documents"), list) else []:
-        if not isinstance(doc, dict):
-            continue
-        name = doc.get("name") or doc.get("file") or doc.get("filename")
-        doc_type = doc.get("type") or doc.get("document_type")
-        if name and doc_type:
-            types[Path(str(name)).name] = str(doc_type)
-    return facts, types
+def manifest_for_claim(claim_id: str) -> Optional[ManifestEntry]:
+    return manifest_entries(path=get_settings().documents_manifest_abs).get(claim_id)
 
 
 def _printed_total(facts: Dict[str, str]) -> Optional[float]:
@@ -153,13 +178,27 @@ def _build(store: Repository, claim_id: str) -> Optional[Tuple[MasterRecord, Dic
     product = load_product(store=store, product_id=claim.product_id, currency=claim.currency)
     documents = store.list(collection="documents", filter_={"claim_id": claim_id})
     documents.sort(key=lambda doc: doc.get("uploaded_at", ""))
-    facts, manifest_types = manifest_for_claim(claim_id=claim_id)
+    manifest = manifest_for_claim(claim_id=claim_id)
+    manifest_docs = manifest.documents if manifest else []
+    facts = dict(manifest.document_facts) if manifest else {}
+    type_by_name = {doc.name: doc.document_type for doc in manifest_docs if doc.name}
+    # Stored documents first (confirmed type, else what the manifest says about that file), then the manifest's
+    # documents that were never uploaded or rendered: the evidence check needs every submitted document's type.
+    document_ids: List[str] = []
     document_types: Dict[str, str] = {}
+    stored_names = set()
     for doc in documents:
-        confirmed = doc.get("document_type") or manifest_types.get(Path(str(doc.get("name", ""))).name)
-        if confirmed:
-            document_types[doc["document_id"]] = confirmed
-    if documents and claim.source == "structured":
+        document_ids.append(doc["document_id"])
+        stored_names.add(doc.get("name"))
+        doc_type = doc.get("document_type") or type_by_name.get(doc.get("name"))
+        if doc_type:
+            document_types[doc["document_id"]] = doc_type
+    for doc in manifest_docs:
+        if (doc.name and doc.name in stored_names) or doc.document_id in document_ids:
+            continue
+        document_ids.append(doc.document_id)
+        document_types[doc.document_id] = doc.document_type
+    if document_ids and claim.source == "structured":
         claim.source = "mixed"
         claim_doc["source"] = "mixed"
         store.upsert(collection="claims", doc_id=claim_id, doc=claim_doc)
@@ -172,9 +211,8 @@ def _build(store: Repository, claim_id: str) -> Optional[Tuple[MasterRecord, Dic
             printed_total = float(digitised["printed_total"])
             reconciled = digitised.get("reconciled")
     record = MasterRecord(claim=claim, lines=lines, policy=policy, history=claim_history(store=store, claim=claim),
-                          product=product, documents=[doc["document_id"] for doc in documents],
-                          document_types=document_types, document_facts=facts, printed_total=printed_total,
-                          reconciled=reconciled)
+                          product=product, documents=document_ids, document_types=document_types,
+                          document_facts=facts, printed_total=printed_total, reconciled=reconciled)
     stored = {**to_doc(record), "document_lines": digitised.get("document_lines", []),
               "discount_rows": digitised.get("discount_rows", [])}
     return record, stored

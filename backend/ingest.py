@@ -21,7 +21,7 @@ from pydantic import BaseModel, Field, ValidationError
 from core.schemas.finding import ValidationIssue
 from core.schemas.master import Claim, HistoryRecord, InvoiceLine, Policy, ProductConfig
 
-from backend.master import refresh_master_records
+from backend.master import manifest_for_claim, refresh_master_records
 from backend.store import Repository, now_iso
 
 logger = logging.getLogger(__name__)
@@ -347,6 +347,30 @@ def store_document(store: Repository, name: str, data: bytes, claim_ids: Set[str
     return meta, issues
 
 
+def import_manifest_documents(store: Repository, claim_ids: List[str]) -> List[Dict[str, Any]]:
+    """Rendered files the synthetic documents manifest lists for these claims become stored documents attached
+    to the claim (skipped when a file of that name is already on the claim). Returns the stored documents."""
+    imported: List[Dict[str, Any]] = []
+    for claim_id in claim_ids:
+        entry = manifest_for_claim(claim_id=claim_id)
+        if entry is None:
+            continue
+        present = {doc.get("name") for doc in store.list(collection="documents", filter_={"claim_id": claim_id})}
+        for doc in entry.documents:
+            if doc.path is None or doc.name in present or doc.path.suffix.lower() not in DOCUMENT_MIMES:
+                continue
+            if not doc.path.exists():
+                logger.warning("manifest file missing", extra={"claim_id": claim_id, "path": str(doc.path)})
+                continue
+            meta, _ = store_document(store=store, name=doc.name, data=doc.path.read_bytes(), claim_ids={claim_id})
+            meta["claim_id"] = claim_id  # the manifest binds the file to the claim even without the id prefix
+            meta["manifest_document_id"] = doc.document_id
+            store.upsert(collection="documents", doc_id=meta["document_id"], doc=meta)
+            imported.append({key: meta.get(key) for key in ("document_id", "name", "claim_id", "pages", "mime")})
+            present.add(doc.name)
+    return imported
+
+
 # ----------------------------------------------------------------------------------------------- orchestration
 
 
@@ -401,6 +425,11 @@ def ingest_files(store: Repository, files: List[Tuple[str, bytes]], actor: str) 
         if meta.get("claim_id"):
             affected.add(meta["claim_id"])
     result.claims_created = len(known["claims"] - existing_claims)
+    imported = import_manifest_documents(store=store, claim_ids=sorted(known["claims"] - existing_claims))
+    if imported:
+        result.documents.extend(imported)
+        result.counts["documents"] = result.counts.get("documents", 0) + len(imported)
+        affected.update(doc["claim_id"] for doc in imported)
     targets = sorted(known["claims"]) if refresh_all else sorted(affected & known["claims"])
     refresh_master_records(store=store, claim_ids=targets)
     result.claims_affected = targets

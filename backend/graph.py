@@ -162,7 +162,10 @@ def load_record(state: ClaimState) -> dict:
     record = build_master_record(store=store, claim_id=state["claim_id"])
     if record is None:
         raise ValueError(f"claim {state['claim_id']} is not in the store")
-    needs_review = bool(record.documents) and any(doc_id not in record.document_types for doc_id in record.documents)
+    # Gate 1 opens when a stored document has no type yet, or when the page classifier ran and asked for a review.
+    claim_doc = store.get(collection="claims", doc_id=state["claim_id"]) or {}
+    needs_review = bool(claim_doc.get("needs_classification_review")) or (
+        bool(record.documents) and any(doc_id not in record.document_types for doc_id in record.documents))
     return {"record": to_doc(record), "needs_classification_review": needs_review, "errors": []}
 
 

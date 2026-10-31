@@ -38,9 +38,31 @@ def _dismiss_open_findings(client: TestClient, claim_id: str) -> int:
     return len(open_ids)
 
 
+def _write_manifest(folder: Path) -> Path:
+    """A documents manifest for CLM-2026-0004: one rendered bill (file on disk) and one listed-only claim form."""
+    import json
+
+    pdf_dir = folder / "documents" / "CLM-2026-0004"
+    pdf_dir.mkdir(parents=True)
+    (pdf_dir / "CLM-2026-0004_bill.pdf").write_bytes(_synthetic_pdf(["Itemised bill (synthetic)", "NET PAYABLE 32,000.00"]))
+    manifest = {"seed": 1, "documents_root": str(folder), "claims": [{
+        "claim_id": "CLM-2026-0004", "claim_type": "daycare", "product_id": "IN-HEALTH-RETAIL",
+        "required_documents": ["claim_form", "itemized_final_hospital_bill", "discharge_summary"],
+        "required_documents_present": ["claim_form", "itemized_final_hospital_bill"], "missing_documents": ["discharge_summary"],
+        "documents": [{"document_id": "DOC-CLM-2026-0004-01", "document_type": "claim_form", "file": None, "rendered": False, "pages": None},
+                      {"document_id": "DOC-CLM-2026-0004-02", "document_type": "itemized_final_hospital_bill",
+                       "file": "documents/CLM-2026-0004/CLM-2026-0004_bill.pdf", "rendered": True, "pages": 1, "format": "pdf"}],
+        "document_facts": {"claimant_name": "Rohan Verma", "policy_number": "POL-IN-0001", "provider_name": "Sunrise Multispeciality Hospital",
+                           "admission_date": "2026-06-02", "discharge_date": None, "invoice_no": "INV-4001", "net_payable": "32,000.00"}}]}
+    path = folder / "documents_manifest.json"
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    return path
+
+
 @pytest.fixture(scope="module")
 def client(tmp_path_factory: pytest.TempPathFactory) -> Iterator[TestClient]:
     os.environ["DATA_DIR"] = str(tmp_path_factory.mktemp("store"))
+    os.environ["DOCUMENTS_MANIFEST_PATH"] = str(_write_manifest(tmp_path_factory.mktemp("synthetic")))
     os.environ["LEAKLENS_API_KEY"] = API_KEY
     os.environ["MONGODB_URI"] = ""
     os.environ["DOCUMENTS_OFFLINE"] = "1"  # document models answer from the (empty) cache: no network, no spend
@@ -104,13 +126,17 @@ def test_ingest_fixture_counts_and_validation_report(client: TestClient) -> None
     assert response.status_code == 200, response.text
     body = response.json()
     assert body["batch_id"].startswith("BATCH-")
-    assert body["counts"] == {"products": 2, "policies": 2, "claims": 4, "invoice_lines": 20, "history": 3, "documents": 1}
+    # documents: the uploaded bill for 0001 + the rendered bill the manifest lists for 0004, pulled in at ingest
+    assert body["counts"] == {"products": 2, "policies": 2, "claims": 4, "invoice_lines": 20, "history": 3, "documents": 2}
     assert body["claims_created"] == 4  # 3 clean + the valid row of broken_claims.csv
     rejected = [issue for issue in body["validation"] if not issue["accepted"]]
     assert len(rejected) == 1
     assert rejected[0]["file"] == "broken_claims.csv" and rejected[0]["row"] == 3
     assert rejected[0]["field"] == "requested_amount"
-    assert body["documents"][0]["claim_id"] == "CLM-2026-0001" and body["documents"][0]["pages"] == 2
+    uploaded = next(doc for doc in body["documents"] if doc["name"] == "CLM-2026-0001_bill.pdf")
+    assert uploaded["claim_id"] == "CLM-2026-0001" and uploaded["pages"] == 2
+    imported = next(doc for doc in body["documents"] if doc["name"] == "CLM-2026-0004_bill.pdf")
+    assert imported["claim_id"] == "CLM-2026-0004" and imported["pages"] == 1
     # the broken row was reported, not stored
     assert client.get("/claims/CLM-2026-0005", headers=HEADERS).status_code == 404
     assert client.get("/claims/CLM-2026-0004", headers=HEADERS).status_code == 200
@@ -139,6 +165,28 @@ def test_claim_list_and_filters(client: TestClient) -> None:
     assert len(client.get("/claims?min_amount=50000", headers=HEADERS).json()) == 2
     assert len(client.get("/claims?from=2026-05-01&to=2026-05-31", headers=HEADERS).json()) == 1
     assert client.get("/claims?category=duplicate", headers=HEADERS).json() == []
+
+
+def test_manifest_documents_feed_the_master_record(client: TestClient) -> None:
+    """The synthetic manifest binds every submitted document (rendered or not) and the header facts to the claim."""
+    from backend.store import get_store
+
+    detail = client.get("/claims/CLM-2026-0004", headers=HEADERS).json()
+    assert [doc["name"] for doc in detail["documents"]] == ["CLM-2026-0004_bill.pdf"]
+    assert detail["documents"][0]["type"] == "itemized_final_hospital_bill" and detail["documents"][0]["confirmed"] is False
+    assert detail["document_facts"] == {"claimant_name": "Rohan Verma", "policy_number": "POL-IN-0001",
+                                        "provider_name": "Sunrise Multispeciality Hospital", "admission_date": "2026-06-02",
+                                        "invoice_no": "INV-4001", "net_payable": "32,000.00"}  # null discharge_date dropped
+    assert detail["printed_total"] == 32000.0 and detail["reconciled"] is False  # fixture has no lines for 0004: 0 != 32,000
+    assert detail["claim"]["source"] == "mixed"
+    master = get_store().get(collection="master_records", doc_id="CLM-2026-0004")
+    stored_id = detail["documents"][0]["id"]
+    assert master["documents"] == [stored_id, "DOC-CLM-2026-0004-01"]  # stored file first, then the listed-only claim form
+    assert master["document_types"] == {stored_id: "itemized_final_hospital_bill", "DOC-CLM-2026-0004-01": "claim_form"}
+    # re-ingesting the claim does not import the file twice
+    body = client.post("/ingest", files=_upload(["claims.csv", "broken_claims.csv"]), headers=HEADERS).json()
+    assert body["counts"].get("documents", 0) == 0 and body["claims_created"] == 0
+    assert len(client.get("/claims/CLM-2026-0004", headers=HEADERS).json()["documents"]) == 1
 
 
 def test_claim_detail_shape(client: TestClient) -> None:
